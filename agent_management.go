@@ -10,17 +10,17 @@ import (
 )
 
 var (
-	agentThinkRequestFieldAppid             = big.NewInt(1 << 0)
-	agentThinkRequestFieldAgentID           = big.NewInt(1 << 1)
-	agentThinkRequestFieldText              = big.NewInt(1 << 2)
-	agentThinkRequestFieldOnListeningAction = big.NewInt(1 << 3)
-	agentThinkRequestFieldOnThinkingAction  = big.NewInt(1 << 4)
-	agentThinkRequestFieldOnSpeakingAction  = big.NewInt(1 << 5)
-	agentThinkRequestFieldInterruptable     = big.NewInt(1 << 6)
-	agentThinkRequestFieldMetadata          = big.NewInt(1 << 7)
+	agentThinkAgentManagementRequestFieldAppid             = big.NewInt(1 << 0)
+	agentThinkAgentManagementRequestFieldAgentID           = big.NewInt(1 << 1)
+	agentThinkAgentManagementRequestFieldText              = big.NewInt(1 << 2)
+	agentThinkAgentManagementRequestFieldOnListeningAction = big.NewInt(1 << 3)
+	agentThinkAgentManagementRequestFieldOnThinkingAction  = big.NewInt(1 << 4)
+	agentThinkAgentManagementRequestFieldOnSpeakingAction  = big.NewInt(1 << 5)
+	agentThinkAgentManagementRequestFieldInterruptable     = big.NewInt(1 << 6)
+	agentThinkAgentManagementRequestFieldMetadata          = big.NewInt(1 << 7)
 )
 
-type AgentThinkRequest struct {
+type AgentThinkAgentManagementRequest struct {
 	// The App ID of the project.
 	Appid string `json:"-" url:"-"`
 	// The agent instance ID you obtained after successfully calling `join` to start a conversational AI agent.
@@ -30,15 +30,15 @@ type AgentThinkRequest struct {
 	// The action to take when the agent is in a listening state:
 	// - `inject`: Inject the custom text instruction into the current turn without interrupting it.
 	// - `ignore`: Ignore the request.
-	OnListeningAction *AgentThinkRequestOnListeningAction `json:"on_listening_action,omitempty" url:"-"`
+	OnListeningAction *AgentThinkAgentManagementRequestOnListeningAction `json:"on_listening_action,omitempty" url:"-"`
 	// The action to take when the agent is in a thinking state:
 	// - `interrupt`: Interrupt the current state and start a new conversation turn.
 	// - `ignore`: Ignore the request.
-	OnThinkingAction *AgentThinkRequestOnThinkingAction `json:"on_thinking_action,omitempty" url:"-"`
+	OnThinkingAction *AgentThinkAgentManagementRequestOnThinkingAction `json:"on_thinking_action,omitempty" url:"-"`
 	// The action to take when the agent is in a speaking state:
 	// - `interrupt`: Interrupt the current state and start a new conversation turn.
 	// - `ignore`: Ignore the request.
-	OnSpeakingAction *AgentThinkRequestOnSpeakingAction `json:"on_speaking_action,omitempty" url:"-"`
+	OnSpeakingAction *AgentThinkAgentManagementRequestOnSpeakingAction `json:"on_speaking_action,omitempty" url:"-"`
 	// Whether user speech can interrupt the injected instruction:
 	// - `true`: User speech can interrupt the instruction.
 	// - `false`: User speech cannot interrupt the instruction.
@@ -50,7 +50,7 @@ type AgentThinkRequest struct {
 	explicitFields *big.Int `json:"-" url:"-"`
 }
 
-func (a *AgentThinkRequest) require(field *big.Int) {
+func (a *AgentThinkAgentManagementRequest) require(field *big.Int) {
 	if a.explicitFields == nil {
 		a.explicitFields = big.NewInt(0)
 	}
@@ -59,142 +59,142 @@ func (a *AgentThinkRequest) require(field *big.Int) {
 
 // SetAppid sets the Appid field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetAppid(appid string) {
+func (a *AgentThinkAgentManagementRequest) SetAppid(appid string) {
 	a.Appid = appid
-	a.require(agentThinkRequestFieldAppid)
+	a.require(agentThinkAgentManagementRequestFieldAppid)
 }
 
 // SetAgentID sets the AgentID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetAgentID(agentID string) {
+func (a *AgentThinkAgentManagementRequest) SetAgentID(agentID string) {
 	a.AgentID = agentID
-	a.require(agentThinkRequestFieldAgentID)
+	a.require(agentThinkAgentManagementRequestFieldAgentID)
 }
 
 // SetText sets the Text field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetText(text string) {
+func (a *AgentThinkAgentManagementRequest) SetText(text string) {
 	a.Text = text
-	a.require(agentThinkRequestFieldText)
+	a.require(agentThinkAgentManagementRequestFieldText)
 }
 
 // SetOnListeningAction sets the OnListeningAction field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetOnListeningAction(onListeningAction *AgentThinkRequestOnListeningAction) {
+func (a *AgentThinkAgentManagementRequest) SetOnListeningAction(onListeningAction *AgentThinkAgentManagementRequestOnListeningAction) {
 	a.OnListeningAction = onListeningAction
-	a.require(agentThinkRequestFieldOnListeningAction)
+	a.require(agentThinkAgentManagementRequestFieldOnListeningAction)
 }
 
 // SetOnThinkingAction sets the OnThinkingAction field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetOnThinkingAction(onThinkingAction *AgentThinkRequestOnThinkingAction) {
+func (a *AgentThinkAgentManagementRequest) SetOnThinkingAction(onThinkingAction *AgentThinkAgentManagementRequestOnThinkingAction) {
 	a.OnThinkingAction = onThinkingAction
-	a.require(agentThinkRequestFieldOnThinkingAction)
+	a.require(agentThinkAgentManagementRequestFieldOnThinkingAction)
 }
 
 // SetOnSpeakingAction sets the OnSpeakingAction field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetOnSpeakingAction(onSpeakingAction *AgentThinkRequestOnSpeakingAction) {
+func (a *AgentThinkAgentManagementRequest) SetOnSpeakingAction(onSpeakingAction *AgentThinkAgentManagementRequestOnSpeakingAction) {
 	a.OnSpeakingAction = onSpeakingAction
-	a.require(agentThinkRequestFieldOnSpeakingAction)
+	a.require(agentThinkAgentManagementRequestFieldOnSpeakingAction)
 }
 
 // SetInterruptable sets the Interruptable field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetInterruptable(interruptable *bool) {
+func (a *AgentThinkAgentManagementRequest) SetInterruptable(interruptable *bool) {
 	a.Interruptable = interruptable
-	a.require(agentThinkRequestFieldInterruptable)
+	a.require(agentThinkAgentManagementRequestFieldInterruptable)
 }
 
 // SetMetadata sets the Metadata field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkRequest) SetMetadata(metadata map[string]string) {
+func (a *AgentThinkAgentManagementRequest) SetMetadata(metadata map[string]string) {
 	a.Metadata = metadata
-	a.require(agentThinkRequestFieldMetadata)
+	a.require(agentThinkAgentManagementRequestFieldMetadata)
 }
 
 // The action to take when the agent is in a listening state:
 // - `inject`: Inject the custom text instruction into the current turn without interrupting it.
 // - `ignore`: Ignore the request.
-type AgentThinkRequestOnListeningAction string
+type AgentThinkAgentManagementRequestOnListeningAction string
 
 const (
-	AgentThinkRequestOnListeningActionInject AgentThinkRequestOnListeningAction = "inject"
-	AgentThinkRequestOnListeningActionIgnore AgentThinkRequestOnListeningAction = "ignore"
+	AgentThinkAgentManagementRequestOnListeningActionInject AgentThinkAgentManagementRequestOnListeningAction = "inject"
+	AgentThinkAgentManagementRequestOnListeningActionIgnore AgentThinkAgentManagementRequestOnListeningAction = "ignore"
 )
 
-func NewAgentThinkRequestOnListeningActionFromString(s string) (AgentThinkRequestOnListeningAction, error) {
+func NewAgentThinkAgentManagementRequestOnListeningActionFromString(s string) (AgentThinkAgentManagementRequestOnListeningAction, error) {
 	switch s {
 	case "inject":
-		return AgentThinkRequestOnListeningActionInject, nil
+		return AgentThinkAgentManagementRequestOnListeningActionInject, nil
 	case "ignore":
-		return AgentThinkRequestOnListeningActionIgnore, nil
+		return AgentThinkAgentManagementRequestOnListeningActionIgnore, nil
 	}
-	var t AgentThinkRequestOnListeningAction
+	var t AgentThinkAgentManagementRequestOnListeningAction
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-func (a AgentThinkRequestOnListeningAction) Ptr() *AgentThinkRequestOnListeningAction {
+func (a AgentThinkAgentManagementRequestOnListeningAction) Ptr() *AgentThinkAgentManagementRequestOnListeningAction {
 	return &a
 }
 
 // The action to take when the agent is in a speaking state:
 // - `interrupt`: Interrupt the current state and start a new conversation turn.
 // - `ignore`: Ignore the request.
-type AgentThinkRequestOnSpeakingAction string
+type AgentThinkAgentManagementRequestOnSpeakingAction string
 
 const (
-	AgentThinkRequestOnSpeakingActionInterrupt AgentThinkRequestOnSpeakingAction = "interrupt"
-	AgentThinkRequestOnSpeakingActionIgnore    AgentThinkRequestOnSpeakingAction = "ignore"
+	AgentThinkAgentManagementRequestOnSpeakingActionInterrupt AgentThinkAgentManagementRequestOnSpeakingAction = "interrupt"
+	AgentThinkAgentManagementRequestOnSpeakingActionIgnore    AgentThinkAgentManagementRequestOnSpeakingAction = "ignore"
 )
 
-func NewAgentThinkRequestOnSpeakingActionFromString(s string) (AgentThinkRequestOnSpeakingAction, error) {
+func NewAgentThinkAgentManagementRequestOnSpeakingActionFromString(s string) (AgentThinkAgentManagementRequestOnSpeakingAction, error) {
 	switch s {
 	case "interrupt":
-		return AgentThinkRequestOnSpeakingActionInterrupt, nil
+		return AgentThinkAgentManagementRequestOnSpeakingActionInterrupt, nil
 	case "ignore":
-		return AgentThinkRequestOnSpeakingActionIgnore, nil
+		return AgentThinkAgentManagementRequestOnSpeakingActionIgnore, nil
 	}
-	var t AgentThinkRequestOnSpeakingAction
+	var t AgentThinkAgentManagementRequestOnSpeakingAction
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-func (a AgentThinkRequestOnSpeakingAction) Ptr() *AgentThinkRequestOnSpeakingAction {
+func (a AgentThinkAgentManagementRequestOnSpeakingAction) Ptr() *AgentThinkAgentManagementRequestOnSpeakingAction {
 	return &a
 }
 
 // The action to take when the agent is in a thinking state:
 // - `interrupt`: Interrupt the current state and start a new conversation turn.
 // - `ignore`: Ignore the request.
-type AgentThinkRequestOnThinkingAction string
+type AgentThinkAgentManagementRequestOnThinkingAction string
 
 const (
-	AgentThinkRequestOnThinkingActionInterrupt AgentThinkRequestOnThinkingAction = "interrupt"
-	AgentThinkRequestOnThinkingActionIgnore    AgentThinkRequestOnThinkingAction = "ignore"
+	AgentThinkAgentManagementRequestOnThinkingActionInterrupt AgentThinkAgentManagementRequestOnThinkingAction = "interrupt"
+	AgentThinkAgentManagementRequestOnThinkingActionIgnore    AgentThinkAgentManagementRequestOnThinkingAction = "ignore"
 )
 
-func NewAgentThinkRequestOnThinkingActionFromString(s string) (AgentThinkRequestOnThinkingAction, error) {
+func NewAgentThinkAgentManagementRequestOnThinkingActionFromString(s string) (AgentThinkAgentManagementRequestOnThinkingAction, error) {
 	switch s {
 	case "interrupt":
-		return AgentThinkRequestOnThinkingActionInterrupt, nil
+		return AgentThinkAgentManagementRequestOnThinkingActionInterrupt, nil
 	case "ignore":
-		return AgentThinkRequestOnThinkingActionIgnore, nil
+		return AgentThinkAgentManagementRequestOnThinkingActionIgnore, nil
 	}
-	var t AgentThinkRequestOnThinkingAction
+	var t AgentThinkAgentManagementRequestOnThinkingAction
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
 }
 
-func (a AgentThinkRequestOnThinkingAction) Ptr() *AgentThinkRequestOnThinkingAction {
+func (a AgentThinkAgentManagementRequestOnThinkingAction) Ptr() *AgentThinkAgentManagementRequestOnThinkingAction {
 	return &a
 }
 
 var (
-	agentThinkResponseFieldAgentID = big.NewInt(1 << 0)
-	agentThinkResponseFieldChannel = big.NewInt(1 << 1)
-	agentThinkResponseFieldStartTs = big.NewInt(1 << 2)
+	agentThinkAgentManagementResponseFieldAgentID = big.NewInt(1 << 0)
+	agentThinkAgentManagementResponseFieldChannel = big.NewInt(1 << 1)
+	agentThinkAgentManagementResponseFieldStartTs = big.NewInt(1 << 2)
 )
 
-type AgentThinkResponse struct {
+type AgentThinkAgentManagementResponse struct {
 	// Unique identifier of the agent instance.
 	AgentID *string `json:"agent_id,omitempty" url:"agent_id,omitempty"`
 	// The name of the RTC channel where the agent is located.
@@ -209,32 +209,32 @@ type AgentThinkResponse struct {
 	rawJSON         json.RawMessage
 }
 
-func (a *AgentThinkResponse) GetAgentID() *string {
+func (a *AgentThinkAgentManagementResponse) GetAgentID() *string {
 	if a == nil {
 		return nil
 	}
 	return a.AgentID
 }
 
-func (a *AgentThinkResponse) GetChannel() *string {
+func (a *AgentThinkAgentManagementResponse) GetChannel() *string {
 	if a == nil {
 		return nil
 	}
 	return a.Channel
 }
 
-func (a *AgentThinkResponse) GetStartTs() *int {
+func (a *AgentThinkAgentManagementResponse) GetStartTs() *int {
 	if a == nil {
 		return nil
 	}
 	return a.StartTs
 }
 
-func (a *AgentThinkResponse) GetExtraProperties() map[string]interface{} {
+func (a *AgentThinkAgentManagementResponse) GetExtraProperties() map[string]interface{} {
 	return a.extraProperties
 }
 
-func (a *AgentThinkResponse) require(field *big.Int) {
+func (a *AgentThinkAgentManagementResponse) require(field *big.Int) {
 	if a.explicitFields == nil {
 		a.explicitFields = big.NewInt(0)
 	}
@@ -243,32 +243,32 @@ func (a *AgentThinkResponse) require(field *big.Int) {
 
 // SetAgentID sets the AgentID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkResponse) SetAgentID(agentID *string) {
+func (a *AgentThinkAgentManagementResponse) SetAgentID(agentID *string) {
 	a.AgentID = agentID
-	a.require(agentThinkResponseFieldAgentID)
+	a.require(agentThinkAgentManagementResponseFieldAgentID)
 }
 
 // SetChannel sets the Channel field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkResponse) SetChannel(channel *string) {
+func (a *AgentThinkAgentManagementResponse) SetChannel(channel *string) {
 	a.Channel = channel
-	a.require(agentThinkResponseFieldChannel)
+	a.require(agentThinkAgentManagementResponseFieldChannel)
 }
 
 // SetStartTs sets the StartTs field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AgentThinkResponse) SetStartTs(startTs *int) {
+func (a *AgentThinkAgentManagementResponse) SetStartTs(startTs *int) {
 	a.StartTs = startTs
-	a.require(agentThinkResponseFieldStartTs)
+	a.require(agentThinkAgentManagementResponseFieldStartTs)
 }
 
-func (a *AgentThinkResponse) UnmarshalJSON(data []byte) error {
-	type unmarshaler AgentThinkResponse
+func (a *AgentThinkAgentManagementResponse) UnmarshalJSON(data []byte) error {
+	type unmarshaler AgentThinkAgentManagementResponse
 	var value unmarshaler
 	if err := json.Unmarshal(data, &value); err != nil {
 		return err
 	}
-	*a = AgentThinkResponse(value)
+	*a = AgentThinkAgentManagementResponse(value)
 	extraProperties, err := internal.ExtractExtraProperties(data, *a)
 	if err != nil {
 		return err
@@ -278,8 +278,8 @@ func (a *AgentThinkResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *AgentThinkResponse) MarshalJSON() ([]byte, error) {
-	type embed AgentThinkResponse
+func (a *AgentThinkAgentManagementResponse) MarshalJSON() ([]byte, error) {
+	type embed AgentThinkAgentManagementResponse
 	var marshaler = struct {
 		embed
 	}{
@@ -289,7 +289,7 @@ func (a *AgentThinkResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(explicitMarshaler)
 }
 
-func (a *AgentThinkResponse) String() string {
+func (a *AgentThinkAgentManagementResponse) String() string {
 	if len(a.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(a.rawJSON); err == nil {
 			return value

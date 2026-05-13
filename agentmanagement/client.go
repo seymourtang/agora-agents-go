@@ -42,9 +42,9 @@ func NewClient(options *core.RequestOptions) *Client {
 // - **Voice and text collaboration**: Combine text instructions with voice input for richer interaction.
 func (c *Client) AgentThink(
 	ctx context.Context,
-	request *Agora.AgentThinkRequest,
+	request *Agora.AgentThinkAgentManagementRequest,
 	opts ...option.RequestOption,
-) (*Agora.AgentThinkResponse, error) {
+) (*Agora.AgentThinkAgentManagementResponse, error) {
 	response, err := c.WithRawResponse.AgentThink(
 		ctx,
 		request,

@@ -394,12 +394,12 @@ func (s *AgentSession) Interrupt(ctx context.Context) error {
 func (s *AgentSession) Think(
 	ctx context.Context,
 	text string,
-	onListeningAction *Agora.AgentThinkRequestOnListeningAction,
-	onThinkingAction *Agora.AgentThinkRequestOnThinkingAction,
-	onSpeakingAction *Agora.AgentThinkRequestOnSpeakingAction,
+	onListeningAction *Agora.AgentThinkAgentManagementRequestOnListeningAction,
+	onThinkingAction *Agora.AgentThinkAgentManagementRequestOnThinkingAction,
+	onSpeakingAction *Agora.AgentThinkAgentManagementRequestOnSpeakingAction,
 	interruptable *bool,
 	metadata map[string]string,
-) (*Agora.AgentThinkResponse, error) {
+) (*Agora.AgentThinkAgentManagementResponse, error) {
 	return s.ThinkWithOptions(ctx, text, &ThinkOptions{
 		OnListeningAction: onListeningAction,
 		OnThinkingAction:  onThinkingAction,
@@ -410,9 +410,9 @@ func (s *AgentSession) Think(
 }
 
 type ThinkOptions struct {
-	OnListeningAction *Agora.AgentThinkRequestOnListeningAction
-	OnThinkingAction  *Agora.AgentThinkRequestOnThinkingAction
-	OnSpeakingAction  *Agora.AgentThinkRequestOnSpeakingAction
+	OnListeningAction *Agora.AgentThinkAgentManagementRequestOnListeningAction
+	OnThinkingAction  *Agora.AgentThinkAgentManagementRequestOnThinkingAction
+	OnSpeakingAction  *Agora.AgentThinkAgentManagementRequestOnSpeakingAction
 	Interruptable     *bool
 	Metadata          map[string]string
 }
@@ -421,7 +421,7 @@ func (s *AgentSession) ThinkWithOptions(
 	ctx context.Context,
 	text string,
 	opts *ThinkOptions,
-) (*Agora.AgentThinkResponse, error) {
+) (*Agora.AgentThinkAgentManagementResponse, error) {
 	s.mu.RLock()
 	if s.status != StatusRunning {
 		s.mu.RUnlock()
@@ -436,7 +436,7 @@ func (s *AgentSession) ThinkWithOptions(
 		return nil, fmt.Errorf("agent management client is not configured")
 	}
 
-	req := &Agora.AgentThinkRequest{
+	req := &Agora.AgentThinkAgentManagementRequest{
 		Appid:   s.appID,
 		AgentID: s.agentID,
 		Text:    text,

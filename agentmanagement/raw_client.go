@@ -32,9 +32,9 @@ func NewRawClient(options *core.RequestOptions) *RawClient {
 
 func (r *RawClient) AgentThink(
 	ctx context.Context,
-	request *Agora.AgentThinkRequest,
+	request *Agora.AgentThinkAgentManagementRequest,
 	opts ...option.RequestOption,
-) (*core.Response[*Agora.AgentThinkResponse], error) {
+) (*core.Response[*Agora.AgentThinkAgentManagementResponse], error) {
 	options := core.NewRequestOptions(opts...)
 	baseURL := internal.ResolveBaseURL(
 		options.BaseURL,
@@ -51,7 +51,7 @@ func (r *RawClient) AgentThink(
 		options.ToHeader(),
 	)
 	headers.Add("Content-Type", "application/json")
-	var response *Agora.AgentThinkResponse
+	var response *Agora.AgentThinkAgentManagementResponse
 	raw, err := r.caller.Call(
 		ctx,
 		&internal.CallParams{
@@ -69,7 +69,7 @@ func (r *RawClient) AgentThink(
 	if err != nil {
 		return nil, err
 	}
-	return &core.Response[*Agora.AgentThinkResponse]{
+	return &core.Response[*Agora.AgentThinkAgentManagementResponse]{
 		StatusCode: raw.StatusCode,
 		Header:     raw.Header,
 		Body:       response,

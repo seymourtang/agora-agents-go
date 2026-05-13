@@ -749,17 +749,16 @@ func (c *CartesiaTts) String() string {
 
 // Cartesia TTS configuration parameters.
 var (
-	cartesiaTtsParamsFieldKey        = big.NewInt(1 << 0)
-	cartesiaTtsParamsFieldVoiceID    = big.NewInt(1 << 1)
+	cartesiaTtsParamsFieldAPIKey     = big.NewInt(1 << 0)
+	cartesiaTtsParamsFieldVoice      = big.NewInt(1 << 1)
 	cartesiaTtsParamsFieldModelID    = big.NewInt(1 << 2)
 	cartesiaTtsParamsFieldSampleRate = big.NewInt(1 << 3)
 )
 
 type CartesiaTtsParams struct {
 	// Cartesia API key
-	Key string `json:"key" url:"key"`
-	// Cartesia voice ID
-	VoiceID string `json:"voice_id" url:"voice_id"`
+	APIKey string            `json:"api_key" url:"api_key"`
+	Voice  *CartesiaTtsVoice `json:"voice" url:"voice"`
 	// Model ID (optional)
 	ModelID *string `json:"model_id,omitempty" url:"model_id,omitempty"`
 	// Audio sampling rate in Hz
@@ -772,18 +771,18 @@ type CartesiaTtsParams struct {
 	rawJSON         json.RawMessage
 }
 
-func (c *CartesiaTtsParams) GetKey() string {
+func (c *CartesiaTtsParams) GetAPIKey() string {
 	if c == nil {
 		return ""
 	}
-	return c.Key
+	return c.APIKey
 }
 
-func (c *CartesiaTtsParams) GetVoiceID() string {
+func (c *CartesiaTtsParams) GetVoice() *CartesiaTtsVoice {
 	if c == nil {
-		return ""
+		return nil
 	}
-	return c.VoiceID
+	return c.Voice
 }
 
 func (c *CartesiaTtsParams) GetModelID() *string {
@@ -811,18 +810,18 @@ func (c *CartesiaTtsParams) require(field *big.Int) {
 	c.explicitFields.Or(c.explicitFields, field)
 }
 
-// SetKey sets the Key field and marks it as non-optional;
+// SetAPIKey sets the APIKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CartesiaTtsParams) SetKey(key string) {
-	c.Key = key
-	c.require(cartesiaTtsParamsFieldKey)
+func (c *CartesiaTtsParams) SetAPIKey(apiKey string) {
+	c.APIKey = apiKey
+	c.require(cartesiaTtsParamsFieldAPIKey)
 }
 
-// SetVoiceID sets the VoiceID field and marks it as non-optional;
+// SetVoice sets the Voice field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (c *CartesiaTtsParams) SetVoiceID(voiceID string) {
-	c.VoiceID = voiceID
-	c.require(cartesiaTtsParamsFieldVoiceID)
+func (c *CartesiaTtsParams) SetVoice(voice *CartesiaTtsVoice) {
+	c.Voice = voice
+	c.require(cartesiaTtsParamsFieldVoice)
 }
 
 // SetModelID sets the ModelID field and marks it as non-optional;
@@ -876,6 +875,364 @@ func (c *CartesiaTtsParams) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", c)
+}
+
+// Cartesia voice selection.
+var (
+	cartesiaTtsVoiceFieldID = big.NewInt(1 << 0)
+)
+
+type CartesiaTtsVoice struct {
+	// Cartesia voice selection mode.
+	// Cartesia voice ID
+	ID string `json:"id" url:"id"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+	mode           string
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (c *CartesiaTtsVoice) GetID() string {
+	if c == nil {
+		return ""
+	}
+	return c.ID
+}
+
+func (c *CartesiaTtsVoice) Mode() string {
+	return c.mode
+}
+
+func (c *CartesiaTtsVoice) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *CartesiaTtsVoice) require(field *big.Int) {
+	if c.explicitFields == nil {
+		c.explicitFields = big.NewInt(0)
+	}
+	c.explicitFields.Or(c.explicitFields, field)
+}
+
+// SetID sets the ID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (c *CartesiaTtsVoice) SetID(id string) {
+	c.ID = id
+	c.require(cartesiaTtsVoiceFieldID)
+}
+
+func (c *CartesiaTtsVoice) UnmarshalJSON(data []byte) error {
+	type embed CartesiaTtsVoice
+	var unmarshaler = struct {
+		embed
+		Mode string `json:"mode"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = CartesiaTtsVoice(unmarshaler.embed)
+	if unmarshaler.Mode != "id" {
+		return fmt.Errorf("unexpected value for literal on type %T; expected %v got %v", c, "id", unmarshaler.Mode)
+	}
+	c.mode = unmarshaler.Mode
+	extraProperties, err := internal.ExtractExtraProperties(data, *c, "mode")
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+	c.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *CartesiaTtsVoice) MarshalJSON() ([]byte, error) {
+	type embed CartesiaTtsVoice
+	var marshaler = struct {
+		embed
+		Mode string `json:"mode"`
+	}{
+		embed: embed(*c),
+		Mode:  "id",
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, c.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (c *CartesiaTtsVoice) String() string {
+	if len(c.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(c.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+// Deepgram Text-to-Speech configuration (Beta).
+var (
+	deepgramTtsFieldParams       = big.NewInt(1 << 0)
+	deepgramTtsFieldSkipPatterns = big.NewInt(1 << 1)
+)
+
+type DeepgramTts struct {
+	Params *DeepgramTtsParams `json:"params" url:"params"`
+	// Controls whether the TTS module skips bracketed content when reading LLM response text.
+	SkipPatterns []int `json:"skip_patterns,omitempty" url:"skip_patterns,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (d *DeepgramTts) GetParams() *DeepgramTtsParams {
+	if d == nil {
+		return nil
+	}
+	return d.Params
+}
+
+func (d *DeepgramTts) GetSkipPatterns() []int {
+	if d == nil {
+		return nil
+	}
+	return d.SkipPatterns
+}
+
+func (d *DeepgramTts) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DeepgramTts) require(field *big.Int) {
+	if d.explicitFields == nil {
+		d.explicitFields = big.NewInt(0)
+	}
+	d.explicitFields.Or(d.explicitFields, field)
+}
+
+// SetParams sets the Params field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTts) SetParams(params *DeepgramTtsParams) {
+	d.Params = params
+	d.require(deepgramTtsFieldParams)
+}
+
+// SetSkipPatterns sets the SkipPatterns field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTts) SetSkipPatterns(skipPatterns []int) {
+	d.SkipPatterns = skipPatterns
+	d.require(deepgramTtsFieldSkipPatterns)
+}
+
+func (d *DeepgramTts) UnmarshalJSON(data []byte) error {
+	type unmarshaler DeepgramTts
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DeepgramTts(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+	d.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DeepgramTts) MarshalJSON() ([]byte, error) {
+	type embed DeepgramTts
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*d),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, d.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (d *DeepgramTts) String() string {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
+}
+
+// Deepgram TTS configuration parameters.
+var (
+	deepgramTtsParamsFieldAPIKey       = big.NewInt(1 << 0)
+	deepgramTtsParamsFieldModel        = big.NewInt(1 << 1)
+	deepgramTtsParamsFieldBaseURL      = big.NewInt(1 << 2)
+	deepgramTtsParamsFieldSampleRate   = big.NewInt(1 << 3)
+	deepgramTtsParamsFieldParams       = big.NewInt(1 << 4)
+	deepgramTtsParamsFieldSkipPatterns = big.NewInt(1 << 5)
+)
+
+type DeepgramTtsParams struct {
+	// Deepgram API key
+	APIKey string `json:"api_key" url:"api_key"`
+	// Deepgram TTS model (for example, "aura-2-thalia-en")
+	Model string `json:"model" url:"model"`
+	// Deepgram WebSocket endpoint override
+	BaseURL *string `json:"base_url,omitempty" url:"base_url,omitempty"`
+	// Audio sampling rate in Hz
+	SampleRate *int `json:"sample_rate,omitempty" url:"sample_rate,omitempty"`
+	// Additional Deepgram TTS parameters
+	Params map[string]interface{} `json:"params,omitempty" url:"params,omitempty"`
+	// Controls whether the TTS module skips bracketed content when reading LLM response text.
+	SkipPatterns []int `json:"skip_patterns,omitempty" url:"skip_patterns,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (d *DeepgramTtsParams) GetAPIKey() string {
+	if d == nil {
+		return ""
+	}
+	return d.APIKey
+}
+
+func (d *DeepgramTtsParams) GetModel() string {
+	if d == nil {
+		return ""
+	}
+	return d.Model
+}
+
+func (d *DeepgramTtsParams) GetBaseURL() *string {
+	if d == nil {
+		return nil
+	}
+	return d.BaseURL
+}
+
+func (d *DeepgramTtsParams) GetSampleRate() *int {
+	if d == nil {
+		return nil
+	}
+	return d.SampleRate
+}
+
+func (d *DeepgramTtsParams) GetParams() map[string]interface{} {
+	if d == nil {
+		return nil
+	}
+	return d.Params
+}
+
+func (d *DeepgramTtsParams) GetSkipPatterns() []int {
+	if d == nil {
+		return nil
+	}
+	return d.SkipPatterns
+}
+
+func (d *DeepgramTtsParams) GetExtraProperties() map[string]interface{} {
+	return d.extraProperties
+}
+
+func (d *DeepgramTtsParams) require(field *big.Int) {
+	if d.explicitFields == nil {
+		d.explicitFields = big.NewInt(0)
+	}
+	d.explicitFields.Or(d.explicitFields, field)
+}
+
+// SetAPIKey sets the APIKey field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTtsParams) SetAPIKey(apiKey string) {
+	d.APIKey = apiKey
+	d.require(deepgramTtsParamsFieldAPIKey)
+}
+
+// SetModel sets the Model field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTtsParams) SetModel(model string) {
+	d.Model = model
+	d.require(deepgramTtsParamsFieldModel)
+}
+
+// SetBaseURL sets the BaseURL field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTtsParams) SetBaseURL(baseURL *string) {
+	d.BaseURL = baseURL
+	d.require(deepgramTtsParamsFieldBaseURL)
+}
+
+// SetSampleRate sets the SampleRate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTtsParams) SetSampleRate(sampleRate *int) {
+	d.SampleRate = sampleRate
+	d.require(deepgramTtsParamsFieldSampleRate)
+}
+
+// SetParams sets the Params field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTtsParams) SetParams(params map[string]interface{}) {
+	d.Params = params
+	d.require(deepgramTtsParamsFieldParams)
+}
+
+// SetSkipPatterns sets the SkipPatterns field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (d *DeepgramTtsParams) SetSkipPatterns(skipPatterns []int) {
+	d.SkipPatterns = skipPatterns
+	d.require(deepgramTtsParamsFieldSkipPatterns)
+}
+
+func (d *DeepgramTtsParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler DeepgramTtsParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*d = DeepgramTtsParams(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *d)
+	if err != nil {
+		return err
+	}
+	d.extraProperties = extraProperties
+	d.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (d *DeepgramTtsParams) MarshalJSON() ([]byte, error) {
+	type embed DeepgramTtsParams
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*d),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, d.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (d *DeepgramTtsParams) String() string {
+	if len(d.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(d.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(d); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", d)
 }
 
 // ElevenLabs Text-to-Speech configuration.
@@ -2592,14 +2949,14 @@ func (o *OpenAiTts) String() string {
 
 // OpenAI TTS configuration parameters.
 var (
-	openAiTtsParamsFieldKey   = big.NewInt(1 << 0)
-	openAiTtsParamsFieldVoice = big.NewInt(1 << 1)
-	openAiTtsParamsFieldModel = big.NewInt(1 << 2)
+	openAiTtsParamsFieldAPIKey = big.NewInt(1 << 0)
+	openAiTtsParamsFieldVoice  = big.NewInt(1 << 1)
+	openAiTtsParamsFieldModel  = big.NewInt(1 << 2)
 )
 
 type OpenAiTtsParams struct {
 	// OpenAI API key
-	Key string `json:"key" url:"key"`
+	APIKey *string `json:"api_key,omitempty" url:"api_key,omitempty"`
 	// Voice name (e.g., "alloy", "echo", "fable", "onyx", "nova", "shimmer")
 	Voice string `json:"voice" url:"voice"`
 	// Model name (e.g., "tts-1", "tts-1-hd")
@@ -2612,11 +2969,11 @@ type OpenAiTtsParams struct {
 	rawJSON         json.RawMessage
 }
 
-func (o *OpenAiTtsParams) GetKey() string {
+func (o *OpenAiTtsParams) GetAPIKey() *string {
 	if o == nil {
-		return ""
+		return nil
 	}
-	return o.Key
+	return o.APIKey
 }
 
 func (o *OpenAiTtsParams) GetVoice() string {
@@ -2644,11 +3001,11 @@ func (o *OpenAiTtsParams) require(field *big.Int) {
 	o.explicitFields.Or(o.explicitFields, field)
 }
 
-// SetKey sets the Key field and marks it as non-optional;
+// SetAPIKey sets the APIKey field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (o *OpenAiTtsParams) SetKey(key string) {
-	o.Key = key
-	o.require(openAiTtsParamsFieldKey)
+func (o *OpenAiTtsParams) SetAPIKey(apiKey *string) {
+	o.APIKey = apiKey
+	o.require(openAiTtsParamsFieldAPIKey)
 }
 
 // SetVoice sets the Voice field and marks it as non-optional;
@@ -3138,6 +3495,7 @@ type Tts struct {
 	Google     *GoogleTts
 	Amazon     *AmazonTts
 	Sarvam     *SarvamTts
+	Deepgram   *DeepgramTts
 }
 
 func (t *Tts) GetVendor() string {
@@ -3231,6 +3589,13 @@ func (t *Tts) GetSarvam() *SarvamTts {
 	return t.Sarvam
 }
 
+func (t *Tts) GetDeepgram() *DeepgramTts {
+	if t == nil {
+		return nil
+	}
+	return t.Deepgram
+}
+
 func (t *Tts) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Vendor string `json:"vendor"`
@@ -3315,6 +3680,12 @@ func (t *Tts) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		t.Sarvam = value
+	case "deepgram":
+		value := new(DeepgramTts)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Deepgram = value
 	}
 	return nil
 }
@@ -3359,6 +3730,9 @@ func (t Tts) MarshalJSON() ([]byte, error) {
 	if t.Sarvam != nil {
 		return internal.MarshalJSONWithExtraProperty(t.Sarvam, "vendor", "sarvam")
 	}
+	if t.Deepgram != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Deepgram, "vendor", "deepgram")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
@@ -3375,6 +3749,7 @@ type TtsVisitor interface {
 	VisitGoogle(*GoogleTts) error
 	VisitAmazon(*AmazonTts) error
 	VisitSarvam(*SarvamTts) error
+	VisitDeepgram(*DeepgramTts) error
 }
 
 func (t *Tts) Accept(visitor TtsVisitor) error {
@@ -3413,6 +3788,9 @@ func (t *Tts) Accept(visitor TtsVisitor) error {
 	}
 	if t.Sarvam != nil {
 		return visitor.VisitSarvam(t.Sarvam)
+	}
+	if t.Deepgram != nil {
+		return visitor.VisitDeepgram(t.Deepgram)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
@@ -3457,6 +3835,9 @@ func (t *Tts) validate() error {
 	}
 	if t.Sarvam != nil {
 		fields = append(fields, "sarvam")
+	}
+	if t.Deepgram != nil {
+		fields = append(fields, "deepgram")
 	}
 	if len(fields) == 0 {
 		if t.Vendor != "" {
@@ -8281,9 +8662,11 @@ var (
 	startAgentsRequestPropertiesMllmFieldInputModalities  = big.NewInt(1 << 5)
 	startAgentsRequestPropertiesMllmFieldOutputModalities = big.NewInt(1 << 6)
 	startAgentsRequestPropertiesMllmFieldGreetingMessage  = big.NewInt(1 << 7)
-	startAgentsRequestPropertiesMllmFieldVendor           = big.NewInt(1 << 8)
-	startAgentsRequestPropertiesMllmFieldStyle            = big.NewInt(1 << 9)
-	startAgentsRequestPropertiesMllmFieldTurnDetection    = big.NewInt(1 << 10)
+	startAgentsRequestPropertiesMllmFieldFailureMessage   = big.NewInt(1 << 8)
+	startAgentsRequestPropertiesMllmFieldMaxHistory       = big.NewInt(1 << 9)
+	startAgentsRequestPropertiesMllmFieldPredefinedTools  = big.NewInt(1 << 10)
+	startAgentsRequestPropertiesMllmFieldVendor           = big.NewInt(1 << 11)
+	startAgentsRequestPropertiesMllmFieldTurnDetection    = big.NewInt(1 << 12)
 )
 
 type StartAgentsRequestPropertiesMllm struct {
@@ -8306,14 +8689,17 @@ type StartAgentsRequestPropertiesMllm struct {
 	OutputModalities []string `json:"output_modalities,omitempty" url:"output_modalities,omitempty"`
 	// Agent greeting message. If provided, the first user in the channel is automatically greeted with this message upon joining.
 	GreetingMessage *string `json:"greeting_message,omitempty" url:"greeting_message,omitempty"`
+	// Message played when the MLLM call fails.
+	FailureMessage *string `json:"failure_message,omitempty" url:"failure_message,omitempty"`
+	// Maximum number of conversation history messages cached for the MLLM session.
+	MaxHistory *int `json:"max_history,omitempty" url:"max_history,omitempty"`
+	// Predefined tools available to the MLLM provider.
+	PredefinedTools []string `json:"predefined_tools,omitempty" url:"predefined_tools,omitempty"`
 	// MLLM provider. Currently supports:
 	// - `openai`: OpenAI Realtime API
 	// - `gemini`: Google Gemini Live
 	// - `vertexai`: Google Gemini Live (Vertex AI)
 	Vendor *StartAgentsRequestPropertiesMllmVendor `json:"vendor,omitempty" url:"vendor,omitempty"`
-	// The request style for MLLM completion:
-	// - `openai`: For OpenAI Realtime API format
-	Style *string `json:"style,omitempty" url:"style,omitempty"`
 	// Turn detection configuration for the MLLM module. When defined, the top-level `turn_detection` object has no effect.
 	TurnDetection *StartAgentsRequestPropertiesMllmTurnDetection `json:"turn_detection,omitempty" url:"turn_detection,omitempty"`
 
@@ -8378,6 +8764,27 @@ func (s *StartAgentsRequestPropertiesMllm) GetGreetingMessage() *string {
 		return nil
 	}
 	return s.GreetingMessage
+}
+
+func (s *StartAgentsRequestPropertiesMllm) GetFailureMessage() *string {
+	if s == nil {
+		return nil
+	}
+	return s.FailureMessage
+}
+
+func (s *StartAgentsRequestPropertiesMllm) GetMaxHistory() *int {
+	if s == nil {
+		return nil
+	}
+	return s.MaxHistory
+}
+
+func (s *StartAgentsRequestPropertiesMllm) GetPredefinedTools() []string {
+	if s == nil {
+		return nil
+	}
+	return s.PredefinedTools
 }
 
 func (s *StartAgentsRequestPropertiesMllm) GetVendor() *StartAgentsRequestPropertiesMllmVendor {
@@ -8461,18 +8868,32 @@ func (s *StartAgentsRequestPropertiesMllm) SetGreetingMessage(greetingMessage *s
 	s.require(startAgentsRequestPropertiesMllmFieldGreetingMessage)
 }
 
+// SetFailureMessage sets the FailureMessage field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *StartAgentsRequestPropertiesMllm) SetFailureMessage(failureMessage *string) {
+	s.FailureMessage = failureMessage
+	s.require(startAgentsRequestPropertiesMllmFieldFailureMessage)
+}
+
+// SetMaxHistory sets the MaxHistory field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *StartAgentsRequestPropertiesMllm) SetMaxHistory(maxHistory *int) {
+	s.MaxHistory = maxHistory
+	s.require(startAgentsRequestPropertiesMllmFieldMaxHistory)
+}
+
+// SetPredefinedTools sets the PredefinedTools field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *StartAgentsRequestPropertiesMllm) SetPredefinedTools(predefinedTools []string) {
+	s.PredefinedTools = predefinedTools
+	s.require(startAgentsRequestPropertiesMllmFieldPredefinedTools)
+}
+
 // SetVendor sets the Vendor field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (s *StartAgentsRequestPropertiesMllm) SetVendor(vendor_ *StartAgentsRequestPropertiesMllmVendor) {
 	s.Vendor = vendor_
 	s.require(startAgentsRequestPropertiesMllmFieldVendor)
-}
-
-// SetStyle sets the Style field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *StartAgentsRequestPropertiesMllm) SetStyle(style *string) {
-	s.Style = style
-	s.require(startAgentsRequestPropertiesMllmFieldStyle)
 }
 
 // SetTurnDetection sets the TurnDetection field and marks it as non-optional;

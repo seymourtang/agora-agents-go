@@ -836,7 +836,7 @@ client.Agents.Interrupt(
 </details>
 
 ## Agent Management
-<details><summary><code>client.AgentManagement.AgentThink(Appid, AgentID, request) -> *Agora.AgentThinkResponse</code></summary>
+<details><summary><code>client.AgentManagement.AgentThink(Appid, AgentID, request) -> *Agora.AgentThinkAgentManagementResponse</code></summary>
 <dl>
 <dd>
 
@@ -870,13 +870,13 @@ Use this endpoint for the following scenarios:
 <dd>
 
 ```go
-request := &Agora.AgentThinkRequest{
+request := &Agora.AgentThinkAgentManagementRequest{
         Appid: "appid",
         AgentID: "agentId",
         Text: "The user just clicked the purchase button.",
-        OnListeningAction: Agora.AgentThinkRequestOnListeningActionInject.Ptr(),
-        OnThinkingAction: Agora.AgentThinkRequestOnThinkingActionInterrupt.Ptr(),
-        OnSpeakingAction: Agora.AgentThinkRequestOnSpeakingActionIgnore.Ptr(),
+        OnListeningAction: Agora.AgentThinkAgentManagementRequestOnListeningActionInject.Ptr(),
+        OnThinkingAction: Agora.AgentThinkAgentManagementRequestOnThinkingActionInterrupt.Ptr(),
+        OnSpeakingAction: Agora.AgentThinkAgentManagementRequestOnSpeakingActionIgnore.Ptr(),
         Interruptable: Agora.Bool(
             true,
         ),
@@ -928,7 +928,7 @@ client.AgentManagement.AgentThink(
 <dl>
 <dd>
 
-**onListeningAction:** `*Agora.AgentThinkRequestOnListeningAction` 
+**onListeningAction:** `*Agora.AgentThinkAgentManagementRequestOnListeningAction` 
 
 The action to take when the agent is in a listening state:
 - `inject`: Inject the custom text instruction into the current turn without interrupting it.
@@ -940,7 +940,7 @@ The action to take when the agent is in a listening state:
 <dl>
 <dd>
 
-**onThinkingAction:** `*Agora.AgentThinkRequestOnThinkingAction` 
+**onThinkingAction:** `*Agora.AgentThinkAgentManagementRequestOnThinkingAction` 
 
 The action to take when the agent is in a thinking state:
 - `interrupt`: Interrupt the current state and start a new conversation turn.
@@ -952,7 +952,7 @@ The action to take when the agent is in a thinking state:
 <dl>
 <dd>
 
-**onSpeakingAction:** `*Agora.AgentThinkRequestOnSpeakingAction` 
+**onSpeakingAction:** `*Agora.AgentThinkAgentManagementRequestOnSpeakingAction` 
 
 The action to take when the agent is in a speaking state:
 - `interrupt`: Interrupt the current state and start a new conversation turn.

@@ -873,7 +873,7 @@ func TestSessionThinkWithOptionsForwardsFields(t *testing.T) {
 	session.status = StatusRunning
 	session.agentID = "agent_123"
 
-	onThinking := Agora.AgentThinkRequestOnThinkingActionInterrupt
+	onThinking := Agora.AgentThinkAgentManagementRequestOnThinkingActionInterrupt
 	notInterruptable := false
 	resp, err := session.ThinkWithOptions(context.Background(), "Injected instruction", &ThinkOptions{
 		OnThinkingAction: &onThinking,

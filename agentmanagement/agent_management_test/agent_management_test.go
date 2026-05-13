@@ -71,13 +71,13 @@ func TestAgentManagementAgentThinkWithWireMock(
 			WireMockBaseURL,
 		),
 	)
-	request := &Agora.AgentThinkRequest{
+	request := &Agora.AgentThinkAgentManagementRequest{
 		Appid:             "appid",
 		AgentID:           "agentId",
 		Text:              "The user just clicked the purchase button.",
-		OnListeningAction: Agora.AgentThinkRequestOnListeningActionInject.Ptr(),
-		OnThinkingAction:  Agora.AgentThinkRequestOnThinkingActionInterrupt.Ptr(),
-		OnSpeakingAction:  Agora.AgentThinkRequestOnSpeakingActionIgnore.Ptr(),
+		OnListeningAction: Agora.AgentThinkAgentManagementRequestOnListeningActionInject.Ptr(),
+		OnThinkingAction:  Agora.AgentThinkAgentManagementRequestOnThinkingActionInterrupt.Ptr(),
+		OnSpeakingAction:  Agora.AgentThinkAgentManagementRequestOnSpeakingActionIgnore.Ptr(),
 		Interruptable: Agora.Bool(
 			true,
 		),
