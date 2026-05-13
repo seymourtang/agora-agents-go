@@ -334,6 +334,15 @@ func WithAdvancedFeatures(af *AdvancedFeatures) AgentOption {
 	}
 }
 
+func WithTools(enabled bool) AgentOption {
+	return func(a *Agent) {
+		if a.advancedFeatures == nil {
+			a.advancedFeatures = &AdvancedFeatures{}
+		}
+		a.advancedFeatures.EnableTools = &enabled
+	}
+}
+
 func WithParameters(params *SessionParams) AgentOption {
 	return func(a *Agent) {
 		a.parameters = params
@@ -470,6 +479,18 @@ func (a *Agent) WithSal(sal *SalConfig) *Agent {
 func (a *Agent) WithAdvancedFeatures(af *AdvancedFeatures) *Agent {
 	clone := a.clone()
 	clone.advancedFeatures = af
+	return clone
+}
+
+func (a *Agent) WithTools(enabled bool) *Agent {
+	clone := a.clone()
+	if clone.advancedFeatures == nil {
+		clone.advancedFeatures = &AdvancedFeatures{}
+	} else {
+		advancedFeatures := *clone.advancedFeatures
+		clone.advancedFeatures = &advancedFeatures
+	}
+	clone.advancedFeatures.EnableTools = &enabled
 	return clone
 }
 

@@ -57,6 +57,20 @@ func TestToPropertiesMapIncludesAudioScenario(t *testing.T) {
 	assert.Equal(t, "aiserver", parameters["audio_scenario"])
 }
 
+func TestWithToolsSetsEnableTools(t *testing.T) {
+	props, err := NewAgent().WithTools(true).ToProperties(ToPropertiesOptions{
+		Channel:              "room-1",
+		Token:                "rtc-token",
+		AgentUID:             "1",
+		RemoteUIDs:           []string{"100"},
+		SkipVendorValidation: true,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, props.AdvancedFeatures)
+	require.NotNil(t, props.AdvancedFeatures.EnableTools)
+	assert.True(t, *props.AdvancedFeatures.EnableTools)
+}
+
 func TestCreateSessionStartIncludesPresetPipelineAndGetTurns(t *testing.T) {
 	var started int32
 

@@ -22,6 +22,7 @@ type HeyGenAvatar struct {
 	options HeyGenAvatarOptions
 }
 
+// Deprecated: HeyGen has been renamed to LiveAvatar. Use NewLiveAvatarAvatar instead.
 func NewHeyGenAvatar(opts HeyGenAvatarOptions) *HeyGenAvatar {
 	if opts.APIKey == "" {
 		panic("HeyGenAvatar requires APIKey")
