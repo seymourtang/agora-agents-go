@@ -473,8 +473,9 @@ func TestBYOKProvidersAreNotTreatedAsManagedPresets(t *testing.T) {
 		APIKey: "deepgram-key",
 		Model:  "nova-3",
 	})).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-		APIKey: "openai-key",
-		Model:  "gpt-4o-mini",
+		APIKey:  "openai-key",
+		Model:   "gpt-4o-mini",
+		Headers: map[string]string{"X-Trace-Id": "trace-123"},
 	})).WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
 		Key:     "minimax-key",
 		GroupID: "minimax-group",
@@ -499,8 +500,27 @@ func TestBYOKProvidersAreNotTreatedAsManagedPresets(t *testing.T) {
 	ttsParams := resolved["tts"].(map[string]interface{})["params"].(map[string]interface{})
 	assert.Equal(t, "deepgram-key", asrParams["api_key"])
 	assert.Equal(t, "openai-key", llm["api_key"])
+	assert.Equal(t, map[string]string{"X-Trace-Id": "trace-123"}, llm["headers"])
 	assert.Equal(t, "minimax-key", ttsParams["key"])
 	assert.Equal(t, "minimax-group", ttsParams["group_id"])
+}
+
+func TestWithMllmSetsLegacyEnableMllmFlag(t *testing.T) {
+	props, err := NewAgent().WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
+		APIKey: "openai-key",
+	})).ToProperties(ToPropertiesOptions{
+		Channel:    "room",
+		Token:      "rtc-token",
+		AgentUID:   "1",
+		RemoteUIDs: []string{"100"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, props.Mllm)
+	require.NotNil(t, props.Mllm.Enable)
+	assert.True(t, *props.Mllm.Enable)
+	require.NotNil(t, props.AdvancedFeatures)
+	require.NotNil(t, props.AdvancedFeatures.EnableMllm)
+	assert.True(t, *props.AdvancedFeatures.EnableMllm)
 }
 
 func TestToPropertiesBubblesMLLMFieldsAndPreservesVendorOverrides(t *testing.T) {

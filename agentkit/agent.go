@@ -408,6 +408,14 @@ func (a *Agent) WithMllm(vendor vendors.MLLM) *Agent {
 			clone.mllm["enable"] = true
 		}
 	}
+	enableMllm := true
+	if clone.advancedFeatures == nil {
+		clone.advancedFeatures = &AdvancedFeatures{}
+	} else {
+		advancedFeatures := *clone.advancedFeatures
+		clone.advancedFeatures = &advancedFeatures
+	}
+	clone.advancedFeatures.EnableMllm = &enableMllm
 	return clone
 }
 
