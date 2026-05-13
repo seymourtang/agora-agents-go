@@ -432,6 +432,28 @@ func TestManagedOpenAITTSOmitKeyAndModel(t *testing.T) {
 	assert.NotContains(t, params, "model")
 }
 
+func TestDeepgramTTSVendorConfig(t *testing.T) {
+	sampleRate := vendors.SampleRate24kHz
+	tts := vendors.NewDeepgramTTS(vendors.DeepgramTTSOptions{
+		APIKey:     "deepgram-key",
+		Model:      "aura-2-thalia-en",
+		BaseURL:    "wss://api.deepgram.com/v1/speak",
+		SampleRate: &sampleRate,
+		Params: map[string]interface{}{
+			"encoding": "linear16",
+		},
+	}).ToConfig()
+
+	assert.Equal(t, "deepgram", tts["vendor"])
+	assert.Equal(t, map[string]interface{}{
+		"api_key":     "deepgram-key",
+		"model":       "aura-2-thalia-en",
+		"base_url":    "wss://api.deepgram.com/v1/speak",
+		"sample_rate": 24000,
+		"encoding":    "linear16",
+	}, tts["params"])
+}
+
 func TestAresASRRemainsKeylessWithoutPreset(t *testing.T) {
 	agent := NewAgent().WithStt(vendors.NewAresSTT(vendors.AresSTTOptions{
 		Language: "en-US",

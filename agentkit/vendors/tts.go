@@ -328,6 +328,58 @@ func (a *AmazonTTS) ToConfig() map[string]interface{} {
 	return config
 }
 
+type DeepgramTTSOptions struct {
+	APIKey       string
+	Model        string
+	BaseURL      string
+	SampleRate   *SampleRate
+	Params       map[string]interface{}
+	SkipPatterns []int
+}
+
+type DeepgramTTS struct {
+	options DeepgramTTSOptions
+}
+
+func NewDeepgramTTS(opts DeepgramTTSOptions) *DeepgramTTS {
+	if opts.APIKey == "" {
+		panic("DeepgramTTS requires APIKey")
+	}
+	if opts.Model == "" {
+		panic("DeepgramTTS requires Model")
+	}
+	return &DeepgramTTS{options: opts}
+}
+
+func (d *DeepgramTTS) GetSampleRate() *SampleRate {
+	return d.options.SampleRate
+}
+
+func (d *DeepgramTTS) ToConfig() map[string]interface{} {
+	params := map[string]interface{}{
+		"api_key": d.options.APIKey,
+		"model":   d.options.Model,
+	}
+	for k, v := range d.options.Params {
+		params[k] = v
+	}
+	if d.options.BaseURL != "" {
+		params["base_url"] = d.options.BaseURL
+	}
+	if d.options.SampleRate != nil {
+		params["sample_rate"] = int(*d.options.SampleRate)
+	}
+
+	config := map[string]interface{}{
+		"vendor": "deepgram",
+		"params": params,
+	}
+	if d.options.SkipPatterns != nil {
+		config["skip_patterns"] = d.options.SkipPatterns
+	}
+	return config
+}
+
 type HumeAITTSOptions struct {
 	Key          string
 	ConfigID     string
