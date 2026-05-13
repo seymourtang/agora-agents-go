@@ -400,6 +400,28 @@ func (s *AgentSession) Think(
 	interruptable *bool,
 	metadata map[string]string,
 ) (*Agora.AgentThinkResponse, error) {
+	return s.ThinkWithOptions(ctx, text, &ThinkOptions{
+		OnListeningAction: onListeningAction,
+		OnThinkingAction:  onThinkingAction,
+		OnSpeakingAction:  onSpeakingAction,
+		Interruptable:     interruptable,
+		Metadata:          metadata,
+	})
+}
+
+type ThinkOptions struct {
+	OnListeningAction *Agora.AgentThinkRequestOnListeningAction
+	OnThinkingAction  *Agora.AgentThinkRequestOnThinkingAction
+	OnSpeakingAction  *Agora.AgentThinkRequestOnSpeakingAction
+	Interruptable     *bool
+	Metadata          map[string]string
+}
+
+func (s *AgentSession) ThinkWithOptions(
+	ctx context.Context,
+	text string,
+	opts *ThinkOptions,
+) (*Agora.AgentThinkResponse, error) {
 	s.mu.RLock()
 	if s.status != StatusRunning {
 		s.mu.RUnlock()
@@ -415,14 +437,16 @@ func (s *AgentSession) Think(
 	}
 
 	req := &Agora.AgentThinkRequest{
-		Appid:             s.appID,
-		AgentID:           s.agentID,
-		Text:              text,
-		OnListeningAction: onListeningAction,
-		OnThinkingAction:  onThinkingAction,
-		OnSpeakingAction:  onSpeakingAction,
-		Interruptable:     interruptable,
-		Metadata:          metadata,
+		Appid:   s.appID,
+		AgentID: s.agentID,
+		Text:    text,
+	}
+	if opts != nil {
+		req.OnListeningAction = opts.OnListeningAction
+		req.OnThinkingAction = opts.OnThinkingAction
+		req.OnSpeakingAction = opts.OnSpeakingAction
+		req.Interruptable = opts.Interruptable
+		req.Metadata = opts.Metadata
 	}
 	reqOpts := s.convoAIRequestOpts(ctx)
 	return s.agentManagement.AgentThink(ctx, req, reqOpts...)
