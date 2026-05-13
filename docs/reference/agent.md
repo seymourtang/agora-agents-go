@@ -98,6 +98,15 @@ func WithAdvancedFeatures(af *AdvancedFeatures) AgentOption
 
 Sets advanced feature flags (e.g., `EnableMllm`, `EnableAivad`).
 
+### WithTools
+
+<!-- snippet: fragment -->
+```go
+func WithTools(enabled bool) AgentOption
+```
+
+Enables or disables MCP tool invocation by setting `AdvancedFeatures.EnableTools`.
+
 ### WithParameters
 
 <!-- snippet: fragment -->
@@ -229,6 +238,15 @@ func (a *Agent) WithSal(sal *SalConfig) *Agent
 ```go
 func (a *Agent) WithAdvancedFeatures(af *AdvancedFeatures) *Agent
 ```
+
+### WithTools (method)
+
+<!-- snippet: fragment -->
+```go
+func (a *Agent) WithTools(enabled bool) *Agent
+```
+
+Enables or disables MCP tool invocation by setting `AdvancedFeatures.EnableTools`.
 
 ### WithParameters (method)
 

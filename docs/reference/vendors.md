@@ -79,6 +79,7 @@ Panics if `APIKey` is empty unless `Model` is one of the supported preset-backed
 | `FailureMessage`  | `string`                   | No       | —                                              | Fallback on error       |
 | `InputModalities` | `[]string`                 | No       | `["text"]`                                     | Input modality types    |
 | `Params`          | `map[string]interface{}`   | No       | —                                              | Additional model params |
+| `Headers`         | `map[string]string`        | No       | —                                              | Custom HTTP headers forwarded to the LLM provider |
 
 ### NewAzureOpenAI
 
@@ -104,6 +105,7 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 | `GreetingMessage` | `string`                   | No       | —                      | Initial greeting     |
 | `FailureMessage`  | `string`                   | No       | —                      | Fallback on error    |
 | `InputModalities` | `[]string`                 | No       | `["text"]`             | Input modality types |
+| `Headers`         | `map[string]string`        | No       | —                      | Custom HTTP headers forwarded to the LLM provider |
 
 ### NewAnthropic
 
@@ -127,6 +129,7 @@ Panics if `APIKey` is empty.
 | `GreetingMessage` | `string`                   | No       | —                              | Initial greeting     |
 | `FailureMessage`  | `string`                   | No       | —                              | Fallback on error    |
 | `InputModalities` | `[]string`                 | No       | `["text"]`                     | Input modality types |
+| `Headers`         | `map[string]string`        | No       | —                              | Custom HTTP headers forwarded to the LLM provider |
 
 ### NewGemini
 
@@ -151,6 +154,7 @@ Panics if `APIKey` is empty.
 | `GreetingMessage` | `string`                   | No       | —                        | Initial greeting     |
 | `FailureMessage`  | `string`                   | No       | —                        | Fallback on error    |
 | `InputModalities` | `[]string`                 | No       | `["text"]`               | Input modality types |
+| `Headers`         | `map[string]string`        | No       | —                        | Custom HTTP headers forwarded to the LLM provider |
 
 ---
 
@@ -270,6 +274,26 @@ Panics if `AccessKey`, `SecretKey`, `Region`, or `VoiceID` is empty.
 | `Region`       | `string` | Yes      | AWS region       |
 | `VoiceID`      | `string` | Yes      | Polly voice ID   |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip |
+
+### NewDeepgramTTS
+
+<!-- snippet: fragment -->
+```go
+func NewDeepgramTTS(opts DeepgramTTSOptions) *DeepgramTTS
+```
+
+Panics if `APIKey` or `Model` is empty.
+
+#### DeepgramTTSOptions
+
+| Field          | Type                     | Required | Description |
+| -------------- | ------------------------ | -------- | ----------- |
+| `APIKey`       | `string`                 | Yes      | Deepgram API key |
+| `Model`        | `string`                 | Yes      | Deepgram TTS model (e.g., `"aura-2-thalia-en"`) |
+| `BaseURL`      | `string`                 | No       | WebSocket endpoint; defaults server-side to `wss://api.deepgram.com/v1/speak` |
+| `SampleRate`   | `*SampleRate`            | No       | Output sample rate |
+| `Params`       | `map[string]interface{}` | No       | Additional Deepgram TTS parameters |
+| `SkipPatterns` | `[]int`                  | No       | Patterns to skip |
 
 ### NewHumeAITTS
 

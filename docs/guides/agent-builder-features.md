@@ -16,6 +16,7 @@ For string values with a finite set of options (e.g. `data_channel`, `sal_mode`,
 |---|---|---|
 | `sal` | `WithSalConfig` / `WithSal` | Selective Attention Locking — speaker recognition and noise suppression |
 | `advancedFeatures` | `WithAdvancedFeatures` | Enable MLLM, RTM, SAL, tools |
+| `tools` | `WithTools` | Enable MCP tool invocation |
 | `parameters` | `WithParameters` | Silence config, farewell config, data channel |
 | `failureMessage` | `WithFailureMessage` | Message spoken when LLM fails |
 | `maxHistory` | `WithMaxHistory` | Max conversation turns in LLM context |
@@ -77,9 +78,7 @@ agent := agentkit.NewAgent(
 
 // Enable tool invocation via MCP
 agent := agentkit.NewAgent(
-    agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
-        EnableTools: Agora.Bool(true),
-    }),
+    agentkit.WithTools(true),
 )
 ```
 
