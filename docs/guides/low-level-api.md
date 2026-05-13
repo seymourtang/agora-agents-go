@@ -8,6 +8,13 @@ description: Direct client.Agents.Start() usage without the builder pattern.
 
 For direct control over the REST API, use `client.Agents.Start()` with raw request objects. See the [API Reference](../../reference.md) for full details.
 
+## Raw Telephony And Phone-Number APIs
+
+AgentKit focuses on realtime agent session helpers. Telephony call status, call hangup, and phone-number management are exposed through the generated low-level clients:
+
+- `c.Telephony` for call status and hangup operations
+- `c.PhoneNumbers` for phone-number list, create, retrieve, update, and delete operations
+
 ## Direct Client Usage
 
 ```go
@@ -90,7 +97,7 @@ GreetingMessage: Agora.String("Hello!"),
 
 ## MLLM (Raw API)
 
-For MLLM flow without the builder pattern, pass `mllm` and `turn_detection` directly. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for details.
+For MLLM flow without the builder pattern, set `mllm.enable` and pass MLLM turn detection as `mllm.turn_detection`. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for details.
 
 ```go
 req := &Agora.StartAgentsRequest{
@@ -102,10 +109,8 @@ req := &Agora.StartAgentsRequest{
         AgentRtcUID:   "1001",
         RemoteRtcUIDs: []string{"1002"},
         IdleTimeout:   Agora.Int(120),
-        AdvancedFeatures: &Agora.StartAgentsRequestPropertiesAdvancedFeatures{
-            EnableMllm: Agora.Bool(true),
-        },
         Mllm: &Agora.StartAgentsRequestPropertiesMllm{
+            Enable: Agora.Bool(true),
             URL:    "wss://api.openai.com/v1/realtime",
             APIKey: Agora.String("<your_openai_api_key>"),
             Vendor: Agora.StartAgentsRequestPropertiesMllmVendorOpenai.Ptr(),
@@ -116,23 +121,12 @@ req := &Agora.StartAgentsRequest{
             InputModalities:  []string{"audio"},
             OutputModalities: []string{"text", "audio"},
             GreetingMessage:  Agora.String("Hello! I'm ready to chat in real-time."),
-        },
-        TurnDetection: &Agora.StartAgentsRequestPropertiesTurnDetection{
-            Type:               agentkit.TurnDetectionTypeServerVad.Ptr(),
-            Threshold:          Agora.Float64(0.5),
-            SilenceDurationMs:  Agora.Int(500),
-        },
-        Tts: &Agora.Tts{
-            Elevenlabs: &Agora.ElevenLabsTts{
-                Params: &Agora.ElevenLabsTtsParams{
-                    Key:     "your-elevenlabs-key",
-                    ModelID: "eleven_flash_v2_5",
-                    VoiceID: "your-voice-id",
+            TurnDetection: &Agora.StartAgentsRequestPropertiesMllmTurnDetection{
+                Mode: Agora.StartAgentsRequestPropertiesMllmTurnDetectionModeServerVad.Ptr(),
+                ServerVadConfig: &Agora.StartAgentsRequestPropertiesMllmTurnDetectionServerVadConfig{
+                    IdleTimeoutMs: Agora.Int(5000),
                 },
             },
-        },
-        Llm: &Agora.StartAgentsRequestPropertiesLlm{
-            URL: "https://api.openai.com/v1/chat/completions",
         },
     },
 }

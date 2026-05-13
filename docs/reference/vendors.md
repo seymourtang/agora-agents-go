@@ -78,7 +78,11 @@ Panics if `APIKey` is empty unless `Model` is one of the supported preset-backed
 | `GreetingMessage` | `string`                   | No       | —                                              | Initial greeting        |
 | `FailureMessage`  | `string`                   | No       | —                                              | Fallback on error       |
 | `InputModalities` | `[]string`                 | No       | `["text"]`                                     | Input modality types    |
+| `OutputModalities` | `[]string`                | No       | —                                              | Output modality types   |
 | `Params`          | `map[string]interface{}`   | No       | —                                              | Additional model params |
+| `Headers`         | `map[string]string`        | No       | —                                              | Custom HTTP headers forwarded to the LLM provider |
+| `GreetingConfigs` | `map[string]interface{}`   | No       | —                                              | Greeting playback configuration |
+| `TemplateVariables` | `map[string]string`      | No       | —                                              | Template variables for messages |
 
 ### NewAzureOpenAI
 
@@ -104,6 +108,11 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 | `GreetingMessage` | `string`                   | No       | —                      | Initial greeting     |
 | `FailureMessage`  | `string`                   | No       | —                      | Fallback on error    |
 | `InputModalities` | `[]string`                 | No       | `["text"]`             | Input modality types |
+| `OutputModalities` | `[]string`                | No       | —                      | Output modality types |
+| `Params`          | `map[string]interface{}`   | No       | —                      | Additional model params |
+| `Headers`         | `map[string]string`        | No       | —                      | Custom HTTP headers forwarded to the LLM provider |
+| `GreetingConfigs` | `map[string]interface{}`   | No       | —                      | Greeting playback configuration |
+| `TemplateVariables` | `map[string]string`      | No       | —                      | Template variables for messages |
 
 ### NewAnthropic
 
@@ -127,6 +136,11 @@ Panics if `APIKey` is empty.
 | `GreetingMessage` | `string`                   | No       | —                              | Initial greeting     |
 | `FailureMessage`  | `string`                   | No       | —                              | Fallback on error    |
 | `InputModalities` | `[]string`                 | No       | `["text"]`                     | Input modality types |
+| `OutputModalities` | `[]string`                | No       | —                              | Output modality types |
+| `Params`          | `map[string]interface{}`   | No       | —                              | Additional model params |
+| `Headers`         | `map[string]string`        | No       | —                              | Custom HTTP headers forwarded to the LLM provider |
+| `GreetingConfigs` | `map[string]interface{}`   | No       | —                              | Greeting playback configuration |
+| `TemplateVariables` | `map[string]string`      | No       | —                              | Template variables for messages |
 
 ### NewGemini
 
@@ -151,6 +165,11 @@ Panics if `APIKey` is empty.
 | `GreetingMessage` | `string`                   | No       | —                        | Initial greeting     |
 | `FailureMessage`  | `string`                   | No       | —                        | Fallback on error    |
 | `InputModalities` | `[]string`                 | No       | `["text"]`               | Input modality types |
+| `OutputModalities` | `[]string`                | No       | —                        | Output modality types |
+| `Params`          | `map[string]interface{}`   | No       | —                        | Additional model params |
+| `Headers`         | `map[string]string`        | No       | —                        | Custom HTTP headers forwarded to the LLM provider |
+| `GreetingConfigs` | `map[string]interface{}`   | No       | —                        | Greeting playback configuration |
+| `TemplateVariables` | `map[string]string`      | No       | —                        | Template variables for messages |
 
 ---
 
@@ -270,6 +289,26 @@ Panics if `AccessKey`, `SecretKey`, `Region`, or `VoiceID` is empty.
 | `Region`       | `string` | Yes      | AWS region       |
 | `VoiceID`      | `string` | Yes      | Polly voice ID   |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip |
+
+### NewDeepgramTTS
+
+<!-- snippet: fragment -->
+```go
+func NewDeepgramTTS(opts DeepgramTTSOptions) *DeepgramTTS
+```
+
+Panics if `APIKey` or `Model` is empty.
+
+#### DeepgramTTSOptions
+
+| Field          | Type                     | Required | Description |
+| -------------- | ------------------------ | -------- | ----------- |
+| `APIKey`       | `string`                 | Yes      | Deepgram API key |
+| `Model`        | `string`                 | Yes      | Deepgram TTS model (e.g., `"aura-2-thalia-en"`) |
+| `BaseURL`      | `string`                 | No       | WebSocket endpoint; defaults server-side to `wss://api.deepgram.com/v1/speak` |
+| `SampleRate`   | `*SampleRate`            | No       | Output sample rate |
+| `Params`       | `map[string]interface{}` | No       | Additional Deepgram TTS parameters |
+| `SkipPatterns` | `[]int`                  | No       | Patterns to skip |
 
 ### NewHumeAITTS
 
@@ -523,21 +562,6 @@ Ares is an Agora built-in STT service — no external API key required.
 | `Language`         | `string`                 | No       | Language code            |
 | `AdditionalParams` | `map[string]interface{}` | No       | Additional vendor params |
 
-### NewSonioxSTT
-
-<!-- snippet: fragment -->
-```go
-func NewSonioxSTT(opts SonioxSTTOptions) *SonioxSTT
-```
-
-Panics if `APIKey` is empty.
-
-#### SonioxSTTOptions
-
-| Field    | Type     | Required | Description    |
-| -------- | -------- | -------- | -------------- |
-| `APIKey` | `string` | Yes      | Soniox API key |
-
 ### NewSarvamSTT
 
 <!-- snippet: fragment -->
@@ -580,6 +604,7 @@ Panics if `APIKey` is empty.
 | `OutputModalities` | `[]string`                | No       | —                           | Output modalities                                  |
 | `Messages`        | `[]map[string]interface{}` | No       | —                           | Conversation messages for short-term memory        |
 | `Params`          | `map[string]interface{}`   | No       | —                           | Additional realtime params such as `voice`         |
+| `TurnDetection`   | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ### NewGeminiLive
 
@@ -603,6 +628,7 @@ Panics if `APIKey` or `Model` is empty.
 | `OutputModalities` | `[]string`                 | No       | —       | Output modalities |
 | `Messages`         | `[]map[string]interface{}` | No       | —       | Conversation messages |
 | `AdditionalParams` | `map[string]interface{}`   | No       | —       | Additional Gemini params |
+| `TurnDetection`    | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ### NewVertexAI
 
@@ -628,6 +654,7 @@ func NewVertexAI(opts VertexAIOptions) *VertexAI
 | `InputModalities` | `[]string`                 | No       | —                        | Input modalities                                |
 | `OutputModalities` | `[]string`                | No       | —                        | Output modalities                               |
 | `AdditionalParams` | `map[string]interface{}`  | No       | —                        | Additional Vertex/Gemini params                 |
+| `TurnDetection`    | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ---
 

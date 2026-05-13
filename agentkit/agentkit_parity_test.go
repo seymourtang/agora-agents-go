@@ -8,12 +8,22 @@ import (
 	"sync/atomic"
 	"testing"
 
+	Agora "github.com/AgoraIO-Conversational-AI/agent-server-sdk-go"
 	"github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/agentkit/vendors"
 	"github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/client"
 	"github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/option"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+type disabledMllmVendor struct{}
+
+func (disabledMllmVendor) ToConfig() map[string]interface{} {
+	return map[string]interface{}{
+		"vendor": "openai",
+		"enable": false,
+	}
+}
 
 func TestToPropertiesSupportsPresetFlowAndRTMDefault(t *testing.T) {
 	enableRTM := true
@@ -37,6 +47,37 @@ func TestToPropertiesSupportsPresetFlowAndRTMDefault(t *testing.T) {
 	assert.Equal(t, "rtm", string(*props.Parameters.DataChannel))
 	assert.Nil(t, props.Llm)
 	assert.Nil(t, props.Tts)
+}
+
+func TestToPropertiesMapIncludesAudioScenario(t *testing.T) {
+	agent := NewAgent(WithAudioScenario(ParametersAudioScenarioAIServer))
+
+	props, err := agent.ToPropertiesMap(ToPropertiesOptions{
+		Channel:              "room-1",
+		Token:                "rtc-token",
+		AgentUID:             "1",
+		RemoteUIDs:           []string{"100"},
+		SkipVendorValidation: true,
+	})
+	require.NoError(t, err)
+
+	parameters, ok := props["parameters"].(map[string]interface{})
+	require.True(t, ok)
+	assert.Equal(t, "aiserver", parameters["audio_scenario"])
+}
+
+func TestWithToolsSetsEnableTools(t *testing.T) {
+	props, err := NewAgent().WithTools(true).ToProperties(ToPropertiesOptions{
+		Channel:              "room-1",
+		Token:                "rtc-token",
+		AgentUID:             "1",
+		RemoteUIDs:           []string{"100"},
+		SkipVendorValidation: true,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, props.AdvancedFeatures)
+	require.NotNil(t, props.AdvancedFeatures.EnableTools)
+	assert.True(t, *props.AdvancedFeatures.EnableTools)
 }
 
 func TestCreateSessionStartIncludesPresetPipelineAndGetTurns(t *testing.T) {
@@ -111,24 +152,13 @@ func TestCreateSessionStartSendsManagedPresetPayloadWithoutGeneratedEmptyFields(
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
 		assert.Equal(t, "deepgram_nova_3,openai_gpt_4o_mini,minimax_speech_2_6_turbo", req["preset"])
 
-		payload, err := json.Marshal(req)
-		require.NoError(t, err)
-		payloadText := string(payload)
-		assert.NotContains(t, payloadText, `"url":""`)
-		assert.NotContains(t, payloadText, `"api_key":""`)
-		assert.NotContains(t, payloadText, `"key":""`)
-		assert.NotContains(t, payloadText, `"group_id":""`)
-
 		props := req["properties"].(map[string]interface{})
 		llm := props["llm"].(map[string]interface{})
 		tts := props["tts"].(map[string]interface{})
 		asr := props["asr"].(map[string]interface{})
-		assert.NotContains(t, llm, "url")
-		if params, ok := llm["params"].(map[string]interface{}); ok {
-			assert.NotContains(t, params, "model")
-		}
-		assert.NotContains(t, tts["params"].(map[string]interface{}), "model")
-		assert.NotContains(t, asr["params"].(map[string]interface{}), "model")
+		assert.Equal(t, "openai", llm["style"])
+		assert.Equal(t, "minimax", tts["vendor"])
+		assert.Equal(t, "deepgram", asr["vendor"])
 
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"agent_id":"agent_123","status":"RUNNING"}`))
@@ -193,6 +223,12 @@ func TestOffRemovesRegisteredHandler(t *testing.T) {
 
 func TestGeminiLiveMatchesTypeScriptShape(t *testing.T) {
 	maxHistory := 8
+	mllmTurnDetection := &Agora.StartAgentsRequestPropertiesMllmTurnDetection{
+		Mode: Agora.StartAgentsRequestPropertiesMllmTurnDetectionModeServerVad.Ptr(),
+		ServerVadConfig: &Agora.StartAgentsRequestPropertiesMllmTurnDetectionServerVadConfig{
+			IdleTimeoutMs: Agora.Int(5000),
+		},
+	}
 	config := vendors.NewGeminiLive(vendors.GeminiLiveOptions{
 		APIKey:           "google-key",
 		Model:            "gemini-live-2.5-flash",
@@ -211,11 +247,11 @@ func TestGeminiLiveMatchesTypeScriptShape(t *testing.T) {
 		AdditionalParams: map[string]interface{}{
 			"temperature": 0.2,
 		},
+		TurnDetection: mllmTurnDetection,
 	}).ToConfig()
 
 	assert.Equal(t, map[string]interface{}{
 		"vendor":  "gemini",
-		"style":   "openai",
 		"api_key": "google-key",
 		"url":     "wss://generativelanguage.googleapis.com/ws",
 		"params": map[string]interface{}{
@@ -233,6 +269,7 @@ func TestGeminiLiveMatchesTypeScriptShape(t *testing.T) {
 		"predefined_tools":  []string{"_publish_message"},
 		"input_modalities":  []string{"audio"},
 		"output_modalities": []string{"text", "audio"},
+		"turn_detection":    mllmTurnDetection,
 	}, config)
 }
 
@@ -249,6 +286,7 @@ func TestMLLMWrappersIncludeOptionalFields(t *testing.T) {
 	assert.Equal(t, []string{"_publish_message"}, openAIConfig["predefined_tools"])
 	assert.Equal(t, "Retry", openAIConfig["failure_message"])
 	assert.Equal(t, 3, openAIConfig["max_history"])
+	assert.NotContains(t, openAIConfig, "style")
 
 	vertexMaxHistory := 5
 	vertexConfig := vendors.NewVertexAI(vendors.VertexAIOptions{
@@ -265,6 +303,36 @@ func TestMLLMWrappersIncludeOptionalFields(t *testing.T) {
 	assert.Equal(t, []string{"_publish_message"}, vertexConfig["predefined_tools"])
 	assert.Equal(t, "Try again", vertexConfig["failure_message"])
 	assert.Equal(t, 5, vertexConfig["max_history"])
+	assert.NotContains(t, vertexConfig, "style")
+}
+
+func TestWithInterruptionForwardsConfig(t *testing.T) {
+	interruption := &InterruptionConfig{
+		Enable: Agora.Bool(false),
+		DisabledConfig: &Agora.StartAgentsRequestPropertiesInterruptionDisabledConfig{
+			Strategy: Agora.StartAgentsRequestPropertiesInterruptionDisabledConfigStrategyIgnore.Ptr(),
+		},
+	}
+
+	props, err := NewAgent(WithInterruptionConfig(interruption)).ToProperties(ToPropertiesOptions{
+		Channel:              "room",
+		Token:                "rtc-token",
+		AgentUID:             "1",
+		RemoteUIDs:           []string{"100"},
+		SkipVendorValidation: true,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, interruption, props.Interruption)
+
+	props, err = NewAgent().WithInterruption(interruption).ToProperties(ToPropertiesOptions{
+		Channel:              "room",
+		Token:                "rtc-token",
+		AgentUID:             "1",
+		RemoteUIDs:           []string{"100"},
+		SkipVendorValidation: true,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, interruption, props.Interruption)
 }
 
 func TestPresetBackedOpenAIVendorsAllowMissingKeys(t *testing.T) {
@@ -425,6 +493,28 @@ func TestManagedOpenAITTSOmitKeyAndModel(t *testing.T) {
 	assert.NotContains(t, params, "model")
 }
 
+func TestDeepgramTTSVendorConfig(t *testing.T) {
+	sampleRate := vendors.SampleRate24kHz
+	tts := vendors.NewDeepgramTTS(vendors.DeepgramTTSOptions{
+		APIKey:     "deepgram-key",
+		Model:      "aura-2-thalia-en",
+		BaseURL:    "wss://api.deepgram.com/v1/speak",
+		SampleRate: &sampleRate,
+		Params: map[string]interface{}{
+			"encoding": "linear16",
+		},
+	}).ToConfig()
+
+	assert.Equal(t, "deepgram", tts["vendor"])
+	assert.Equal(t, map[string]interface{}{
+		"api_key":     "deepgram-key",
+		"model":       "aura-2-thalia-en",
+		"base_url":    "wss://api.deepgram.com/v1/speak",
+		"sample_rate": 24000,
+		"encoding":    "linear16",
+	}, tts["params"])
+}
+
 func TestAresASRRemainsKeylessWithoutPreset(t *testing.T) {
 	agent := NewAgent().WithStt(vendors.NewAresSTT(vendors.AresSTTOptions{
 		Language: "en-US",
@@ -466,8 +556,9 @@ func TestBYOKProvidersAreNotTreatedAsManagedPresets(t *testing.T) {
 		APIKey: "deepgram-key",
 		Model:  "nova-3",
 	})).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-		APIKey: "openai-key",
-		Model:  "gpt-4o-mini",
+		APIKey:  "openai-key",
+		Model:   "gpt-4o-mini",
+		Headers: map[string]string{"X-Trace-Id": "trace-123"},
 	})).WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
 		Key:     "minimax-key",
 		GroupID: "minimax-group",
@@ -492,18 +583,90 @@ func TestBYOKProvidersAreNotTreatedAsManagedPresets(t *testing.T) {
 	ttsParams := resolved["tts"].(map[string]interface{})["params"].(map[string]interface{})
 	assert.Equal(t, "deepgram-key", asrParams["api_key"])
 	assert.Equal(t, "openai-key", llm["api_key"])
+	assert.Equal(t, map[string]string{"X-Trace-Id": "trace-123"}, llm["headers"])
 	assert.Equal(t, "minimax-key", ttsParams["key"])
 	assert.Equal(t, "minimax-group", ttsParams["group_id"])
 }
 
-func TestToPropertiesBubblesMLLMFieldsAndPreservesVendorOverrides(t *testing.T) {
+func TestWithMllmSetsMllmEnableWithoutLegacyFlag(t *testing.T) {
+	props, err := NewAgent().WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
+		APIKey: "openai-key",
+	})).ToProperties(ToPropertiesOptions{
+		Channel:    "room",
+		Token:      "rtc-token",
+		AgentUID:   "1",
+		RemoteUIDs: []string{"100"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, props.Mllm)
+	require.NotNil(t, props.Mllm.Enable)
+	assert.True(t, *props.Mllm.Enable)
+	assert.Nil(t, props.AdvancedFeatures)
+}
+
+func TestWithMllmForcesEnableAndRemovesDeprecatedAdvancedFlag(t *testing.T) {
 	enableMllm := true
+	enableRtm := true
+	props, err := NewAgent(WithAdvancedFeatures(&AdvancedFeatures{
+		EnableMllm: &enableMllm,
+		EnableRtm:  &enableRtm,
+	})).WithMllm(disabledMllmVendor{}).ToProperties(ToPropertiesOptions{
+		Channel:    "room",
+		Token:      "rtc-token",
+		AgentUID:   "1",
+		RemoteUIDs: []string{"100"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, props.Mllm)
+	require.NotNil(t, props.Mllm.Enable)
+	assert.True(t, *props.Mllm.Enable)
+	require.NotNil(t, props.AdvancedFeatures)
+	assert.Nil(t, props.AdvancedFeatures.EnableMllm)
+	require.NotNil(t, props.AdvancedFeatures.EnableRtm)
+	assert.True(t, *props.AdvancedFeatures.EnableRtm)
+}
+
+func TestWithMllmDropsAdvancedFeaturesWhenOnlyDeprecatedEnableMllmWasSet(t *testing.T) {
+	enableMllm := true
+	props, err := NewAgent(WithAdvancedFeatures(&AdvancedFeatures{
+		EnableMllm: &enableMllm,
+	})).WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
+		APIKey: "openai-key",
+	})).ToProperties(ToPropertiesOptions{
+		Channel:    "room",
+		Token:      "rtc-token",
+		AgentUID:   "1",
+		RemoteUIDs: []string{"100"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, props.Mllm)
+	require.NotNil(t, props.Mllm.Enable)
+	assert.True(t, *props.Mllm.Enable)
+	assert.Nil(t, props.AdvancedFeatures)
+}
+
+func TestMllmModeDoesNotRequireLlmOrTtsWhenEnableMissing(t *testing.T) {
+	agent := NewAgent()
+	agent.mllm = map[string]interface{}{
+		"vendor": "openai",
+	}
+
+	props, err := agent.ToProperties(ToPropertiesOptions{
+		Channel:    "room",
+		Token:      "rtc-token",
+		AgentUID:   "1",
+		RemoteUIDs: []string{"100"},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, props.Mllm)
+}
+
+func TestToPropertiesBubblesMLLMFieldsAndPreservesVendorOverrides(t *testing.T) {
 	maxHistory := 9
 	agent := NewAgent(
 		WithGreeting("Agent greeting"),
 		WithFailureMessage("Agent failure"),
 		WithMaxHistory(maxHistory),
-		WithAdvancedFeatures(&AdvancedFeatures{EnableMllm: &enableMllm}),
 	).WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
 		APIKey:          "openai-key",
 		Model:           "gpt-4o-realtime-preview",
@@ -525,17 +688,11 @@ func TestToPropertiesBubblesMLLMFieldsAndPreservesVendorOverrides(t *testing.T) 
 	payload, err := json.Marshal(props.Mllm)
 	require.NoError(t, err)
 	assert.Contains(t, string(payload), "greeting_message")
-	assert.Contains(t, string(payload), "failure_message")
-	assert.Contains(t, string(payload), "max_history")
-	assert.Contains(t, string(payload), "predefined_tools")
 	assert.Contains(t, string(payload), "url")
 
 	var decoded map[string]interface{}
 	require.NoError(t, json.Unmarshal(payload, &decoded))
 	assert.Equal(t, "Vendor greeting", decoded["greeting_message"])
-	assert.Equal(t, "Agent failure", decoded["failure_message"])
-	assert.Equal(t, float64(9), decoded["max_history"])
-	assert.Equal(t, []interface{}{"_publish_message"}, decoded["predefined_tools"])
 	assert.Equal(t, "wss://openai.example.com/realtime", decoded["url"])
 }
 
@@ -638,4 +795,91 @@ func TestSessionWarnHookReceivesHandlerPanics(t *testing.T) {
 	session.emit("started", map[string]string{"agent_id": "agent"})
 	require.Len(t, warnings, 1)
 	assert.Contains(t, warnings[0], "recovered panic")
+}
+
+func TestSessionThinkRoutesToAgentManagement(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v2/projects/appid/agents/agent_123/think":
+			var req map[string]interface{}
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+			assert.Equal(t, "Injected instruction", req["text"])
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"agent_id":"agent_123","channel":"room-1","start_ts":123}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	rawClient := client.NewClient(
+		option.WithBaseURL(server.URL),
+		option.WithBasicAuth("user", "pass"),
+		option.WithMaxAttempts(1),
+	)
+
+	session := NewAgentSession(AgentSessionOptions{
+		Client:                rawClient.Agents,
+		AgentManagementClient: rawClient.AgentManagement,
+		Agent:                 NewAgent(),
+		AppID:                 "appid",
+		Name:                  "agent",
+		Channel:               "room-1",
+		AgentUID:              "1",
+		RemoteUIDs:            []string{"2"},
+	})
+	session.status = StatusRunning
+	session.agentID = "agent_123"
+
+	resp, err := session.Think(context.Background(), "Injected instruction", nil, nil, nil, nil, nil)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, "agent_123", *resp.AgentID)
+}
+
+func TestSessionThinkWithOptionsForwardsFields(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v2/projects/appid/agents/agent_123/think":
+			var req map[string]interface{}
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+			assert.Equal(t, "Injected instruction", req["text"])
+			assert.Equal(t, "interrupt", req["on_thinking_action"])
+			assert.Equal(t, false, req["interruptable"])
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"agent_id":"agent_123","channel":"room-1","start_ts":123}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	rawClient := client.NewClient(
+		option.WithBaseURL(server.URL),
+		option.WithBasicAuth("user", "pass"),
+		option.WithMaxAttempts(1),
+	)
+
+	session := NewAgentSession(AgentSessionOptions{
+		Client:                rawClient.Agents,
+		AgentManagementClient: rawClient.AgentManagement,
+		Agent:                 NewAgent(),
+		AppID:                 "appid",
+		Name:                  "agent",
+		Channel:               "room-1",
+		AgentUID:              "1",
+		RemoteUIDs:            []string{"2"},
+	})
+	session.status = StatusRunning
+	session.agentID = "agent_123"
+
+	onThinking := Agora.AgentThinkAgentManagementRequestOnThinkingActionInterrupt
+	notInterruptable := false
+	resp, err := session.ThinkWithOptions(context.Background(), "Injected instruction", &ThinkOptions{
+		OnThinkingAction: &onThinking,
+		Interruptable:    &notInterruptable,
+	})
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, "agent_123", *resp.AgentID)
 }

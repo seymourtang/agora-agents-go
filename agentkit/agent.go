@@ -74,6 +74,18 @@ func cloneValue(value interface{}) interface{} {
 	}
 }
 
+func boolFromMap(m map[string]interface{}, key string) bool {
+	if m == nil {
+		return false
+	}
+	value, ok := m[key]
+	if !ok {
+		return false
+	}
+	b, ok := value.(bool)
+	return ok && b
+}
+
 // =============================================================================
 // Top-level configuration aliases
 // =============================================================================
@@ -124,6 +136,12 @@ type EndOfSpeechVadConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfi
 // EndOfSpeechSemanticConfig holds semantic model settings for EoS detection.
 type EndOfSpeechSemanticConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechSemanticConfig
 
+// InterruptionConfig configures unified interruption handling (top-level `interruption`).
+type InterruptionConfig = Agora.StartAgentsRequestPropertiesInterruption
+
+// InterruptionMode controls interruption trigger mode: "start_of_speech" | "keywords".
+type InterruptionMode = Agora.StartAgentsRequestPropertiesInterruptionMode
+
 // =============================================================================
 // Deprecated turn detection aliases
 // =============================================================================
@@ -171,6 +189,15 @@ type FarewellConfig = Agora.StartAgentsRequestPropertiesParametersFarewellConfig
 // ParametersDataChannel is the agent data-transmission channel: "rtm" | "datastream".
 type ParametersDataChannel = Agora.StartAgentsRequestPropertiesParametersDataChannel
 
+// ParametersAudioScenario is the RTC audio scenario used by the agent session.
+type ParametersAudioScenario string
+
+const (
+	ParametersAudioScenarioDefault  ParametersAudioScenario = "default"
+	ParametersAudioScenarioChorus   ParametersAudioScenario = "chorus"
+	ParametersAudioScenarioAIServer ParametersAudioScenario = "aiserver"
+)
+
 // =============================================================================
 // Geofence sub-type aliases
 // =============================================================================
@@ -190,6 +217,12 @@ type LlmConfig = Agora.StartAgentsRequestPropertiesLlm
 
 // MllmConfig is the concrete MLLM configuration payload (start_agents_request_properties.mllm).
 type MllmConfig = Agora.StartAgentsRequestPropertiesMllm
+
+// MllmTurnDetectionConfig configures MLLM turn detection (`mllm.turn_detection`).
+type MllmTurnDetectionConfig = Agora.StartAgentsRequestPropertiesMllmTurnDetection
+
+// MllmTurnDetectionMode controls MLLM turn detection mode.
+type MllmTurnDetectionMode = Agora.StartAgentsRequestPropertiesMllmTurnDetectionMode
 
 // AsrConfig is the concrete ASR/STT configuration payload (start_agents_request_properties.asr).
 type AsrConfig = Agora.StartAgentsRequestPropertiesAsr
@@ -233,9 +266,11 @@ type Agent struct {
 	avatar                   map[string]interface{}
 	avatarRequiredSampleRate *vendors.SampleRate
 	turnDetection            *TurnDetectionConfig
+	interruption             *InterruptionConfig
 	sal                      *SalConfig
 	advancedFeatures         *AdvancedFeatures
 	parameters               *SessionParams
+	audioScenario            *ParametersAudioScenario
 	geofence                 *GeofenceConfig
 	labels                   map[string]string
 	rtc                      *RtcConfig
@@ -288,6 +323,12 @@ func WithTurnDetectionConfig(td *TurnDetectionConfig) AgentOption {
 	}
 }
 
+func WithInterruptionConfig(interruption *InterruptionConfig) AgentOption {
+	return func(a *Agent) {
+		a.interruption = interruption
+	}
+}
+
 func WithSalConfig(sal *SalConfig) AgentOption {
 	return func(a *Agent) {
 		a.sal = sal
@@ -300,9 +341,24 @@ func WithAdvancedFeatures(af *AdvancedFeatures) AgentOption {
 	}
 }
 
+func WithTools(enabled bool) AgentOption {
+	return func(a *Agent) {
+		if a.advancedFeatures == nil {
+			a.advancedFeatures = &AdvancedFeatures{}
+		}
+		a.advancedFeatures.EnableTools = &enabled
+	}
+}
+
 func WithParameters(params *SessionParams) AgentOption {
 	return func(a *Agent) {
 		a.parameters = params
+	}
+}
+
+func WithAudioScenario(audioScenario ParametersAudioScenario) AgentOption {
+	return func(a *Agent) {
+		a.audioScenario = &audioScenario
 	}
 }
 
@@ -363,6 +419,15 @@ func (a *Agent) WithStt(vendor vendors.STT) *Agent {
 func (a *Agent) WithMllm(vendor vendors.MLLM) *Agent {
 	clone := a.clone()
 	clone.mllm = vendor.ToConfig()
+	if clone.mllm != nil {
+		clone.mllm["enable"] = true
+	}
+	if clone.advancedFeatures != nil {
+		clone.advancedFeatures.EnableMllm = nil
+		if clone.advancedFeatures.EnableRtm == nil && clone.advancedFeatures.EnableSal == nil && clone.advancedFeatures.EnableTools == nil {
+			clone.advancedFeatures = nil
+		}
+	}
 	return clone
 }
 
@@ -387,6 +452,12 @@ func (a *Agent) WithAvatar(vendor vendors.Avatar) *Agent {
 func (a *Agent) WithTurnDetection(td *TurnDetectionConfig) *Agent {
 	clone := a.clone()
 	clone.turnDetection = td
+	return clone
+}
+
+func (a *Agent) WithInterruption(interruption *InterruptionConfig) *Agent {
+	clone := a.clone()
+	clone.interruption = interruption
 	return clone
 }
 
@@ -420,9 +491,27 @@ func (a *Agent) WithAdvancedFeatures(af *AdvancedFeatures) *Agent {
 	return clone
 }
 
+func (a *Agent) WithTools(enabled bool) *Agent {
+	clone := a.clone()
+	if clone.advancedFeatures == nil {
+		clone.advancedFeatures = &AdvancedFeatures{}
+	} else {
+		advancedFeatures := *clone.advancedFeatures
+		clone.advancedFeatures = &advancedFeatures
+	}
+	clone.advancedFeatures.EnableTools = &enabled
+	return clone
+}
+
 func (a *Agent) WithParameters(params *SessionParams) *Agent {
 	clone := a.clone()
 	clone.parameters = params
+	return clone
+}
+
+func (a *Agent) WithAudioScenario(audioScenario ParametersAudioScenario) *Agent {
+	clone := a.clone()
+	clone.audioScenario = &audioScenario
 	return clone
 }
 
@@ -475,6 +564,7 @@ func (a *Agent) FailureMessage() string                        { return a.failur
 func (a *Agent) MaxHistory() *int                              { return a.maxHistory }
 func (a *Agent) Avatar() map[string]interface{}                { return a.avatar }
 func (a *Agent) TurnDetection() *TurnDetectionConfig           { return a.turnDetection }
+func (a *Agent) Interruption() *InterruptionConfig             { return a.interruption }
 func (a *Agent) Sal() *SalConfig                               { return a.sal }
 func (a *Agent) AdvancedFeatures() *AdvancedFeatures           { return a.advancedFeatures }
 func (a *Agent) Parameters() *SessionParams                    { return a.parameters }
@@ -510,6 +600,7 @@ func (a *Agent) CreateSession(client *AgoraClient, opts CreateSessionOptions) *A
 
 	return NewAgentSession(AgentSessionOptions{
 		Client:                   client.Agents,
+		AgentManagementClient:    client.AgentManagement,
 		Agent:                    a,
 		AppID:                    client.AppID,
 		AppCertificate:           client.AppCertificate,
@@ -600,6 +691,9 @@ func (a *Agent) ToProperties(opts ToPropertiesOptions) (*Agora.StartAgentsReques
 	if a.turnDetection != nil {
 		props.TurnDetection = a.turnDetection
 	}
+	if a.interruption != nil {
+		props.Interruption = a.interruption
+	}
 	if a.sal != nil {
 		props.Sal = a.sal
 	}
@@ -617,6 +711,13 @@ func (a *Agent) ToProperties(opts ToPropertiesOptions) (*Agora.StartAgentsReques
 		params := *a.parameters
 		props.Parameters = &params
 	}
+	if a.audioScenario != nil {
+		if props.Parameters == nil {
+			props.Parameters = &Agora.StartAgentsRequestPropertiesParameters{}
+		}
+		value := Agora.StartAgentsRequestPropertiesParametersAudioScenario(*a.audioScenario)
+		props.Parameters.AudioScenario = &value
+	}
 	if a.geofence != nil {
 		props.Geofence = a.geofence
 	}
@@ -630,7 +731,7 @@ func (a *Agent) ToProperties(opts ToPropertiesOptions) (*Agora.StartAgentsReques
 		props.FillerWords = a.fillerWords
 	}
 
-	isMllmMode := a.advancedFeatures != nil && a.advancedFeatures.EnableMllm != nil && *a.advancedFeatures.EnableMllm
+	isMllmMode := a.mllm != nil
 	if isMllmMode {
 		return props, nil
 	}
@@ -745,6 +846,14 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	}
 	if a.stt != nil {
 		propsMap["asr"] = cloneConfig(a.stt)
+	}
+	if a.audioScenario != nil {
+		parameters, ok := propsMap["parameters"].(map[string]interface{})
+		if !ok || parameters == nil {
+			parameters = map[string]interface{}{}
+			propsMap["parameters"] = parameters
+		}
+		parameters["audio_scenario"] = string(*a.audioScenario)
 	}
 
 	return propsMap, nil

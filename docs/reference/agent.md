@@ -78,7 +78,16 @@ Sets the maximum number of conversation turns to retain.
 func WithTurnDetectionConfig(td *TurnDetectionConfig) AgentOption
 ```
 
-Sets the turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for the preferred SOS/EOS model.
+Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection. Use interruption config for interruption behavior and MLLM vendor `TurnDetection` for MLLM turn detection.
+
+### WithInterruptionConfig
+
+<!-- snippet: fragment -->
+```go
+func WithInterruptionConfig(interruption *InterruptionConfig) AgentOption
+```
+
+Sets unified interruption control using the top-level `interruption` object.
 
 ### WithSalConfig
 
@@ -96,7 +105,16 @@ Sets the speech analytics configuration.
 func WithAdvancedFeatures(af *AdvancedFeatures) AgentOption
 ```
 
-Sets advanced feature flags (e.g., `EnableMllm`, `EnableAivad`).
+Sets advanced feature flags such as RTM or tool invocation.
+
+### WithTools
+
+<!-- snippet: fragment -->
+```go
+func WithTools(enabled bool) AgentOption
+```
+
+Enables or disables MCP tool invocation by setting `AdvancedFeatures.EnableTools`.
 
 ### WithParameters
 
@@ -193,7 +211,7 @@ func (a *Agent) WithAvatar(vendor vendors.Avatar) *Agent
 func (a *Agent) WithTurnDetection(td *TurnDetectionConfig) *Agent
 ```
 
-Sets the turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for the preferred SOS/EOS model.
+Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection. Use interruption config for interruption behavior and MLLM vendor `TurnDetection` for MLLM turn detection.
 
 ### WithInstructions (method)
 
@@ -229,6 +247,15 @@ func (a *Agent) WithSal(sal *SalConfig) *Agent
 ```go
 func (a *Agent) WithAdvancedFeatures(af *AdvancedFeatures) *Agent
 ```
+
+### WithTools (method)
+
+<!-- snippet: fragment -->
+```go
+func (a *Agent) WithTools(enabled bool) *Agent
+```
+
+Enables or disables MCP tool invocation by setting `AdvancedFeatures.EnableTools`.
 
 ### WithParameters (method)
 

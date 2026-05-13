@@ -68,6 +68,7 @@ agent := agentkit.NewAgent(...).WithLlm(llm)
 | `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID` |
 | `NewGroqTTS` | `GroqTTSOptions` | `Key` |
 | `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported preset-backed MiniMax models; `Key`, `GroupID`, `Model` for BYOK |
+| `NewDeepgramTTS` | `DeepgramTTSOptions` | `APIKey`, `Model` |
 | `NewSarvamTTS` | `SarvamTTSOptions` | `APIKey` |
 
 <!-- snippet: fragment -->
@@ -108,7 +109,6 @@ Note: `OpenAITTS` always returns `SampleRate24kHz`. Other TTS vendors return the
 | `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region` |
 | `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey` |
 | `NewAresSTT` | `AresSTTOptions` | None |
-| `NewSonioxSTT` | `SonioxSTTOptions` | `APIKey` |
 | `NewSarvamSTT` | `SarvamSTTOptions` | `APIKey` |
 
 <!-- snippet: fragment -->
@@ -127,6 +127,7 @@ agent = agent.WithStt(stt)
 | Constructor | Options Struct | Required Fields | Default Model |
 |---|---|---|---|
 | `NewOpenAIRealtime` | `OpenAIRealtimeOptions` | `APIKey` | `gpt-4o-realtime-preview` |
+| `NewGeminiLive` | `GeminiLiveOptions` | `APIKey`, `Model` | — |
 | `NewVertexAI` | `VertexAIOptions` | `ProjectID` | `gemini-2.0-flash-exp` |
 
 <!-- snippet: fragment -->

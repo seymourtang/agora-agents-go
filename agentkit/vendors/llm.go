@@ -38,6 +38,7 @@ type OpenAIOptions struct {
 	FailureMessage    string
 	InputModalities   []string
 	Params            map[string]interface{}
+	Headers           map[string]string
 	OutputModalities  []string
 	GreetingConfigs   map[string]interface{}
 	TemplateVariables map[string]string
@@ -105,6 +106,9 @@ func (o *OpenAI) ToConfig() map[string]interface{} {
 	if o.options.APIKey != "" {
 		config["api_key"] = o.options.APIKey
 	}
+	if o.options.Headers != nil {
+		config["headers"] = o.options.Headers
+	}
 
 	if o.options.SystemMessages != nil {
 		config["system_messages"] = o.options.SystemMessages
@@ -151,6 +155,7 @@ type AzureOpenAIOptions struct {
 	FailureMessage    string
 	InputModalities   []string
 	Params            map[string]interface{}
+	Headers           map[string]string
 	OutputModalities  []string
 	GreetingConfigs   map[string]interface{}
 	TemplateVariables map[string]string
@@ -216,6 +221,9 @@ func (a *AzureOpenAI) ToConfig() map[string]interface{} {
 	if len(params) > 0 {
 		config["params"] = params
 	}
+	if a.options.Headers != nil {
+		config["headers"] = a.options.Headers
+	}
 
 	if a.options.SystemMessages != nil {
 		config["system_messages"] = a.options.SystemMessages
@@ -258,6 +266,7 @@ type AnthropicOptions struct {
 	FailureMessage    string
 	InputModalities   []string
 	Params            map[string]interface{}
+	Headers           map[string]string
 	OutputModalities  []string
 	GreetingConfigs   map[string]interface{}
 	TemplateVariables map[string]string
@@ -316,6 +325,9 @@ func (a *Anthropic) ToConfig() map[string]interface{} {
 	if a.options.SystemMessages != nil {
 		config["system_messages"] = a.options.SystemMessages
 	}
+	if a.options.Headers != nil {
+		config["headers"] = a.options.Headers
+	}
 	if a.options.GreetingMessage != "" {
 		config["greeting_message"] = a.options.GreetingMessage
 	}
@@ -358,6 +370,7 @@ type GeminiOptions struct {
 	FailureMessage    string
 	InputModalities   []string
 	Params            map[string]interface{}
+	Headers           map[string]string
 	OutputModalities  []string
 	GreetingConfigs   map[string]interface{}
 	TemplateVariables map[string]string
@@ -418,6 +431,9 @@ func (g *Gemini) ToConfig() map[string]interface{} {
 
 	if g.options.SystemMessages != nil {
 		config["system_messages"] = g.options.SystemMessages
+	}
+	if g.options.Headers != nil {
+		config["headers"] = g.options.Headers
 	}
 	if g.options.GreetingMessage != "" {
 		config["greeting_message"] = g.options.GreetingMessage
