@@ -14,12 +14,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **`AgentSession.Think()` / `ThinkWithOptions()`** — Send a custom instruction to a running agent through the agent management API.
 - **`Agent.WithInterruption()` / `WithInterruptionConfig()`** — Configure the new top-level `interruption` object for unified interruption control.
 - **MLLM turn detection** — `NewOpenAIRealtime`, `NewGeminiLive`, and `NewVertexAI` now accept `TurnDetection`, which maps to `mllm.turn_detection` and overrides top-level turn detection for MLLM sessions.
+- **`AudioScenario` AgentKit support** — Session params and AgentKit request construction now expose the top-level `parameters.audio_scenario` field.
 
 ### Fixed
 
 - **MiniMax TTS preset stripping** — When a MiniMax reseller preset is inferred (`minimax_speech_2_6_turbo` or `minimax_speech_2_8_turbo`), the `group_id` and `url` fields are now correctly stripped from `tts.params` alongside `key` and `model`. Previously they were forwarded to the API, causing request failures.
 - **MLLM enable flag** — `Agent.WithMllm()` now sets `mllm.enable = true` and removes the deprecated `advanced_features.enable_mllm` flag from generated requests.
 - **MLLM wrapper shape** — MLLM vendors no longer emit removed fields such as `style`; docs and tests now reflect the v2.6 MLLM contract.
+- **Preset-backed OpenAI TTS** — `NewOpenAITTS` no longer requires `APIKey` when a reseller preset supplies credentials server-side.
 - **AgentKit parity coverage** — Added regression coverage for interruption, MLLM turn detection, Deepgram TTS, LLM headers, and deprecated MLLM flag cleanup.
 
 ## [v1.3.0] — 2026-04-02
