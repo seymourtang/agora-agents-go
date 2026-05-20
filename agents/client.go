@@ -171,7 +171,7 @@ func (c *Client) GetTurns(
 	return response.Body, nil
 }
 
-// Stop the specified conversational agent instance.
+// Stop the specified conversational agent instance. The API responds after request parameters are validated, and the stop operation is processed asynchronously after the response is returned.
 func (c *Client) Stop(
 	ctx context.Context,
 	request *Agora.StopAgentsRequest,

@@ -122,6 +122,13 @@ func TestAgentsStartWithWireMock(
 					"Please hold on a second.",
 				),
 			},
+			TurnDetection: &Agora.StartAgentsRequestPropertiesTurnDetection{
+				Config: &Agora.StartAgentsRequestPropertiesTurnDetectionConfig{
+					EndOfSpeech: &Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeech{
+						Mode: Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechModeSemantic.Ptr(),
+					},
+				},
+			},
 		},
 	}
 	_, invocationErr := client.Agents.Start(

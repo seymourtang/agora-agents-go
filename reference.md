@@ -78,6 +78,13 @@ request := &Agora.StartAgentsRequest{
                     "Please hold on a second.",
                 ),
             },
+            TurnDetection: &Agora.StartAgentsRequestPropertiesTurnDetection{
+                Config: &Agora.StartAgentsRequestPropertiesTurnDetectionConfig{
+                    EndOfSpeech: &Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeech{
+                        Mode: Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechModeSemantic.Ptr(),
+                    },
+                },
+            },
         },
     }
 client.Agents.Start(
@@ -239,7 +246,6 @@ The agent state to filter by. Only one state can be specified per query:
 - `RUNNING` (2): The agent is running.
 - `STOPPING` (3): The agent is stopping.
 - `STOPPED` (4): The agent has exited.
-- `RECOVERING` (5): The agent is recovering.
 - `FAILED` (6): The agent failed to execute.
     
 </dd>
@@ -476,6 +482,22 @@ client.Agents.GetTurns(
     
 </dd>
 </dl>
+
+<dl>
+<dd>
+
+**pageIndex:** `*int` — The page number. Starts from 1.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**pageSize:** `*int` — The number of dialogue turns returned per page.
+    
+</dd>
+</dl>
 </dd>
 </dl>
 
@@ -496,7 +518,7 @@ client.Agents.GetTurns(
 <dl>
 <dd>
 
-Stop the specified conversational agent instance.
+Stop the specified conversational agent instance. The API responds after request parameters are validated, and the stop operation is processed asynchronously after the response is returned.
 </dd>
 </dl>
 </dd>
@@ -932,6 +954,7 @@ client.AgentManagement.AgentThink(
 
 The action to take when the agent is in a listening state:
 - `inject`: Inject the custom text instruction into the current turn without interrupting it.
+- `interrupt`: Immediately interrupt the current flow and initiate a new round of dialogue.
 - `ignore`: Ignore the request.
     
 </dd>

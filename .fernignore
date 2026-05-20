@@ -12,3 +12,6 @@ docs/
 # Dependency manifests are managed manually
 go.mod
 go.sum
+.fern/replay.lock
+.fern/replay.yml
+.gitattributes

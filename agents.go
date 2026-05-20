@@ -82,8 +82,10 @@ func (g *GetHistoryAgentsRequest) SetAgentID(agentID string) {
 }
 
 var (
-	getTurnsAgentsRequestFieldAppid   = big.NewInt(1 << 0)
-	getTurnsAgentsRequestFieldAgentID = big.NewInt(1 << 1)
+	getTurnsAgentsRequestFieldAppid     = big.NewInt(1 << 0)
+	getTurnsAgentsRequestFieldAgentID   = big.NewInt(1 << 1)
+	getTurnsAgentsRequestFieldPageIndex = big.NewInt(1 << 2)
+	getTurnsAgentsRequestFieldPageSize  = big.NewInt(1 << 3)
 )
 
 type GetTurnsAgentsRequest struct {
@@ -91,6 +93,10 @@ type GetTurnsAgentsRequest struct {
 	Appid string `json:"-" url:"-"`
 	// The agent instance ID you obtained after successfully calling `join` to start a conversational AI agent.
 	AgentID string `json:"-" url:"-"`
+	// The page number. Starts from 1.
+	PageIndex *int `json:"-" url:"page_index,omitempty"`
+	// The number of dialogue turns returned per page.
+	PageSize *int `json:"-" url:"page_size,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -115,6 +121,20 @@ func (g *GetTurnsAgentsRequest) SetAppid(appid string) {
 func (g *GetTurnsAgentsRequest) SetAgentID(agentID string) {
 	g.AgentID = agentID
 	g.require(getTurnsAgentsRequestFieldAgentID)
+}
+
+// SetPageIndex sets the PageIndex field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsRequest) SetPageIndex(pageIndex *int) {
+	g.PageIndex = pageIndex
+	g.require(getTurnsAgentsRequestFieldPageIndex)
+}
+
+// SetPageSize sets the PageSize field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsRequest) SetPageSize(pageSize *int) {
+	g.PageSize = pageSize
+	g.require(getTurnsAgentsRequestFieldPageSize)
 }
 
 var (
@@ -178,7 +198,6 @@ type ListAgentsRequest struct {
 	// - `RUNNING` (2): The agent is running.
 	// - `STOPPING` (3): The agent is stopping.
 	// - `STOPPED` (4): The agent has exited.
-	// - `RECOVERING` (5): The agent is recovering.
 	// - `FAILED` (6): The agent failed to execute.
 	State *ListAgentsRequestState `json:"-" url:"state,omitempty"`
 	// The maximum number of entries returned per page.
@@ -2955,7 +2974,7 @@ var (
 )
 
 type OpenAiTtsParams struct {
-	// OpenAI API key
+	// OpenAI API key. Optional for preset-backed OpenAI TTS usage.
 	APIKey *string `json:"api_key,omitempty" url:"api_key,omitempty"`
 	// Voice name (e.g., "alloy", "echo", "fable", "onyx", "nova", "shimmer")
 	Voice string `json:"voice" url:"voice"`
@@ -3883,7 +3902,6 @@ type GetAgentsResponse struct {
 	// - `RUNNING` (2): The agent is running.
 	// - `STOPPING` (3): The agent is stopping.
 	// - `STOPPED` (4): The agent has exited.
-	// - `RECOVERING` (5): The agent is recovering.
 	// - `FAILED` (6): The agent failed to execute.
 	Status *GetAgentsResponseStatus `json:"status,omitempty" url:"status,omitempty"`
 	// Unique id of the agent instance
@@ -4022,18 +4040,16 @@ func (g *GetAgentsResponse) String() string {
 // - `RUNNING` (2): The agent is running.
 // - `STOPPING` (3): The agent is stopping.
 // - `STOPPED` (4): The agent has exited.
-// - `RECOVERING` (5): The agent is recovering.
 // - `FAILED` (6): The agent failed to execute.
 type GetAgentsResponseStatus string
 
 const (
-	GetAgentsResponseStatusIdle       GetAgentsResponseStatus = "IDLE"
-	GetAgentsResponseStatusStarting   GetAgentsResponseStatus = "STARTING"
-	GetAgentsResponseStatusRunning    GetAgentsResponseStatus = "RUNNING"
-	GetAgentsResponseStatusStopping   GetAgentsResponseStatus = "STOPPING"
-	GetAgentsResponseStatusStopped    GetAgentsResponseStatus = "STOPPED"
-	GetAgentsResponseStatusRecovering GetAgentsResponseStatus = "RECOVERING"
-	GetAgentsResponseStatusFailed     GetAgentsResponseStatus = "FAILED"
+	GetAgentsResponseStatusIdle     GetAgentsResponseStatus = "IDLE"
+	GetAgentsResponseStatusStarting GetAgentsResponseStatus = "STARTING"
+	GetAgentsResponseStatusRunning  GetAgentsResponseStatus = "RUNNING"
+	GetAgentsResponseStatusStopping GetAgentsResponseStatus = "STOPPING"
+	GetAgentsResponseStatusStopped  GetAgentsResponseStatus = "STOPPED"
+	GetAgentsResponseStatusFailed   GetAgentsResponseStatus = "FAILED"
 )
 
 func NewGetAgentsResponseStatusFromString(s string) (GetAgentsResponseStatus, error) {
@@ -4048,8 +4064,6 @@ func NewGetAgentsResponseStatusFromString(s string) (GetAgentsResponseStatus, er
 		return GetAgentsResponseStatusStopping, nil
 	case "STOPPED":
 		return GetAgentsResponseStatusStopped, nil
-	case "RECOVERING":
-		return GetAgentsResponseStatusRecovering, nil
 	case "FAILED":
 		return GetAgentsResponseStatusFailed, nil
 	}
@@ -4308,10 +4322,25 @@ func (g GetHistoryAgentsResponseContentsItemRole) Ptr() *GetHistoryAgentsRespons
 }
 
 var (
-	getTurnsAgentsResponseFieldTurns = big.NewInt(1 << 0)
+	getTurnsAgentsResponseFieldAgentID        = big.NewInt(1 << 0)
+	getTurnsAgentsResponseFieldName           = big.NewInt(1 << 1)
+	getTurnsAgentsResponseFieldChannel        = big.NewInt(1 << 2)
+	getTurnsAgentsResponseFieldTotalTurnCount = big.NewInt(1 << 3)
+	getTurnsAgentsResponseFieldPagination     = big.NewInt(1 << 4)
+	getTurnsAgentsResponseFieldTurns          = big.NewInt(1 << 5)
 )
 
 type GetTurnsAgentsResponse struct {
+	// The unique identifier of the agent.
+	AgentID *string `json:"agent_id,omitempty" url:"agent_id,omitempty"`
+	// The name of the agent.
+	Name *string `json:"name,omitempty" url:"name,omitempty"`
+	// The name of the RTC channel the agent joined.
+	Channel *string `json:"channel,omitempty" url:"channel,omitempty"`
+	// The total number of dialogue turns in the current session.
+	TotalTurnCount *int `json:"total_turn_count,omitempty" url:"total_turn_count,omitempty"`
+	// Pagination information.
+	Pagination *GetTurnsAgentsResponsePagination `json:"pagination,omitempty" url:"pagination,omitempty"`
 	// A list of conversation turns for the agent session.
 	Turns []*GetTurnsAgentsResponseTurnsItem `json:"turns,omitempty" url:"turns,omitempty"`
 
@@ -4320,6 +4349,41 @@ type GetTurnsAgentsResponse struct {
 
 	extraProperties map[string]interface{}
 	rawJSON         json.RawMessage
+}
+
+func (g *GetTurnsAgentsResponse) GetAgentID() *string {
+	if g == nil {
+		return nil
+	}
+	return g.AgentID
+}
+
+func (g *GetTurnsAgentsResponse) GetName() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Name
+}
+
+func (g *GetTurnsAgentsResponse) GetChannel() *string {
+	if g == nil {
+		return nil
+	}
+	return g.Channel
+}
+
+func (g *GetTurnsAgentsResponse) GetTotalTurnCount() *int {
+	if g == nil {
+		return nil
+	}
+	return g.TotalTurnCount
+}
+
+func (g *GetTurnsAgentsResponse) GetPagination() *GetTurnsAgentsResponsePagination {
+	if g == nil {
+		return nil
+	}
+	return g.Pagination
 }
 
 func (g *GetTurnsAgentsResponse) GetTurns() []*GetTurnsAgentsResponseTurnsItem {
@@ -4338,6 +4402,41 @@ func (g *GetTurnsAgentsResponse) require(field *big.Int) {
 		g.explicitFields = big.NewInt(0)
 	}
 	g.explicitFields.Or(g.explicitFields, field)
+}
+
+// SetAgentID sets the AgentID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponse) SetAgentID(agentID *string) {
+	g.AgentID = agentID
+	g.require(getTurnsAgentsResponseFieldAgentID)
+}
+
+// SetName sets the Name field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponse) SetName(name *string) {
+	g.Name = name
+	g.require(getTurnsAgentsResponseFieldName)
+}
+
+// SetChannel sets the Channel field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponse) SetChannel(channel *string) {
+	g.Channel = channel
+	g.require(getTurnsAgentsResponseFieldChannel)
+}
+
+// SetTotalTurnCount sets the TotalTurnCount field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponse) SetTotalTurnCount(totalTurnCount *int) {
+	g.TotalTurnCount = totalTurnCount
+	g.require(getTurnsAgentsResponseFieldTotalTurnCount)
+}
+
+// SetPagination sets the Pagination field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponse) SetPagination(pagination *GetTurnsAgentsResponsePagination) {
+	g.Pagination = pagination
+	g.require(getTurnsAgentsResponseFieldPagination)
 }
 
 // SetTurns sets the Turns field and marks it as non-optional;
@@ -4375,6 +4474,120 @@ func (g *GetTurnsAgentsResponse) MarshalJSON() ([]byte, error) {
 }
 
 func (g *GetTurnsAgentsResponse) String() string {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+// Pagination information.
+var (
+	getTurnsAgentsResponsePaginationFieldPageIndex  = big.NewInt(1 << 0)
+	getTurnsAgentsResponsePaginationFieldTotalPages = big.NewInt(1 << 1)
+	getTurnsAgentsResponsePaginationFieldIsLastPage = big.NewInt(1 << 2)
+)
+
+type GetTurnsAgentsResponsePagination struct {
+	// The current page number; starts from 1.
+	PageIndex *int `json:"page_index,omitempty" url:"page_index,omitempty"`
+	// The total number of pages.
+	TotalPages *int `json:"total_pages,omitempty" url:"total_pages,omitempty"`
+	// True if the current page is the last page.
+	IsLastPage *bool `json:"is_last_page,omitempty" url:"is_last_page,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (g *GetTurnsAgentsResponsePagination) GetPageIndex() *int {
+	if g == nil {
+		return nil
+	}
+	return g.PageIndex
+}
+
+func (g *GetTurnsAgentsResponsePagination) GetTotalPages() *int {
+	if g == nil {
+		return nil
+	}
+	return g.TotalPages
+}
+
+func (g *GetTurnsAgentsResponsePagination) GetIsLastPage() *bool {
+	if g == nil {
+		return nil
+	}
+	return g.IsLastPage
+}
+
+func (g *GetTurnsAgentsResponsePagination) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GetTurnsAgentsResponsePagination) require(field *big.Int) {
+	if g.explicitFields == nil {
+		g.explicitFields = big.NewInt(0)
+	}
+	g.explicitFields.Or(g.explicitFields, field)
+}
+
+// SetPageIndex sets the PageIndex field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponsePagination) SetPageIndex(pageIndex *int) {
+	g.PageIndex = pageIndex
+	g.require(getTurnsAgentsResponsePaginationFieldPageIndex)
+}
+
+// SetTotalPages sets the TotalPages field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponsePagination) SetTotalPages(totalPages *int) {
+	g.TotalPages = totalPages
+	g.require(getTurnsAgentsResponsePaginationFieldTotalPages)
+}
+
+// SetIsLastPage sets the IsLastPage field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GetTurnsAgentsResponsePagination) SetIsLastPage(isLastPage *bool) {
+	g.IsLastPage = isLastPage
+	g.require(getTurnsAgentsResponsePaginationFieldIsLastPage)
+}
+
+func (g *GetTurnsAgentsResponsePagination) UnmarshalJSON(data []byte) error {
+	type unmarshaler GetTurnsAgentsResponsePagination
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GetTurnsAgentsResponsePagination(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+	g.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GetTurnsAgentsResponsePagination) MarshalJSON() ([]byte, error) {
+	type embed GetTurnsAgentsResponsePagination
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*g),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, g.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (g *GetTurnsAgentsResponsePagination) String() string {
 	if len(g.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
 			return value
@@ -4689,8 +4902,8 @@ type GetTurnsAgentsResponseTurnsItemEndMetadata struct {
 	// - `api_leave`: The turn was interrupted because the agent left the channel.
 	//
 	// When `type` is `ignored`, possible values are:
-	// - `semantic`: The turn was ignored because semantic end-of-speech detection determined no response was required.
-	// - `keywords`: The turn was ignored because the start keyword was not detected.
+	// - `semantic`: The turn was ignored because semantic end-of-speech detection determined no response was required. Applies when `turn_detection.config.end_of_speech.mode` is set to `semantic`.
+	// - `keywords`: The turn was ignored because the start keyword was not detected. Applies when `turn_detection.config.start_of_speech.mode` is set to `keywords`.
 	// - `disable`: The turn was ignored because interruption is disabled for this turn.
 	CausedBy *string `json:"caused_by,omitempty" url:"caused_by,omitempty"`
 	// The transport protocol used to deliver the request. Included only when `caused_by` is `api_speak` or `api_interrupt`.
@@ -4971,16 +5184,16 @@ type GetTurnsAgentsResponseTurnsItemMetricsSegmentedLatencyMsItem struct {
 	//
 	// When the LLM input modality is `text`, the returned segments are:
 	// - `algorithm_processing`: Algorithm processing delay.
-	// - `asr_ttlw`: ASR Time To Last Word (TTLW) in milliseconds.
-	// - `llm_ttft`: LLM Time To First Token (TTFT) in milliseconds.
-	// - `llm_ftfs`: LLM First Token To First Sentence (FTFS) in milliseconds.
-	// - `tts_ttfb`: TTS Time To First Byte (TTFB) in milliseconds.
+	// - `asr_ttlw`: The ASR Time To Last Word (TTLW) in milliseconds. Represents the delay from when the user finishes speaking to when the ASR module outputs the last word.
+	// - `llm_ttft`: The LLM Time To First Token (TTFT) in milliseconds. Represents the delay from when the user finishes speaking to when the LLM outputs the first token.
+	// - `llm_ftfs`: The LLM First Token To First Sentence (FTFS) in milliseconds. Represents the delay from when the LLM outputs the first token to when it outputs the first complete sentence.
+	// - `tts_ttfb`: The TTS Time To First Byte (TTFB) in milliseconds. Represents the delay from when the TTS module receives a text request to when it outputs the first audio byte.
 	// - `transport`: Network transmission delay in milliseconds. Not returned when the user is connected using the RTC Web SDK.
 	//
 	// When the LLM input modality is `audio`, the returned segments are:
 	// - `algorithm_processing`: Algorithm processing delay.
-	// - `asr_ttlw`: ASR Time To Last Word (TTLW) in milliseconds.
-	// - `llm_ttfa`: LLM Time To First Audio Byte (TTFA) in milliseconds.
+	// - `asr_ttlw`: The ASR Time To Last Word (TTLW) in milliseconds. Represents the delay from when the user finishes speaking to when the ASR module outputs the last word.
+	// - `llm_ttfa`: The LLM Time To First Audio Byte (TTFA) in milliseconds. Represents the delay from when the user finishes speaking to when the LLM outputs the first audio byte.
 	// - `transport`: Network transmission delay in milliseconds. Not returned when the user is connected using the RTC Web SDK.
 	Name *string `json:"name,omitempty" url:"name,omitempty"`
 	// The latency in milliseconds for the segment.
@@ -5385,7 +5598,7 @@ type InterruptAgentsResponse struct {
 	AgentID *string `json:"agent_id,omitempty" url:"agent_id,omitempty"`
 	// The name of the channel
 	Channel *string `json:"channel,omitempty" url:"channel,omitempty"`
-	// Timestamp when the broadcast started
+	// Unix timestamp in seconds when the interrupt request was processed.
 	StartTs *int `json:"start_ts,omitempty" url:"start_ts,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
@@ -5851,13 +6064,12 @@ func (l *ListAgentsResponseDataListItem) String() string {
 type ListAgentsResponseDataListItemStatus string
 
 const (
-	ListAgentsResponseDataListItemStatusIdle       ListAgentsResponseDataListItemStatus = "IDLE"
-	ListAgentsResponseDataListItemStatusStarting   ListAgentsResponseDataListItemStatus = "STARTING"
-	ListAgentsResponseDataListItemStatusRunning    ListAgentsResponseDataListItemStatus = "RUNNING"
-	ListAgentsResponseDataListItemStatusStopping   ListAgentsResponseDataListItemStatus = "STOPPING"
-	ListAgentsResponseDataListItemStatusStopped    ListAgentsResponseDataListItemStatus = "STOPPED"
-	ListAgentsResponseDataListItemStatusRecovering ListAgentsResponseDataListItemStatus = "RECOVERING"
-	ListAgentsResponseDataListItemStatusFailed     ListAgentsResponseDataListItemStatus = "FAILED"
+	ListAgentsResponseDataListItemStatusIdle     ListAgentsResponseDataListItemStatus = "IDLE"
+	ListAgentsResponseDataListItemStatusStarting ListAgentsResponseDataListItemStatus = "STARTING"
+	ListAgentsResponseDataListItemStatusRunning  ListAgentsResponseDataListItemStatus = "RUNNING"
+	ListAgentsResponseDataListItemStatusStopping ListAgentsResponseDataListItemStatus = "STOPPING"
+	ListAgentsResponseDataListItemStatusStopped  ListAgentsResponseDataListItemStatus = "STOPPED"
+	ListAgentsResponseDataListItemStatusFailed   ListAgentsResponseDataListItemStatus = "FAILED"
 )
 
 func NewListAgentsResponseDataListItemStatusFromString(s string) (ListAgentsResponseDataListItemStatus, error) {
@@ -5872,8 +6084,6 @@ func NewListAgentsResponseDataListItemStatusFromString(s string) (ListAgentsResp
 		return ListAgentsResponseDataListItemStatusStopping, nil
 	case "STOPPED":
 		return ListAgentsResponseDataListItemStatusStopped, nil
-	case "RECOVERING":
-		return ListAgentsResponseDataListItemStatusRecovering, nil
 	case "FAILED":
 		return ListAgentsResponseDataListItemStatusFailed, nil
 	}
@@ -6538,7 +6748,7 @@ var (
 )
 
 type StartAgentsRequestPropertiesAdvancedFeatures struct {
-	// Use `mllm.enable` instead. Enable Multimodal Large Language Model for voice-to-voice processing. Enabling MLLM automatically disables ASR, LLM, and TTS since the MLLM handles end-to-end voice processing directly. See `turn_detection.mode` for turn detection options available with MLLM.
+	// Use `mllm.enable` instead. Enable Multimodal Large Language Model for voice-to-voice processing. Enabling MLLM automatically disables ASR, LLM, and TTS since the MLLM handles end-to-end voice processing directly. See `turn_detection.type` for turn detection options available with MLLM.
 	EnableMllm *bool `json:"enable_mllm,omitempty" url:"enable_mllm,omitempty"`
 	// Whether to enable the Signaling (RTM) service. When enabled, the agent can combine the capabilities provided by Signaling to implement advanced functions, such as delivering custom information. Before enabling the Signaling service, make sure the token includes both RTC and RTM privileges.
 	EnableRtm *bool `json:"enable_rtm,omitempty" url:"enable_rtm,omitempty"`
@@ -6850,6 +7060,7 @@ type StartAgentsRequestPropertiesAvatar struct {
 	// - `akool`: Akool (Beta)
 	// - `liveavatar`: LiveAvatar (Beta)
 	// - `anam`: Anam (Beta)
+	// - `generic`: Generic (Beta)
 	Vendor *StartAgentsRequestPropertiesAvatarVendor `json:"vendor,omitempty" url:"vendor,omitempty"`
 	// The configuration parameters for the avatar vendor. See [AI Avatar Overview](https://docs.agora.io/en/conversational-ai/models/avatar/overview) for details.
 	Params map[string]interface{} `json:"params,omitempty" url:"params,omitempty"`
@@ -6957,6 +7168,7 @@ func (s *StartAgentsRequestPropertiesAvatar) String() string {
 // - `akool`: Akool (Beta)
 // - `liveavatar`: LiveAvatar (Beta)
 // - `anam`: Anam (Beta)
+// - `generic`: Generic (Beta)
 type StartAgentsRequestPropertiesAvatarVendor string
 
 const (
@@ -6964,6 +7176,8 @@ const (
 	// LiveAvatar (Beta) — formerly HeyGen
 	StartAgentsRequestPropertiesAvatarVendorLiveavatar StartAgentsRequestPropertiesAvatarVendor = "liveavatar"
 	StartAgentsRequestPropertiesAvatarVendorAnam       StartAgentsRequestPropertiesAvatarVendor = "anam"
+	// Generic avatar (Beta)
+	StartAgentsRequestPropertiesAvatarVendorGeneric StartAgentsRequestPropertiesAvatarVendor = "generic"
 	// Deprecated: HeyGen has renamed to LiveAvatar. Use `liveavatar` instead.
 	StartAgentsRequestPropertiesAvatarVendorHeygen StartAgentsRequestPropertiesAvatarVendor = "heygen"
 )
@@ -6976,6 +7190,8 @@ func NewStartAgentsRequestPropertiesAvatarVendorFromString(s string) (StartAgent
 		return StartAgentsRequestPropertiesAvatarVendorLiveavatar, nil
 	case "anam":
 		return StartAgentsRequestPropertiesAvatarVendorAnam, nil
+	case "generic":
+		return StartAgentsRequestPropertiesAvatarVendorGeneric, nil
 	case "heygen":
 		return StartAgentsRequestPropertiesAvatarVendorHeygen, nil
 	}
@@ -7202,7 +7418,7 @@ var (
 
 type StartAgentsRequestPropertiesFillerWordsContentStaticConfig struct {
 	// List of filler word phrases. Maximum 100 filler words, each not exceeding 50 English words.
-	Phrases []string `json:"phrases,omitempty" url:"phrases,omitempty"`
+	Phrases []string `json:"phrases" url:"phrases"`
 	// Filler word selection rule:
 	// - `shuffle`: Random shuffle. Already-used filler words are not repeated until all have been used once.
 	// - `round_robin`: Round-robin. Selects and plays filler words sequentially from the list.
@@ -8032,7 +8248,7 @@ type StartAgentsRequestPropertiesLlm struct {
 	MaxHistory *int `json:"max_history,omitempty" url:"max_history,omitempty"`
 	// LLM input modalities:
 	// - `["text"]`: Text only
-	// - `["text", "image"]`: Text plus image; requires the selected LLM to support visual input
+	// - `["text", "image"]`: Text plus image. Recommended configuration, requires the selected LLM to support visual input
 	InputModalities []string `json:"input_modalities,omitempty" url:"input_modalities,omitempty"`
 	// LLM output modalities:
 	// - `["text"]`: The output text is converted to speech by the TTS module and then published to the RTC channel.
@@ -8334,8 +8550,9 @@ func (s *StartAgentsRequestPropertiesLlm) String() string {
 
 // Agent greeting broadcast configuration.
 var (
-	startAgentsRequestPropertiesLlmGreetingConfigsFieldMode    = big.NewInt(1 << 0)
-	startAgentsRequestPropertiesLlmGreetingConfigsFieldDelayMs = big.NewInt(1 << 1)
+	startAgentsRequestPropertiesLlmGreetingConfigsFieldMode          = big.NewInt(1 << 0)
+	startAgentsRequestPropertiesLlmGreetingConfigsFieldDelayMs       = big.NewInt(1 << 1)
+	startAgentsRequestPropertiesLlmGreetingConfigsFieldInterruptable = big.NewInt(1 << 2)
 )
 
 type StartAgentsRequestPropertiesLlmGreetingConfigs struct {
@@ -8345,6 +8562,9 @@ type StartAgentsRequestPropertiesLlmGreetingConfigs struct {
 	Mode *StartAgentsRequestPropertiesLlmGreetingConfigsMode `json:"mode,omitempty" url:"mode,omitempty"`
 	// The delay in milliseconds before the agent plays the greeting message after a user joins the channel.
 	DelayMs *int `json:"delay_ms,omitempty" url:"delay_ms,omitempty"`
+	// - `true`: Follows the global `interruption` configuration.
+	// - `false`: Uninterruptible. The greeting plays in its entirety. If the user speaks multiple times while the greeting plays, the system merges the speech segments after the greeting ends and sends them to the LLM for a single response.
+	Interruptable *bool `json:"interruptable,omitempty" url:"interruptable,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -8365,6 +8585,13 @@ func (s *StartAgentsRequestPropertiesLlmGreetingConfigs) GetDelayMs() *int {
 		return nil
 	}
 	return s.DelayMs
+}
+
+func (s *StartAgentsRequestPropertiesLlmGreetingConfigs) GetInterruptable() *bool {
+	if s == nil {
+		return nil
+	}
+	return s.Interruptable
 }
 
 func (s *StartAgentsRequestPropertiesLlmGreetingConfigs) GetExtraProperties() map[string]interface{} {
@@ -8390,6 +8617,13 @@ func (s *StartAgentsRequestPropertiesLlmGreetingConfigs) SetMode(mode *StartAgen
 func (s *StartAgentsRequestPropertiesLlmGreetingConfigs) SetDelayMs(delayMs *int) {
 	s.DelayMs = delayMs
 	s.require(startAgentsRequestPropertiesLlmGreetingConfigsFieldDelayMs)
+}
+
+// SetInterruptable sets the Interruptable field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *StartAgentsRequestPropertiesLlmGreetingConfigs) SetInterruptable(interruptable *bool) {
+	s.Interruptable = interruptable
+	s.require(startAgentsRequestPropertiesLlmGreetingConfigsFieldInterruptable)
 }
 
 func (s *StartAgentsRequestPropertiesLlmGreetingConfigs) UnmarshalJSON(data []byte) error {
@@ -8663,10 +8897,8 @@ var (
 	startAgentsRequestPropertiesMllmFieldOutputModalities = big.NewInt(1 << 6)
 	startAgentsRequestPropertiesMllmFieldGreetingMessage  = big.NewInt(1 << 7)
 	startAgentsRequestPropertiesMllmFieldFailureMessage   = big.NewInt(1 << 8)
-	startAgentsRequestPropertiesMllmFieldMaxHistory       = big.NewInt(1 << 9)
-	startAgentsRequestPropertiesMllmFieldPredefinedTools  = big.NewInt(1 << 10)
-	startAgentsRequestPropertiesMllmFieldVendor           = big.NewInt(1 << 11)
-	startAgentsRequestPropertiesMllmFieldTurnDetection    = big.NewInt(1 << 12)
+	startAgentsRequestPropertiesMllmFieldVendor           = big.NewInt(1 << 9)
+	startAgentsRequestPropertiesMllmFieldTurnDetection    = big.NewInt(1 << 10)
 )
 
 type StartAgentsRequestPropertiesMllm struct {
@@ -8689,16 +8921,13 @@ type StartAgentsRequestPropertiesMllm struct {
 	OutputModalities []string `json:"output_modalities,omitempty" url:"output_modalities,omitempty"`
 	// Agent greeting message. If provided, the first user in the channel is automatically greeted with this message upon joining.
 	GreetingMessage *string `json:"greeting_message,omitempty" url:"greeting_message,omitempty"`
-	// Message played when the MLLM call fails.
+	// Agent failure message. If provided, the agent speaks this message when an MLLM request fails.
 	FailureMessage *string `json:"failure_message,omitempty" url:"failure_message,omitempty"`
-	// Maximum number of conversation history messages cached for the MLLM session.
-	MaxHistory *int `json:"max_history,omitempty" url:"max_history,omitempty"`
-	// Predefined tools available to the MLLM provider.
-	PredefinedTools []string `json:"predefined_tools,omitempty" url:"predefined_tools,omitempty"`
 	// MLLM provider. Currently supports:
 	// - `openai`: OpenAI Realtime API
 	// - `gemini`: Google Gemini Live
 	// - `vertexai`: Google Gemini Live (Vertex AI)
+	// - `xai`: xAI Grok Realtime API
 	Vendor *StartAgentsRequestPropertiesMllmVendor `json:"vendor,omitempty" url:"vendor,omitempty"`
 	// Turn detection configuration for the MLLM module. When defined, the top-level `turn_detection` object has no effect.
 	TurnDetection *StartAgentsRequestPropertiesMllmTurnDetection `json:"turn_detection,omitempty" url:"turn_detection,omitempty"`
@@ -8771,20 +9000,6 @@ func (s *StartAgentsRequestPropertiesMllm) GetFailureMessage() *string {
 		return nil
 	}
 	return s.FailureMessage
-}
-
-func (s *StartAgentsRequestPropertiesMllm) GetMaxHistory() *int {
-	if s == nil {
-		return nil
-	}
-	return s.MaxHistory
-}
-
-func (s *StartAgentsRequestPropertiesMllm) GetPredefinedTools() []string {
-	if s == nil {
-		return nil
-	}
-	return s.PredefinedTools
 }
 
 func (s *StartAgentsRequestPropertiesMllm) GetVendor() *StartAgentsRequestPropertiesMllmVendor {
@@ -8875,20 +9090,6 @@ func (s *StartAgentsRequestPropertiesMllm) SetFailureMessage(failureMessage *str
 	s.require(startAgentsRequestPropertiesMllmFieldFailureMessage)
 }
 
-// SetMaxHistory sets the MaxHistory field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *StartAgentsRequestPropertiesMllm) SetMaxHistory(maxHistory *int) {
-	s.MaxHistory = maxHistory
-	s.require(startAgentsRequestPropertiesMllmFieldMaxHistory)
-}
-
-// SetPredefinedTools sets the PredefinedTools field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (s *StartAgentsRequestPropertiesMllm) SetPredefinedTools(predefinedTools []string) {
-	s.PredefinedTools = predefinedTools
-	s.require(startAgentsRequestPropertiesMllmFieldPredefinedTools)
-}
-
 // SetVendor sets the Vendor field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
 func (s *StartAgentsRequestPropertiesMllm) SetVendor(vendor_ *StartAgentsRequestPropertiesMllmVendor) {
@@ -8953,7 +9154,7 @@ var (
 type StartAgentsRequestPropertiesMllmTurnDetection struct {
 	// Turn detection mode for MLLM:
 	// - `agora_vad`: Agora VAD-based detection.
-	// - `server_vad`: Vendor-side VAD-based detection. Supported by OpenAI Realtime API and Gemini Live.
+	// - `server_vad`: Vendor-side VAD-based detection. Supported by OpenAI Realtime API, Gemini Live, and xAI Grok.
 	// - `semantic_vad`: Semantic-based detection. Supported by OpenAI Realtime API only.
 	Mode *StartAgentsRequestPropertiesMllmTurnDetectionMode `json:"mode,omitempty" url:"mode,omitempty"`
 	// Configuration for Agora VAD-based turn detection. Applicable when `mode` is `agora_vad`.
@@ -9209,7 +9410,7 @@ func (s *StartAgentsRequestPropertiesMllmTurnDetectionAgoraVadConfig) String() s
 
 // Turn detection mode for MLLM:
 // - `agora_vad`: Agora VAD-based detection.
-// - `server_vad`: Vendor-side VAD-based detection. Supported by OpenAI Realtime API and Gemini Live.
+// - `server_vad`: Vendor-side VAD-based detection. Supported by OpenAI Realtime API, Gemini Live, and xAI Grok.
 // - `semantic_vad`: Semantic-based detection. Supported by OpenAI Realtime API only.
 type StartAgentsRequestPropertiesMllmTurnDetectionMode string
 
@@ -9360,7 +9561,7 @@ type StartAgentsRequestPropertiesMllmTurnDetectionServerVadConfig struct {
 	PrefixPaddingMs *int `json:"prefix_padding_ms,omitempty" url:"prefix_padding_ms,omitempty"`
 	// Duration of silence in milliseconds required to determine end of speech.
 	SilenceDurationMs *int `json:"silence_duration_ms,omitempty" url:"silence_duration_ms,omitempty"`
-	// VAD sensitivity threshold. Applicable to OpenAI Realtime API only.
+	// VAD sensitivity threshold. Applicable to OpenAI Realtime API and xAI Grok.
 	Threshold *float64 `json:"threshold,omitempty" url:"threshold,omitempty"`
 	// Idle timeout in milliseconds. Applicable to OpenAI Realtime API only.
 	IdleTimeoutMs *int `json:"idle_timeout_ms,omitempty" url:"idle_timeout_ms,omitempty"`
@@ -9560,12 +9761,14 @@ func (s StartAgentsRequestPropertiesMllmTurnDetectionServerVadConfigStartOfSpeec
 // - `openai`: OpenAI Realtime API
 // - `gemini`: Google Gemini Live
 // - `vertexai`: Google Gemini Live (Vertex AI)
+// - `xai`: xAI Grok Realtime API
 type StartAgentsRequestPropertiesMllmVendor string
 
 const (
 	StartAgentsRequestPropertiesMllmVendorOpenai   StartAgentsRequestPropertiesMllmVendor = "openai"
 	StartAgentsRequestPropertiesMllmVendorGemini   StartAgentsRequestPropertiesMllmVendor = "gemini"
 	StartAgentsRequestPropertiesMllmVendorVertexai StartAgentsRequestPropertiesMllmVendor = "vertexai"
+	StartAgentsRequestPropertiesMllmVendorXai      StartAgentsRequestPropertiesMllmVendor = "xai"
 )
 
 func NewStartAgentsRequestPropertiesMllmVendorFromString(s string) (StartAgentsRequestPropertiesMllmVendor, error) {
@@ -9576,6 +9779,8 @@ func NewStartAgentsRequestPropertiesMllmVendorFromString(s string) (StartAgentsR
 		return StartAgentsRequestPropertiesMllmVendorGemini, nil
 	case "vertexai":
 		return StartAgentsRequestPropertiesMllmVendorVertexai, nil
+	case "xai":
+		return StartAgentsRequestPropertiesMllmVendorXai, nil
 	}
 	var t StartAgentsRequestPropertiesMllmVendor
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -11639,7 +11844,6 @@ type StartAgentsResponse struct {
 	// - `RUNNING` (2): The agent is running.
 	// - `STOPPING` (3): The agent is stopping.
 	// - `STOPPED` (4): The agent has exited.
-	// - `RECOVERING` (5): The agent is recovering.
 	// - `FAILED` (6): The agent failed to execute.
 	Status *StartAgentsResponseStatus `json:"status,omitempty" url:"status,omitempty"`
 
@@ -11748,18 +11952,16 @@ func (s *StartAgentsResponse) String() string {
 // - `RUNNING` (2): The agent is running.
 // - `STOPPING` (3): The agent is stopping.
 // - `STOPPED` (4): The agent has exited.
-// - `RECOVERING` (5): The agent is recovering.
 // - `FAILED` (6): The agent failed to execute.
 type StartAgentsResponseStatus string
 
 const (
-	StartAgentsResponseStatusIdle       StartAgentsResponseStatus = "IDLE"
-	StartAgentsResponseStatusStarting   StartAgentsResponseStatus = "STARTING"
-	StartAgentsResponseStatusRunning    StartAgentsResponseStatus = "RUNNING"
-	StartAgentsResponseStatusStopping   StartAgentsResponseStatus = "STOPPING"
-	StartAgentsResponseStatusStopped    StartAgentsResponseStatus = "STOPPED"
-	StartAgentsResponseStatusRecovering StartAgentsResponseStatus = "RECOVERING"
-	StartAgentsResponseStatusFailed     StartAgentsResponseStatus = "FAILED"
+	StartAgentsResponseStatusIdle     StartAgentsResponseStatus = "IDLE"
+	StartAgentsResponseStatusStarting StartAgentsResponseStatus = "STARTING"
+	StartAgentsResponseStatusRunning  StartAgentsResponseStatus = "RUNNING"
+	StartAgentsResponseStatusStopping StartAgentsResponseStatus = "STOPPING"
+	StartAgentsResponseStatusStopped  StartAgentsResponseStatus = "STOPPED"
+	StartAgentsResponseStatusFailed   StartAgentsResponseStatus = "FAILED"
 )
 
 func NewStartAgentsResponseStatusFromString(s string) (StartAgentsResponseStatus, error) {
@@ -11774,8 +11976,6 @@ func NewStartAgentsResponseStatusFromString(s string) (StartAgentsResponseStatus
 		return StartAgentsResponseStatusStopping, nil
 	case "STOPPED":
 		return StartAgentsResponseStatusStopped, nil
-	case "RECOVERING":
-		return StartAgentsResponseStatusRecovering, nil
 	case "FAILED":
 		return StartAgentsResponseStatusFailed, nil
 	}
@@ -12095,7 +12295,6 @@ type UpdateAgentsResponse struct {
 	// - `RUNNING` (2): The agent is running.
 	// - `STOPPING` (3): The agent is stopping.
 	// - `STOPPED` (4): The agent has exited.
-	// - `RECOVERING` (5): The agent is recovering.
 	// - `FAILED` (6): The agent failed to execute.
 	Status *UpdateAgentsResponseStatus `json:"status,omitempty" url:"status,omitempty"`
 
@@ -12204,18 +12403,16 @@ func (u *UpdateAgentsResponse) String() string {
 // - `RUNNING` (2): The agent is running.
 // - `STOPPING` (3): The agent is stopping.
 // - `STOPPED` (4): The agent has exited.
-// - `RECOVERING` (5): The agent is recovering.
 // - `FAILED` (6): The agent failed to execute.
 type UpdateAgentsResponseStatus string
 
 const (
-	UpdateAgentsResponseStatusIdle       UpdateAgentsResponseStatus = "IDLE"
-	UpdateAgentsResponseStatusStarting   UpdateAgentsResponseStatus = "STARTING"
-	UpdateAgentsResponseStatusRunning    UpdateAgentsResponseStatus = "RUNNING"
-	UpdateAgentsResponseStatusStopping   UpdateAgentsResponseStatus = "STOPPING"
-	UpdateAgentsResponseStatusStopped    UpdateAgentsResponseStatus = "STOPPED"
-	UpdateAgentsResponseStatusRecovering UpdateAgentsResponseStatus = "RECOVERING"
-	UpdateAgentsResponseStatusFailed     UpdateAgentsResponseStatus = "FAILED"
+	UpdateAgentsResponseStatusIdle     UpdateAgentsResponseStatus = "IDLE"
+	UpdateAgentsResponseStatusStarting UpdateAgentsResponseStatus = "STARTING"
+	UpdateAgentsResponseStatusRunning  UpdateAgentsResponseStatus = "RUNNING"
+	UpdateAgentsResponseStatusStopping UpdateAgentsResponseStatus = "STOPPING"
+	UpdateAgentsResponseStatusStopped  UpdateAgentsResponseStatus = "STOPPED"
+	UpdateAgentsResponseStatusFailed   UpdateAgentsResponseStatus = "FAILED"
 )
 
 func NewUpdateAgentsResponseStatusFromString(s string) (UpdateAgentsResponseStatus, error) {
@@ -12230,8 +12427,6 @@ func NewUpdateAgentsResponseStatusFromString(s string) (UpdateAgentsResponseStat
 		return UpdateAgentsResponseStatusStopping, nil
 	case "STOPPED":
 		return UpdateAgentsResponseStatusStopped, nil
-	case "RECOVERING":
-		return UpdateAgentsResponseStatusRecovering, nil
 	case "FAILED":
 		return UpdateAgentsResponseStatusFailed, nil
 	}
