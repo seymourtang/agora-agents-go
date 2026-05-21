@@ -267,6 +267,7 @@ type Agent struct {
 	avatarRequiredSampleRate *vendors.SampleRate
 	turnDetection            *TurnDetectionConfig
 	interruption             *InterruptionConfig
+	greetingConfigs          *LlmGreetingConfigs
 	sal                      *SalConfig
 	advancedFeatures         *AdvancedFeatures
 	parameters               *SessionParams
@@ -326,6 +327,12 @@ func WithTurnDetectionConfig(td *TurnDetectionConfig) AgentOption {
 func WithInterruptionConfig(interruption *InterruptionConfig) AgentOption {
 	return func(a *Agent) {
 		a.interruption = interruption
+	}
+}
+
+func WithGreetingConfigs(configs *LlmGreetingConfigs) AgentOption {
+	return func(a *Agent) {
+		a.greetingConfigs = configs
 	}
 }
 
@@ -398,7 +405,7 @@ func (a *Agent) WithTts(vendor vendors.TTS) *Agent {
 	clone.ttsSampleRate = vendor.GetSampleRate()
 	// If an avatar is already set, verify the new TTS sample rate matches.
 	// Mirrors the check in WithAvatar so both call orderings fail fast.
-	if clone.avatarRequiredSampleRate != nil && clone.ttsSampleRate != nil {
+	if clone.avatarRequiredSampleRate != nil && *clone.avatarRequiredSampleRate != 0 && clone.ttsSampleRate != nil {
 		if *clone.ttsSampleRate != *clone.avatarRequiredSampleRate {
 			panic(fmt.Sprintf(
 				"TTS sample rate %d Hz is incompatible with the configured avatar, which requires %d Hz. "+
@@ -433,10 +440,11 @@ func (a *Agent) WithMllm(vendor vendors.MLLM) *Agent {
 
 func (a *Agent) WithAvatar(vendor vendors.Avatar) *Agent {
 	requiredSR := vendor.RequiredSampleRate()
+	avatarConfig := vendor.ToConfig()
 	// If a TTS is already set, verify sample rate compatibility now.
 	// Mirrors the check in WithTts so both call orderings fail fast.
 	// AgentSession.Start also validates as a final safety net.
-	if a.ttsSampleRate != nil && *a.ttsSampleRate != requiredSR {
+	if avatarConfigEnabled(avatarConfig) && requiredSR != 0 && a.ttsSampleRate != nil && *a.ttsSampleRate != requiredSR {
 		panic(fmt.Sprintf(
 			"Avatar requires TTS sample rate of %d Hz, but TTS is configured with %d Hz. "+
 				"Please update your TTS sample_rate to %d.",
@@ -444,8 +452,12 @@ func (a *Agent) WithAvatar(vendor vendors.Avatar) *Agent {
 		))
 	}
 	clone := a.clone()
-	clone.avatar = vendor.ToConfig()
-	clone.avatarRequiredSampleRate = &requiredSR
+	clone.avatar = avatarConfig
+	if avatarConfigEnabled(avatarConfig) {
+		clone.avatarRequiredSampleRate = &requiredSR
+	} else {
+		clone.avatarRequiredSampleRate = nil
+	}
 	return clone
 }
 
@@ -458,6 +470,12 @@ func (a *Agent) WithTurnDetection(td *TurnDetectionConfig) *Agent {
 func (a *Agent) WithInterruption(interruption *InterruptionConfig) *Agent {
 	clone := a.clone()
 	clone.interruption = interruption
+	return clone
+}
+
+func (a *Agent) WithGreetingConfigs(configs *LlmGreetingConfigs) *Agent {
+	clone := a.clone()
+	clone.greetingConfigs = configs
 	return clone
 }
 
@@ -565,6 +583,7 @@ func (a *Agent) MaxHistory() *int                              { return a.maxHis
 func (a *Agent) Avatar() map[string]interface{}                { return a.avatar }
 func (a *Agent) TurnDetection() *TurnDetectionConfig           { return a.turnDetection }
 func (a *Agent) Interruption() *InterruptionConfig             { return a.interruption }
+func (a *Agent) GreetingConfigs() *LlmGreetingConfigs          { return a.greetingConfigs }
 func (a *Agent) Sal() *SalConfig                               { return a.sal }
 func (a *Agent) AdvancedFeatures() *AdvancedFeatures           { return a.advancedFeatures }
 func (a *Agent) Parameters() *SessionParams                    { return a.parameters }
@@ -621,21 +640,39 @@ func (a *Agent) CreateSession(client *AgoraClient, opts CreateSessionOptions) *A
 }
 
 func (a *Agent) ToProperties(opts ToPropertiesOptions) (*Agora.StartAgentsRequestProperties, error) {
+	propsMap, err := a.ToPropertiesMap(opts)
+	if err != nil {
+		return nil, err
+	}
+	var props Agora.StartAgentsRequestProperties
+	if err := mapToStruct(propsMap, &props); err != nil {
+		return nil, fmt.Errorf("failed to convert properties map: %w", err)
+	}
+	return &props, nil
+}
+
+func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{}, error) {
+	// Reject incompatible combinations before any work (token generation, etc.).
+	// Avatars are currently supported only with the cascading ASR/LLM/TTS pipeline.
+	if a.mllm != nil && a.hasEnabledAvatar() {
+		return nil, fmt.Errorf("avatar is only supported with cascading ASR/LLM/TTS sessions; remove the avatar configuration when using MLLM")
+	}
+
+	expiry := opts.ExpiresIn
+	if expiry != 0 {
+		var err error
+		expiry, err = ValidateExpiresIn(expiry)
+		if err != nil {
+			return nil, fmt.Errorf("invalid expiresIn: %w", err)
+		}
+	}
+	opts.ExpiresIn = expiry
+
 	token := opts.Token
 	if token == "" {
 		if opts.AppID == "" || opts.AppCertificate == "" {
 			return nil, fmt.Errorf("either token or app_id+app_certificate must be provided")
 		}
-		expiry := opts.ExpiresIn
-		if expiry > 0 {
-			var err error
-			expiry, err = ValidateExpiresIn(expiry)
-			if err != nil {
-				return nil, fmt.Errorf("invalid expiresIn: %w", err)
-			}
-		}
-		// Use GenerateConvoAIToken (RTC + RTM) so the token works whether or
-		// not the caller enables advanced_features.enable_rtm.
 		var err error
 		token, err = GenerateConvoAIToken(GenerateConvoAITokenOptions{
 			AppID:          opts.AppID,
@@ -649,101 +686,95 @@ func (a *Agent) ToProperties(opts ToPropertiesOptions) (*Agora.StartAgentsReques
 		}
 	}
 
-	props := &Agora.StartAgentsRequestProperties{
-		Channel:       opts.Channel,
-		Token:         token,
-		AgentRtcUID:   opts.AgentUID,
-		RemoteRtcUIDs: opts.RemoteUIDs,
+	propsMap := map[string]interface{}{
+		"channel":       opts.Channel,
+		"token":         token,
+		"agent_rtc_uid": opts.AgentUID,
 	}
-
+	if opts.RemoteUIDs != nil {
+		propsMap["remote_rtc_uids"] = opts.RemoteUIDs
+	}
 	if opts.IdleTimeout != nil {
-		props.IdleTimeout = opts.IdleTimeout
+		propsMap["idle_timeout"] = *opts.IdleTimeout
 	}
 	if opts.EnableStringUID != nil {
-		props.EnableStringUID = opts.EnableStringUID
+		propsMap["enable_string_uid"] = *opts.EnableStringUID
 	}
 	if a.mllm != nil {
-		mllmConfig := make(map[string]interface{})
-		for k, v := range a.mllm {
-			mllmConfig[k] = v
-		}
-		if a.greeting != "" {
-			if _, exists := mllmConfig["greeting_message"]; !exists {
-				mllmConfig["greeting_message"] = a.greeting
-			}
-		}
-		if a.failureMessage != "" {
-			if _, exists := mllmConfig["failure_message"]; !exists {
-				mllmConfig["failure_message"] = a.failureMessage
-			}
-		}
-		if a.maxHistory != nil {
-			if _, exists := mllmConfig["max_history"]; !exists {
-				mllmConfig["max_history"] = *a.maxHistory
-			}
-		}
-		var mllm Agora.StartAgentsRequestPropertiesMllm
-		if err := mapToStruct(mllmConfig, &mllm); err != nil {
-			return nil, fmt.Errorf("failed to convert MLLM config: %w", err)
-		}
-		props.Mllm = &mllm
+		propsMap["mllm"] = a.buildMllmConfigMap()
 	}
 	if a.turnDetection != nil {
-		props.TurnDetection = a.turnDetection
+		if err := setStructMap(propsMap, "turn_detection", a.turnDetection); err != nil {
+			return nil, err
+		}
 	}
 	if a.interruption != nil {
-		props.Interruption = a.interruption
+		if err := setStructMap(propsMap, "interruption", a.interruption); err != nil {
+			return nil, err
+		}
 	}
 	if a.sal != nil {
-		props.Sal = a.sal
+		if err := setStructMap(propsMap, "sal", a.sal); err != nil {
+			return nil, err
+		}
 	}
 	if a.avatar != nil {
-		var avatar Agora.StartAgentsRequestPropertiesAvatar
-		if err := mapToStruct(a.avatar, &avatar); err != nil {
-			return nil, fmt.Errorf("failed to convert avatar config: %w", err)
+		avatar, err := a.enrichAvatarParams(opts)
+		if err != nil {
+			return nil, err
 		}
-		props.Avatar = &avatar
+		propsMap["avatar"] = avatar
 	}
 	if a.advancedFeatures != nil {
-		props.AdvancedFeatures = a.advancedFeatures
+		if err := setStructMap(propsMap, "advanced_features", a.advancedFeatures); err != nil {
+			return nil, err
+		}
 	}
 	if a.parameters != nil {
-		params := *a.parameters
-		props.Parameters = &params
+		if err := setStructMap(propsMap, "parameters", a.parameters); err != nil {
+			return nil, err
+		}
 	}
 	if a.audioScenario != nil {
-		if props.Parameters == nil {
-			props.Parameters = &Agora.StartAgentsRequestPropertiesParameters{}
+		parameters, ok := propsMap["parameters"].(map[string]interface{})
+		if !ok || parameters == nil {
+			parameters = map[string]interface{}{}
+			propsMap["parameters"] = parameters
 		}
-		value := Agora.StartAgentsRequestPropertiesParametersAudioScenario(*a.audioScenario)
-		props.Parameters.AudioScenario = &value
+		parameters["audio_scenario"] = string(*a.audioScenario)
 	}
 	if a.geofence != nil {
-		props.Geofence = a.geofence
+		if err := setStructMap(propsMap, "geofence", a.geofence); err != nil {
+			return nil, err
+		}
 	}
 	if len(a.labels) > 0 {
-		props.Labels = a.labels
+		propsMap["labels"] = cloneValue(a.labels)
 	}
 	if a.rtc != nil {
-		props.Rtc = a.rtc
+		if err := setStructMap(propsMap, "rtc", a.rtc); err != nil {
+			return nil, err
+		}
 	}
 	if a.fillerWords != nil {
-		props.FillerWords = a.fillerWords
-	}
-
-	isMllmMode := a.mllm != nil
-	if isMllmMode {
-		return props, nil
+		if err := setStructMap(propsMap, "filler_words", a.fillerWords); err != nil {
+			return nil, err
+		}
 	}
 
 	if a.advancedFeatures != nil && a.advancedFeatures.EnableRtm != nil && *a.advancedFeatures.EnableRtm {
-		if props.Parameters == nil {
-			props.Parameters = &Agora.StartAgentsRequestPropertiesParameters{}
+		parameters, ok := propsMap["parameters"].(map[string]interface{})
+		if !ok || parameters == nil {
+			parameters = map[string]interface{}{}
+			propsMap["parameters"] = parameters
 		}
-		if props.Parameters.DataChannel == nil {
-			rtm := Agora.StartAgentsRequestPropertiesParametersDataChannel("rtm")
-			props.Parameters.DataChannel = &rtm
+		if _, exists := parameters["data_channel"]; !exists {
+			parameters["data_channel"] = "rtm"
 		}
+	}
+
+	if a.mllm != nil {
+		return propsMap, nil
 	}
 
 	if !opts.SkipVendorValidation {
@@ -756,90 +787,7 @@ func (a *Agent) ToProperties(opts ToPropertiesOptions) (*Agora.StartAgentsReques
 	}
 
 	if a.llm != nil {
-		llmConfig := make(map[string]interface{})
-		for k, v := range a.llm {
-			llmConfig[k] = v
-		}
-		if a.instructions != "" {
-			llmConfig["system_messages"] = []map[string]interface{}{
-				{"role": "system", "content": a.instructions},
-			}
-		}
-		if a.greeting != "" {
-			if _, exists := llmConfig["greeting_message"]; !exists {
-				llmConfig["greeting_message"] = a.greeting
-			}
-		}
-		if a.failureMessage != "" {
-			if _, exists := llmConfig["failure_message"]; !exists {
-				llmConfig["failure_message"] = a.failureMessage
-			}
-		}
-		if a.maxHistory != nil {
-			if _, exists := llmConfig["max_history"]; !exists {
-				llmConfig["max_history"] = *a.maxHistory
-			}
-		}
-
-		var llm Agora.StartAgentsRequestPropertiesLlm
-		if err := mapToStruct(llmConfig, &llm); err != nil {
-			return nil, fmt.Errorf("failed to convert LLM config: %w", err)
-		}
-		props.Llm = &llm
-	}
-
-	if a.tts != nil {
-		var tts Agora.Tts
-		if err := mapToStruct(a.tts, &tts); err != nil {
-			return nil, fmt.Errorf("failed to convert TTS config: %w", err)
-		}
-		props.Tts = &tts
-	}
-
-	if a.stt != nil {
-		var stt Agora.StartAgentsRequestPropertiesAsr
-		if err := mapToStruct(a.stt, &stt); err != nil {
-			return nil, fmt.Errorf("failed to convert STT config: %w", err)
-		}
-		props.Asr = &stt
-	}
-
-	return props, nil
-}
-
-func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{}, error) {
-	props, err := a.ToProperties(opts)
-	if err != nil {
-		return nil, err
-	}
-	propsMap, err := structToMap(props)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert properties to map: %w", err)
-	}
-
-	if a.llm != nil {
-		llmConfig := cloneConfig(a.llm)
-		if a.instructions != "" {
-			llmConfig["system_messages"] = []map[string]interface{}{
-				{"role": "system", "content": a.instructions},
-			}
-		}
-		if a.greeting != "" {
-			if _, exists := llmConfig["greeting_message"]; !exists {
-				llmConfig["greeting_message"] = a.greeting
-			}
-		}
-		if a.failureMessage != "" {
-			if _, exists := llmConfig["failure_message"]; !exists {
-				llmConfig["failure_message"] = a.failureMessage
-			}
-		}
-		if a.maxHistory != nil {
-			if _, exists := llmConfig["max_history"]; !exists {
-				llmConfig["max_history"] = *a.maxHistory
-			}
-		}
-		propsMap["llm"] = llmConfig
+		propsMap["llm"] = a.buildLlmConfigMap()
 	}
 	if a.tts != nil {
 		propsMap["tts"] = cloneConfig(a.tts)
@@ -847,16 +795,154 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	if a.stt != nil {
 		propsMap["asr"] = cloneConfig(a.stt)
 	}
-	if a.audioScenario != nil {
-		parameters, ok := propsMap["parameters"].(map[string]interface{})
-		if !ok || parameters == nil {
-			parameters = map[string]interface{}{}
-			propsMap["parameters"] = parameters
-		}
-		parameters["audio_scenario"] = string(*a.audioScenario)
-	}
 
 	return propsMap, nil
+}
+
+func (a *Agent) buildMllmConfigMap() map[string]interface{} {
+	mllmConfig := cloneConfig(a.mllm)
+	if a.greeting != "" {
+		if _, exists := mllmConfig["greeting_message"]; !exists {
+			mllmConfig["greeting_message"] = a.greeting
+		}
+	}
+	if a.failureMessage != "" {
+		if _, exists := mllmConfig["failure_message"]; !exists {
+			mllmConfig["failure_message"] = a.failureMessage
+		}
+	}
+	return mllmConfig
+}
+
+func (a *Agent) buildLlmConfigMap() map[string]interface{} {
+	llmConfig := cloneConfig(a.llm)
+	if a.instructions != "" {
+		llmConfig["system_messages"] = []map[string]interface{}{
+			{"role": "system", "content": a.instructions},
+		}
+	}
+	if a.greeting != "" {
+		llmConfig["greeting_message"] = a.greeting
+	}
+	if a.failureMessage != "" {
+		llmConfig["failure_message"] = a.failureMessage
+	}
+	if a.maxHistory != nil {
+		llmConfig["max_history"] = *a.maxHistory
+	}
+	if a.greetingConfigs != nil {
+		if value, err := structToMap(a.greetingConfigs); err == nil {
+			llmConfig["greeting_configs"] = value
+		} else {
+			llmConfig["greeting_configs"] = a.greetingConfigs
+		}
+	}
+	return llmConfig
+}
+
+func setStructMap(target map[string]interface{}, key string, value interface{}) error {
+	valueMap, err := structToMap(value)
+	if err != nil {
+		return fmt.Errorf("failed to convert %s config to map: %w", key, err)
+	}
+	target[key] = valueMap
+	return nil
+}
+
+func (a *Agent) enrichAvatarParams(opts ToPropertiesOptions) (map[string]interface{}, error) {
+	avatar := cloneConfig(a.avatar)
+	if !avatarConfigEnabled(avatar) {
+		return avatar, nil
+	}
+	vendor, _ := avatar["vendor"].(string)
+	params, _ := avatar["params"].(map[string]interface{})
+	if params == nil {
+		params = map[string]interface{}{}
+		avatar["params"] = params
+	}
+
+	if IsGenericAvatar(vendor) {
+		if _, exists := params["agora_appid"]; !exists && opts.AppID != "" {
+			params["agora_appid"] = opts.AppID
+		}
+		if _, exists := params["agora_channel"]; !exists && opts.Channel != "" {
+			params["agora_channel"] = opts.Channel
+		}
+	}
+
+	avatarUID := avatarUIDString(params["agora_uid"])
+	if isAvatarTokenManaged(vendor) && avatarUID != "" {
+		if avatarUID == opts.AgentUID && opts.Warn != nil {
+			opts.Warn("avatar agora_uid matches agent_rtc_uid; use a distinct UID so the avatar video stream does not collide with the voice agent")
+		}
+		if token, _ := params["agora_token"].(string); token == "" {
+			if opts.AppCertificate == "" {
+				return nil, fmt.Errorf("cannot auto-generate avatar agora_token: appCertificate is required; pass AppCertificate when creating AgoraClient, or set AgoraToken on the avatar vendor")
+			}
+			generated, err := GenerateAvatarRtcToken(GenerateAvatarRtcTokenOptions{
+				AppID:          opts.AppID,
+				AppCertificate: opts.AppCertificate,
+				Channel:        opts.Channel,
+				UID:            avatarUID,
+				ExpirySeconds:  opts.ExpiresIn,
+			})
+			if err != nil {
+				return nil, err
+			}
+			params["agora_token"] = generated
+		}
+	}
+
+	return avatar, nil
+}
+
+func isAvatarTokenManaged(vendor string) bool {
+	return IsHeyGenAvatar(vendor) || IsLiveAvatarAvatar(vendor) || IsGenericAvatar(vendor)
+}
+
+func avatarConfigEnabled(avatar map[string]interface{}) bool {
+	if avatar == nil {
+		return false
+	}
+	enabled, ok := avatar["enable"].(bool)
+	return !ok || enabled
+}
+
+func (a *Agent) hasEnabledAvatar() bool {
+	return a != nil && a.avatar != nil && avatarConfigEnabled(a.avatar)
+}
+
+func avatarUIDString(value interface{}) string {
+	switch v := value.(type) {
+	case string:
+		return v
+	case int:
+		return fmt.Sprint(v)
+	case int8:
+		return fmt.Sprint(v)
+	case int16:
+		return fmt.Sprint(v)
+	case int32:
+		return fmt.Sprint(v)
+	case int64:
+		return fmt.Sprint(v)
+	case uint:
+		return fmt.Sprint(v)
+	case uint8:
+		return fmt.Sprint(v)
+	case uint16:
+		return fmt.Sprint(v)
+	case uint32:
+		return fmt.Sprint(v)
+	case uint64:
+		return fmt.Sprint(v)
+	case float32:
+		return fmt.Sprint(v)
+	case float64:
+		return fmt.Sprint(v)
+	default:
+		return ""
+	}
 }
 
 type ToPropertiesOptions struct {
@@ -872,6 +958,7 @@ type ToPropertiesOptions struct {
 	IdleTimeout          *int
 	EnableStringUID      *bool
 	SkipVendorValidation bool
+	Warn                 func(string)
 }
 
 func (a *Agent) clone() *Agent {
