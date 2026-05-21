@@ -344,7 +344,7 @@ func validateEnrichedAvatarConfig(properties map[string]interface{}) error {
 		}
 		return nil
 	}
-	if isAvatarTokenManaged(vendor) && avatarUIDString(params["agora_uid"]) != "" && !hasNonEmptyString(params, "agora_token") {
+	if IsAvatarTokenManaged(vendor) && avatarUIDString(params["agora_uid"]) != "" && !hasNonEmptyString(params, "agora_token") {
 		return fmt.Errorf("%s avatar requires agora_token; pass AgoraToken on the avatar vendor or provide AppCertificate for automatic token generation", vendor)
 	}
 	return nil

@@ -227,6 +227,69 @@ type MllmTurnDetectionMode = Agora.StartAgentsRequestPropertiesMllmTurnDetection
 // AsrConfig is the concrete ASR/STT configuration payload (start_agents_request_properties.asr).
 type AsrConfig = Agora.StartAgentsRequestPropertiesAsr
 
+// SttConfig is an alias for AsrConfig (wire field remains `asr`).
+type SttConfig = AsrConfig
+
+// LlmStyle is the LLM request style (openai, gemini, anthropic, dify).
+type LlmStyle = Agora.StartAgentsRequestPropertiesLlmStyle
+
+// SttVendor is the ASR/STT vendor identifier.
+type SttVendor = Agora.StartAgentsRequestPropertiesAsrVendor
+
+// MllmVendor is the MLLM vendor identifier.
+type MllmVendor = Agora.StartAgentsRequestPropertiesMllmVendor
+
+// AvatarVendor is the avatar vendor identifier.
+type AvatarVendor = Agora.StartAgentsRequestPropertiesAvatarVendor
+
+// AgentConfig is the full agent start payload (start_agents_request_properties).
+type AgentConfig = Agora.StartAgentsRequestProperties
+
+// AgentConfigUpdate is the agent update payload (update_agents_request_properties).
+type AgentConfigUpdate = Agora.UpdateAgentsRequestProperties
+
+// SessionInfo is the response from GetAgents.
+type SessionInfo = Agora.GetAgentsResponse
+
+// SessionListResponse is the response from ListAgents.
+type SessionListResponse = Agora.ListAgentsResponse
+
+// SessionSummary is a single entry in a session list response.
+type SessionSummary = Agora.ListAgentsResponseDataListItem
+
+// ConversationHistory is the response from GetHistoryAgents.
+type ConversationHistory = Agora.GetHistoryAgentsResponse
+
+// ConversationTurn is a single turn in conversation history.
+type ConversationTurn = Agora.GetHistoryAgentsResponseContentsItem
+
+// ConversationRole is the role of a participant in a conversation turn.
+type ConversationRole = Agora.GetHistoryAgentsResponseContentsItemRole
+
+// ConversationTurns is the response from GetTurnsAgents.
+type ConversationTurns = Agora.GetTurnsAgentsResponse
+
+// ConversationSessionTurn is a single turn in a paginated turns response.
+type ConversationSessionTurn = Agora.GetTurnsAgentsResponseTurnsItem
+
+// ThinkResponse is the response from AgentThink.
+type ThinkResponse = Agora.AgentThinkAgentManagementResponse
+
+// ThinkOnListeningAction is the action when the agent is listening.
+type ThinkOnListeningAction = Agora.AgentThinkAgentManagementRequestOnListeningAction
+
+// ThinkOnThinkingAction is the action when the agent is thinking.
+type ThinkOnThinkingAction = Agora.AgentThinkAgentManagementRequestOnThinkingAction
+
+// ThinkOnSpeakingAction is the action when the agent is speaking.
+type ThinkOnSpeakingAction = Agora.AgentThinkAgentManagementRequestOnSpeakingAction
+
+// SpeakPriority is the priority for speak requests.
+type SpeakPriority = Agora.SpeakAgentsRequestPriority
+
+// Labels is a string map of session metadata labels.
+type Labels = map[string]string
+
 // TtsConfig is the concrete TTS configuration payload (start_agents_request_properties.tts).
 type TtsConfig = Agora.Tts
 
@@ -871,7 +934,7 @@ func (a *Agent) enrichAvatarParams(opts ToPropertiesOptions) (map[string]interfa
 	}
 
 	avatarUID := avatarUIDString(params["agora_uid"])
-	if isAvatarTokenManaged(vendor) && avatarUID != "" {
+	if IsAvatarTokenManaged(vendor) && avatarUID != "" {
 		if avatarUID == opts.AgentUID && opts.Warn != nil {
 			opts.Warn("avatar agora_uid matches agent_rtc_uid; use a distinct UID so the avatar video stream does not collide with the voice agent")
 		}
@@ -896,7 +959,7 @@ func (a *Agent) enrichAvatarParams(opts ToPropertiesOptions) (map[string]interfa
 	return avatar, nil
 }
 
-func isAvatarTokenManaged(vendor string) bool {
+func IsAvatarTokenManaged(vendor string) bool {
 	return IsHeyGenAvatar(vendor) || IsLiveAvatarAvatar(vendor) || IsGenericAvatar(vendor)
 }
 
