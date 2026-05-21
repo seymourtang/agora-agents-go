@@ -2,6 +2,7 @@
 core/request_option_custom.go
 option/request_option_custom.go
 tests/
+changelog.md
 
 # Wrapper layer - custom code that should not be overwritten
 agentkit/
