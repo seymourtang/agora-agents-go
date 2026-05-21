@@ -4,23 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
-
-### Added
-
-- **Alias parity** — Exported `SttConfig`, session/conversation type aliases, `IsAvatarTokenManaged`, think type aliases, and cross-SDK discovery table in `docs/reference/agent.md`.
-
-### Deprecated (legacy naming — use replacements)
-
-- **`NewXAIGrok` / `XAIGrok` / `XAIGrokOptions`** — Use `NewXaiGrok` / `XaiGrok` / `XaiGrokOptions`.
-- **`NewHeyGenAvatar` / `HeyGenAvatar` / `HeyGenAvatarOptions`** — Use `NewLiveAvatarAvatar` / `LiveAvatarAvatar` / `LiveAvatarAvatarOptions`.
-
-## [v1.5.0] — 2026-05-20
+## [v2.0.0] — 2026-05-21
 
 AgentKit alignment for Conversational AI v2.7.
 
 ### Added
 
+- **Alias parity** — Exported `SttConfig`, session/conversation type aliases, `IsAvatarTokenManaged`, think type aliases, and cross-SDK discovery table in `docs/reference/agent.md`.
 - **`AgoraClient.Telephony` and `AgoraClient.PhoneNumbers`** — AgentKit callers can reach the v2.7 telephony and phone-number REST endpoints without rebuilding the generated client.
 - **`vendors.NewXaiGrok`** — xAI Grok MLLM sessions (`mllm.vendor`: `"xai"`), matching the TypeScript `XaiGrok` shape. `NewXAIGrok` remains as a deprecated alias.
 - **`vendors.NewGenericAvatar` and `IsGenericAvatar`** — Generic avatar wrapper for custom avatar providers.
@@ -35,6 +25,9 @@ AgentKit alignment for Conversational AI v2.7.
 
 ### Changed
 
+- **ConvoAI token options** — `GenerateConvoAIToken()` now accepts an integer `UID` and handles the internal token string conversion for users, agents, and avatars.
+- **Avatar token generation** — Removed the dedicated `GenerateAvatarRtcToken()` wrapper; avatar RTC tokens use the existing ConvoAI token helper.
+- **Session lifecycle naming** — Renamed the AgentKit lifecycle type to `AgentSessionLifecycle`; `SessionStatus` is now the generated API status alias.
 - **`AgentSession.Start`** — Sends a map-based join payload after preset resolution, preventing generated structs from reintroducing empty provider-owned fields such as `llm.url`, `llm.api_key`, or `tts.params.key`.
 - **`ToPropertiesMap`** — Builds vendor configs from maps directly for closer parity with Python and TypeScript AgentKit.
 - **`GetTurns`** — Supports `page_index` and `page_size`; callers with more than one page should paginate or call `GetAllTurns`.
@@ -48,6 +41,7 @@ AgentKit alignment for Conversational AI v2.7.
 
 ### Migration Notes
 
+- Deprecated aliases remain for compatibility. Use `NewXaiGrok` / `XaiGrok` / `XaiGrokOptions` instead of `NewXAIGrok` / `XAIGrok` / `XAIGrokOptions`, and `NewLiveAvatarAvatar` / `LiveAvatarAvatar` / `LiveAvatarAvatarOptions` instead of `NewHeyGenAvatar` / `HeyGenAvatar` / `HeyGenAvatarOptions`.
 - In v2.7, omitting `ThinkOptions.OnListeningAction` uses the server default `interrupt`. Pass `agentkit.ThinkOnListeningActionInject.Ptr()` to preserve inject-style behavior.
 - Avatar `AgoraUID` should be distinct from the session `AgentUID`. The SDK warns on collisions and preserves explicitly provided avatar tokens.
 
