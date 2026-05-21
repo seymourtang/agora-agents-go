@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- **Alias parity** — Exported `SttConfig`, session/conversation type aliases, `IsAvatarTokenManaged`, think type aliases, and cross-SDK discovery table in `docs/reference/agent.md`.
+
+### Deprecated (legacy naming — use replacements)
+
+- **`NewXAIGrok` / `XAIGrok` / `XAIGrokOptions`** — Use `NewXaiGrok` / `XaiGrok` / `XaiGrokOptions`.
+- **`NewHeyGenAvatar` / `HeyGenAvatar` / `HeyGenAvatarOptions`** — Use `NewLiveAvatarAvatar` / `LiveAvatarAvatar` / `LiveAvatarAvatarOptions`.
+
 ## [v1.5.0] — 2026-05-20
 
 AgentKit alignment for Conversational AI v2.7.
