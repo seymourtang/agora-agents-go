@@ -31,7 +31,8 @@ c := client.NewClient(
 
 | Field | Type | Description |
 |---|---|---|
-| `c.Agents` | `*agents.Client` | Agent lifecycle (start, stop, speak, interrupt, update, get, getHistory) |
+| `c.Agents` | `*agents.Client` | Agent lifecycle (start, stop, speak, interrupt, update, get, getHistory, getTurns) |
+| `c.AgentManagement` | `*agentmanagement.Client` | Management actions: `agent-think` |
 | `c.Telephony` | `*telephony.Client` | Telephony operations (call, hangup) |
 | `c.PhoneNumbers` | `*phonenumbers.Client` | Phone number management |
 

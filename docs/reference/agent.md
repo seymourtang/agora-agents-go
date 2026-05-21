@@ -87,7 +87,16 @@ Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and
 func WithInterruptionConfig(interruption *InterruptionConfig) AgentOption
 ```
 
-Sets unified interruption control using the top-level `interruption` object.
+Sets unified interruption control using the top-level `interruption` object. Use the `agentkit.InterruptionModeStartOfSpeech` / `InterruptionModeKeywords` and `InterruptionDisabledStrategyAppend` / `InterruptionDisabledStrategyIgnore` convenience constants when populating `InterruptionConfig.Mode` and `InterruptionConfig.DisabledConfig.Strategy`.
+
+### WithGreetingConfigs
+
+<!-- snippet: fragment -->
+```go
+func WithGreetingConfigs(configs *LlmGreetingConfigs) AgentOption
+```
+
+Sets `llm.greeting_configs`, including v2.7 `interruptable`.
 
 ### WithSalConfig
 
@@ -124,6 +133,15 @@ func WithParameters(params *SessionParams) AgentOption
 ```
 
 Sets additional session parameters.
+
+### WithAudioScenario
+
+<!-- snippet: fragment -->
+```go
+func WithAudioScenario(audioScenario ParametersAudioScenario) AgentOption
+```
+
+Sets `parameters.audio_scenario` (`default`, `chorus`, or `aiserver`).
 
 ### WithGeofence
 
@@ -213,6 +231,28 @@ func (a *Agent) WithTurnDetection(td *TurnDetectionConfig) *Agent
 
 Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection. Use interruption config for interruption behavior and MLLM vendor `TurnDetection` for MLLM turn detection.
 
+Example with `pause_state_enabled`:
+
+```go
+enabled := true
+mode := "default"
+eosMode := Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechModeSemantic
+
+agent := agentkit.NewAgent(
+    agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+        Mode: &mode,
+        Config: &agentkit.TurnDetectionNestedConfig{
+            EndOfSpeech: &agentkit.EndOfSpeechConfig{
+                Mode: &eosMode,
+                SemanticConfig: &agentkit.EndOfSpeechSemanticConfig{
+                    PauseStateEnabled: &enabled,
+                },
+            },
+        },
+    }),
+)
+```
+
 ### WithInstructions (method)
 
 <!-- snippet: fragment -->
@@ -256,6 +296,15 @@ func (a *Agent) WithTools(enabled bool) *Agent
 ```
 
 Enables or disables MCP tool invocation by setting `AdvancedFeatures.EnableTools`.
+
+### WithAudioScenario (method)
+
+<!-- snippet: fragment -->
+```go
+func (a *Agent) WithAudioScenario(audioScenario ParametersAudioScenario) *Agent
+```
+
+Sets `parameters.audio_scenario` on immutable agent clones.
 
 ### WithParameters (method)
 
@@ -323,6 +372,8 @@ func (a *Agent) TtsSampleRate() *vendors.SampleRate
 func (a *Agent) AvatarRequiredSampleRate() *vendors.SampleRate
 func (a *Agent) Avatar() map[string]interface{}
 func (a *Agent) TurnDetection() *TurnDetectionConfig
+func (a *Agent) Interruption() *InterruptionConfig
+func (a *Agent) GreetingConfigs() *LlmGreetingConfigs
 func (a *Agent) Sal() *SalConfig
 func (a *Agent) AdvancedFeatures() *AdvancedFeatures
 func (a *Agent) Parameters() *SessionParams
@@ -360,6 +411,8 @@ type ToPropertiesOptions struct {
     ExpiresIn       int
     IdleTimeout     *int
     EnableStringUID *bool
+    SkipVendorValidation bool
+    Warn            func(string)
 }
 ```
 
@@ -374,6 +427,8 @@ type ToPropertiesOptions struct {
 | `ExpiresIn` | `int` | Token lifetime in seconds (default: `86400` = 24 h, Agora max). Use `ExpiresInHours()` / `ExpiresInMinutes()` for clarity. Valid range: 1–86400. |
 | `IdleTimeout` | `*int` | Session idle timeout |
 | `EnableStringUID` | `*bool` | Enable string UID mode |
+| `SkipVendorValidation` | `bool` | Allow preset or pipeline-backed starts without explicit LLM/TTS |
+| `Warn` | `func(string)` | Warning sink for recoverable config issues |
 
 ## Type Aliases
 
@@ -400,6 +455,8 @@ Additional SOS/EOS turn detection aliases: `TurnDetectionNestedConfig`, `StartOf
 <!-- snippet: fragment -->
 ```go
 func GenerateRtcToken(opts GenerateTokenOptions) (string, error)
+func GenerateRtcTokenWithAccount(opts GenerateRtcTokenWithAccountOptions) (string, error)
+func GenerateAvatarRtcToken(opts GenerateAvatarRtcTokenOptions) (string, error)
 ```
 
 ### GenerateTokenOptions
@@ -423,6 +480,8 @@ type GenerateTokenOptions struct {
 const (
     RolePublisher      = 1
     RoleSubscriber     = 2
-    DefaultExpirySeconds = 3600
+    DefaultExpirySeconds = 86400
 )
 ```
+
+`GenerateAvatarRtcToken` uses the same ConvoAI token format as agent tokens and scopes the token to the avatar `AgoraUID`.
