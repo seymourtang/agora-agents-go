@@ -2,6 +2,7 @@
 core/request_option_custom.go
 option/request_option_custom.go
 tests/
+changelog.md
 
 # Wrapper layer - custom code that should not be overwritten
 agentkit/
@@ -12,3 +13,6 @@ docs/
 # Dependency manifests are managed manually
 go.mod
 go.sum
+.fern/replay.lock
+.fern/replay.yml
+.gitattributes

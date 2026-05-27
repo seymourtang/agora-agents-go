@@ -6,9 +6,9 @@ import (
 	bytes "bytes"
 	context "context"
 	json "encoding/json"
-	Agora "github.com/AgoraIO-Conversational-AI/agent-server-sdk-go"
-	client "github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/client"
-	option "github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/option"
+	Agora "github.com/AgoraIO/agora-agents-go"
+	client "github.com/AgoraIO/agora-agents-go/client"
+	option "github.com/AgoraIO/agora-agents-go/option"
 	require "github.com/stretchr/testify/require"
 	http "net/http"
 	testing "testing"
@@ -121,6 +121,13 @@ func TestAgentsStartWithWireMock(
 				FailureMessage: Agora.String(
 					"Please hold on a second.",
 				),
+			},
+			TurnDetection: &Agora.StartAgentsRequestPropertiesTurnDetection{
+				Config: &Agora.StartAgentsRequestPropertiesTurnDetectionConfig{
+					EndOfSpeech: &Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeech{
+						Mode: Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechModeSemantic.Ptr(),
+					},
+				},
 			},
 		},
 	}

@@ -6,7 +6,7 @@ description: Complete API reference for all vendor constructors and configuratio
 
 # Vendors Reference
 
-Package: `github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/agentkit/vendors`
+Package: `github.com/AgoraIO/agora-agents-go/agentkit/vendors`
 
 ## SampleRate
 
@@ -101,6 +101,7 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 | `Endpoint`        | `string`                   | Yes      | —                      | Azure endpoint URL   |
 | `DeploymentName`  | `string`                   | Yes      | —                      | Deployment name      |
 | `APIVersion`      | `string`                   | No       | `"2024-08-01-preview"` | API version          |
+| `Model`           | `string`                   | No       | —                      | Deployment's underlying model name (e.g., `"gpt-4o"`). Emitted as `params.model` for parity with the TypeScript SDK. |
 | `Temperature`     | `*float64`                 | No       | —                      | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                      | Nucleus sampling     |
 | `MaxTokens`       | `*int`                     | No       | —                      | Max tokens           |
@@ -600,6 +601,7 @@ Panics if `APIKey` is empty.
 | `Model`           | `string`   | No       | `"gpt-4o-realtime-preview"` | Model identifier                                   |
 | `URL`             | `string`   | No       | —                           | Custom realtime WebSocket URL                      |
 | `GreetingMessage` | `string`                   | No       | —                           | Initial greeting                                   |
+| `FailureMessage`  | `string`                   | No       | —                           | Fallback message                                   |
 | `InputModalities` | `[]string`                 | No       | —                           | Input modalities                                   |
 | `OutputModalities` | `[]string`                | No       | —                           | Output modalities                                  |
 | `Messages`        | `[]map[string]interface{}` | No       | —                           | Conversation messages for short-term memory        |
@@ -621,14 +623,57 @@ Panics if `APIKey` or `Model` is empty.
 | ------------------ | -------------------------- | -------- | ------- | ----------- |
 | `APIKey`           | `string`                   | Yes      | —       | Google AI API key |
 | `Model`            | `string`                   | Yes      | —       | Gemini Live model identifier |
+| `URL`              | `string`                   | No       | —       | Custom realtime WebSocket URL |
 | `Instructions`     | `string`                   | No       | —       | System instruction |
 | `Voice`            | `string`                   | No       | —       | Voice name |
 | `GreetingMessage`  | `string`                   | No       | —       | Initial greeting |
+| `FailureMessage`   | `string`                   | No       | —       | Fallback message |
 | `InputModalities`  | `[]string`                 | No       | —       | Input modalities |
 | `OutputModalities` | `[]string`                 | No       | —       | Output modalities |
 | `Messages`         | `[]map[string]interface{}` | No       | —       | Conversation messages |
 | `AdditionalParams` | `map[string]interface{}`   | No       | —       | Additional Gemini params |
 | `TurnDetection`    | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
+
+### NewXaiGrok
+
+<!-- snippet: fragment -->
+```go
+func NewXaiGrok(opts XaiGrokOptions) *XaiGrok
+```
+
+xAI Grok MLLM vendor (`mllm.vendor`: `"xai"`). Panics if `APIKey` is empty. Defaults `URL` to `wss://api.x.ai/v1/realtime`.
+
+> `NewXAIGrok` / `XAIGrokOptions` are deprecated aliases.
+
+#### XaiGrokOptions
+
+Same fields as `XAIGrokOptions` below.
+
+### NewXAIGrok (deprecated)
+
+<!-- snippet: fragment -->
+```go
+func NewXAIGrok(opts XAIGrokOptions) *XAIGrok
+```
+
+Deprecated. Use `NewXaiGrok` instead.
+
+#### XAIGrokOptions
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `APIKey` | `string` | Yes | — | xAI API key |
+| `URL` | `string` | No | `"wss://api.x.ai/v1/realtime"` | Realtime WebSocket URL |
+| `Voice` | `string` | No | — | Voice identifier |
+| `Language` | `string` | No | — | Language code |
+| `SampleRate` | `*int` | No | — | Audio sample rate in Hz |
+| `GreetingMessage` | `string` | No | — | Initial greeting |
+| `FailureMessage` | `string` | No | — | Fallback message |
+| `InputModalities` | `[]string` | No | — | Input modalities |
+| `OutputModalities` | `[]string` | No | — | Output modalities |
+| `Messages` | `[]map[string]interface{}` | No | — | Conversation messages |
+| `Params` | `map[string]interface{}` | No | — | Additional xAI params |
+| `TurnDetection` | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | `agora_vad` / `server_vad` turn detection |
 
 ### NewVertexAI
 
@@ -646,11 +691,13 @@ func NewVertexAI(opts VertexAIOptions) *VertexAI
 | `ProjectID`       | `string`   | Yes      | —                        | GCP project ID                                  |
 | `Location`        | `string`   | No       | `"us-central1"`          | GCP region                                      |
 | `Model`           | `string`   | No       | `"gemini-2.0-flash-exp"` | Model identifier                                |
+| `URL`             | `string`   | No       | —                        | Custom realtime WebSocket URL                   |
 | `ADCredentialsString` | `string` | Yes     | —                        | ADC JSON credentials string                     |
 | `Voice`           | `string`   | No       | —                        | Voice name                                      |
 | `Instructions`    | `string`                   | No       | —                        | System instruction                              |
 | `Messages`        | `[]map[string]interface{}` | No       | —                        | Conversation messages                           |
 | `GreetingMessage` | `string`                   | No       | —                        | Initial greeting                                |
+| `FailureMessage`  | `string`                   | No       | —                        | Fallback message                                |
 | `InputModalities` | `[]string`                 | No       | —                        | Input modalities                                |
 | `OutputModalities` | `[]string`                | No       | —                        | Output modalities                               |
 | `AdditionalParams` | `map[string]interface{}`  | No       | —                        | Additional Vertex/Gemini params                 |
@@ -678,7 +725,7 @@ Required TTS sample rate: **24kHz** (`SampleRate24kHz`)
 | `APIKey`              | `string` | Yes      | HeyGen API key                                   |
 | `Quality`             | `string` | Yes      | `"low"`, `"medium"`, or `"high"`                 |
 | `AgoraUID`            | `string` | Yes      | UID for avatar's video stream                    |
-| `AgoraToken`          | `string` | No       | RTC token for avatar authentication              |
+| `AgoraToken`          | `string` | No       | Avatar Agora token. Auto-generated when omitted. |
 | `AvatarID`            | `string` | No       | HeyGen avatar ID                                 |
 | `Enable`              | `*bool`  | No       | Enable or disable the avatar (default: `true`)   |
 | `DisableIdleTimeout`  | `*bool`  | No       | Disable the idle timeout                         |
@@ -724,6 +771,31 @@ func NewAnamAvatar(opts AnamAvatarOptions) *AnamAvatar
 
 Panics if `APIKey` is empty.
 
+### NewGenericAvatar
+
+<!-- snippet: fragment -->
+```go
+func NewGenericAvatar(opts GenericAvatarOptions) *GenericAvatar
+```
+
+Panics if `APIKey`, `APIBaseURL`, `AvatarID`, or `AgoraUID` is empty. `AgoraAppID`, `AgoraChannel`, and `AgoraToken` are optional; AgentKit fills them from the session on `Start()` when omitted.
+
+Generic avatars do not enforce a fixed TTS sample rate. Use the sample rate required by your avatar provider.
+
+#### GenericAvatarOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | Generic avatar vendor API key |
+| `APIBaseURL` | `string` | Yes | Generic avatar API endpoint |
+| `AvatarID` | `string` | Yes | Avatar identifier |
+| `AgoraUID` | `string` | Yes | UID for avatar video stream; use a different UID from `AgentUID` |
+| `AgoraToken` | `string` | No | Avatar token; auto-generated with the same token format as agent tokens when omitted |
+| `AgoraAppID` | `string` | No | Overrides session App ID |
+| `AgoraChannel` | `string` | No | Overrides session channel |
+| `Enable` | `*bool` | No | Enable or disable the avatar |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
+
 ---
 
 ## Sample Rate Constants
@@ -732,6 +804,7 @@ Panics if `APIKey` is empty.
 ```go
 const (
     HeyGenRequiredSampleRate = SampleRate24kHz  // 24000 Hz
+    LiveAvatarRequiredSampleRate = SampleRate24kHz
     AkoolRequiredSampleRate  = SampleRate16kHz  // 16000 Hz
 )
 ```

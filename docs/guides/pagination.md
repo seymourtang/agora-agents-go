@@ -20,9 +20,9 @@ import (
     "fmt"
     "log"
 
-    Agora "github.com/AgoraIO-Conversational-AI/agent-server-sdk-go"
-    "github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/client"
-    "github.com/AgoraIO-Conversational-AI/agent-server-sdk-go/option"
+    Agora "github.com/AgoraIO/agora-agents-go"
+    "github.com/AgoraIO/agora-agents-go/client"
+    "github.com/AgoraIO/agora-agents-go/option"
 )
 
 func main() {
@@ -72,3 +72,31 @@ for {
 ```
 
 When no more pages exist, `GetNextPage` returns `core.ErrNoPages`. The iterator treats this as a normal end-of-stream (not an error).
+
+## AgentKit GetTurns Pagination
+
+`AgentSession.GetTurns` uses page-number pagination rather than `core.Page`. Pass `GetTurnsOptions` to fetch a specific page, or call `GetAllTurns` to aggregate every page.
+
+```go
+pageIndex := 1
+pageSize := 50
+
+turnsPage, err := session.GetTurns(ctx, agentkit.GetTurnsOptions{
+    PageIndex: &pageIndex,
+    PageSize:  &pageSize,
+})
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("turns on page:", len(turnsPage.Turns))
+```
+
+```go
+turnsResponse, err := session.GetAllTurns(ctx)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println("all turns:", len(turnsResponse.Turns))
+```
+
+If you also subscribe to notifications, event `112` indicates the session turns have finished and are ready to query.
