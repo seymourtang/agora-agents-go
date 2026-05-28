@@ -101,7 +101,7 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 | `Endpoint`        | `string`                   | Yes      | —                      | Azure endpoint URL   |
 | `DeploymentName`  | `string`                   | Yes      | —                      | Deployment name      |
 | `APIVersion`      | `string`                   | No       | `"2024-08-01-preview"` | API version          |
-| `Model`           | `string`                   | No       | —                      | Deployment's underlying model name (e.g., `"gpt-4o"`). Emitted as `params.model` for parity with the TypeScript SDK. |
+| `Model`           | `string`                   | No       | —                      | Deployment's base model name (e.g., `"gpt-4o"`). Emitted as `params.model` for parity with the TypeScript SDK. |
 | `Temperature`     | `*float64`                 | No       | —                      | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                      | Nucleus sampling     |
 | `MaxTokens`       | `*int`                     | No       | —                      | Max tokens           |
@@ -171,6 +171,18 @@ Panics if `APIKey` is empty.
 | `Headers`         | `map[string]string`        | No       | —                        | Custom HTTP headers forwarded to the LLM provider |
 | `GreetingConfigs` | `map[string]interface{}`   | No       | —                        | Greeting playback configuration |
 | `TemplateVariables` | `map[string]string`      | No       | —                        | Template variables for messages |
+
+### Other LLM vendors
+
+The SDK also includes named helpers for the remaining Agora-supported LLM providers. These helpers choose the correct request format internally.
+
+| Constructor | Options Struct | Required Fields |
+|---|---|---|
+| `NewGroq` | `GroqOptions` | `APIKey` |
+| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `ProjectID`, `Location` |
+| `NewAmazonBedrock` | `AmazonBedrockOptions` | `APIKey`, `URL`, `Model` |
+| `NewDify` | `DifyOptions` | `APIKey`, `URL` |
+| `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` |
 
 ---
 

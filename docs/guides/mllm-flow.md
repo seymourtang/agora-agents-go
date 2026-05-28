@@ -113,7 +113,7 @@ agent := agentkit.NewAgent(
 
 ## Low-Level Usage
 
-Use AgentKit for MLLM session starts. It keeps the app-credentials flow intact and generates the required REST and RTC tokens from `AppID` and `AppCertificate`. See [Low-Level API](./low-level-api.md) for generated-client escape hatches that are outside the realtime session lifecycle.
+Use AgentKit for MLLM session starts. It keeps the app-credentials flow intact and generates the required REST and RTC tokens from `AppID` and `AppCertificate`. See [Low-Level API](./low-level-api.md) for generated REST operations outside the realtime session lifecycle.
 
 ## Pointer Helper Functions
 

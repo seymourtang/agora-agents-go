@@ -43,6 +43,11 @@ type Avatar interface {
 | `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Endpoint`, `DeploymentName` | — |
 | `NewAnthropic` | `AnthropicOptions` | `APIKey` | `claude-3-5-sonnet-20241022` |
 | `NewGemini` | `GeminiOptions` | `APIKey` | `gemini-2.0-flash-exp` |
+| `NewGroq` | `GroqOptions` | `APIKey` | `llama-3.3-70b-versatile` |
+| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `ProjectID`, `Location` | `gemini-2.0-flash-exp` |
+| `NewAmazonBedrock` | `AmazonBedrockOptions` | `APIKey`, `URL`, `Model` | — |
+| `NewDify` | `DifyOptions` | `APIKey`, `URL` | — |
+| `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` | — |
 
 <!-- snippet: fragment -->
 ```go
@@ -173,8 +178,8 @@ All vendor constructors validate required fields and `panic` if they are missing
 
 <!-- snippet: fragment -->
 ```go
-// This panics because gpt-4o is not a supported Agora-managed model.
+// This panics because gpt-4o requires an OpenAI API key.
 vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o"})
 ```
 
-This is Go-idiomatic for configuration errors that indicate programmer mistakes rather than runtime conditions. Handle these by ensuring BYOK fields are populated when you are not using a supported Agora-managed model.
+This fails early so invalid vendor configuration does not reach session start. Provide BYOK fields when you use models outside the Agora-managed catalog.

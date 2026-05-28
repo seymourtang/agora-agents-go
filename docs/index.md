@@ -16,18 +16,18 @@ Source: [github.com/AgoraIO/agora-agents-go](https://github.com/AgoraIO/agora-ag
 
 **MLLM flow** uses a multimodal model such as OpenAI Realtime or Gemini Live for end-to-end audio.
 
-## Choose a starting point
+## Start here
 
-- Use [Quick Start](./getting-started/quick-start.md) if you want the recommended builder path with no vendor keys.
-- Use [MLLM Flow](./guides/mllm-flow.md) if you want realtime end-to-end audio with OpenAI Realtime or Gemini Live.
-- Use [Cascading Flow](./guides/cascading-flow.md) if you want separate ASR, LLM, and TTS vendors.
+- Start with [Quick Start](./getting-started/quick-start.md). It shows the baseline app-credentials setup and starts a cascading ASR -> LLM -> TTS agent.
+- Use [MLLM Flow](./guides/mllm-flow.md) when your agent uses one realtime multimodal model, such as OpenAI Realtime or Gemini Live.
+- Use [Cascading Flow](./guides/cascading-flow.md) for more examples of the default ASR -> LLM -> TTS flow, including provider-specific configuration.
 
-## SDK layers
+## How the SDK is organized
 
 | Layer | Package | Description |
 |---|---|---|
-| **Fern-generated client** | `client`, `option`, `agents`, `telephony`, `phonenumbers` | Low-level typed REST API access |
-| **Hand-written agentkit layer** | `agentkit`, `agentkit/vendors` | High-level builder pattern, lifecycle, typed vendors |
+| **Generated REST clients** | `client`, `option`, `agents`, `telephony`, `phonenumbers` | Typed access to REST APIs not covered by AgentKit |
+| **AgentKit** | `agentkit`, `agentkit/vendors` | Agent builder, session lifecycle, and typed vendors |
 
 ## Installation
 
@@ -43,9 +43,9 @@ Requires Go 1.21 or later.
 |---|---|
 | [Installation](./getting-started/installation.md) | Prerequisites, package install, import paths |
 | [Authentication](./getting-started/authentication.md) | App credentials for REST auth and RTC joins |
-| [Quick Start](./getting-started/quick-start.md) | Recommended app-credentials onboarding flow |
+| [Quick Start](./getting-started/quick-start.md) | App credentials and AgentKit |
 | [BYOK](./guides/byok.md) | Bring your own vendor credentials and config |
-| [Architecture](./concepts/architecture.md) | Two-layer design, when to use agentkit vs. raw client |
+| [Architecture](./concepts/architecture.md) | SDK structure and generated REST clients |
 | [Agent](./concepts/agent.md) | Builder pattern, immutable reuse, vendor configuration |
 | [AgentSession](./concepts/session.md) | State machine, lifecycle methods, events |
 | [Vendors](./concepts/vendors.md) | LLM, TTS, STT, MLLM, and Avatar provider catalog |
@@ -56,10 +56,10 @@ Requires Go 1.21 or later.
 | [Error Handling](./guides/error-handling.md) | API errors and Go error handling patterns |
 | [Pagination](./guides/pagination.md) | Iterate over paginated list endpoints |
 | [Advanced](./guides/advanced.md) | Headers, retries, timeouts, raw response, custom HTTP client |
-| [Low-Level API](./guides/low-level-api.md) | Direct `client.Agents.Start()` usage |
+| [Low-Level API](./guides/low-level-api.md) | Generated REST APIs |
 | [Client Reference](./reference/client.md) | Constructor options, public methods |
 | [Agent Reference](./reference/agent.md) | Full builder API |
 | [Session Reference](./reference/session.md) | All methods and payload types |
 | [Vendor Reference](./reference/vendors.md) | Constructor options for every vendor class |
 
-For Fern-generated raw API types, see the [API Reference](../../reference.md).
+For generated REST API types, see the [API Reference](../../reference.md).

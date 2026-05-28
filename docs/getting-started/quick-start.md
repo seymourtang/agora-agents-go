@@ -6,12 +6,12 @@ description: Build and run your first Agora Conversational AI agent in Go with a
 
 # Quick Start
 
-This guide uses the recommended onboarding path:
+This guide starts with the standard AgentKit path:
 
 - `AppID`, `AppCertificate`, and `Area` on `AgoraClient`
 - the `Agent` builder with `WithStt()`, `WithLlm()`, and `WithTts()`
 - automatic ConvoAI REST auth and RTC join token generation
-- no vendor API keys in application code
+- no vendor API keys when using supported Agora-managed models
 
 ## Full example
 
@@ -91,7 +91,7 @@ func main() {
 
 ## When to use BYOK instead
 
-Use the builder without vendor API keys when you want the fastest path with Agora-managed models.
+Use the builder without vendor API keys when you are using supported Agora-managed models.
 
 Use BYOK when you need to:
 

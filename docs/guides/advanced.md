@@ -63,7 +63,7 @@ if err := client.StopAgent(ctx, agentID); err != nil {
 
 ## Raw Responses
 
-The generated clients expose `WithRawResponse` for advanced debugging of status codes and headers. Keep session lifecycle code on AgentKit unless you specifically need a generated-client escape hatch.
+The generated clients expose `WithRawResponse` for advanced debugging of status codes and headers. Keep session lifecycle code on AgentKit unless you specifically need to call a generated REST method.
 
 ```go
 resp, err := client.Agents.WithRawResponse.Get(ctx, req)
@@ -78,4 +78,4 @@ fmt.Println(resp.Body)
 
 ## Generated-Client Options
 
-Generated-client request options such as `option.WithMaxAttempts`, `option.WithHTTPHeader`, and `option.WithQueryParameters` are available for low-level REST calls. They are advanced tools and are not needed for the recommended AgentKit session flow.
+Generated-client request options such as `option.WithMaxAttempts`, `option.WithHTTPHeader`, and `option.WithQueryParameters` are available for low-level REST calls. They are advanced tools and are not needed for the AgentKit session flow.

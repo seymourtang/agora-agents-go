@@ -57,7 +57,7 @@ type AgentSessionOptions struct {
 | `EnableStringUID` | `*bool` | No | Enable string UID mode |
 | `ExpiresIn` | `int` | No | Auto-generated token lifetime in seconds |
 | `UseAppCredentialsForREST` | `bool` | No | Generate ConvoAI REST auth headers per request |
-| `Preset` | `[]string` | No | Advanced feature flag for internal/explicit model routing. Leave unset for normal builder usage. |
+| `Preset` | `[]string` | No | Advanced preset value for project-specific routing. Leave unset for normal builder usage. |
 | `PipelineID` | `string` | No | Published pipeline ID to send on session start |
 | `Debug` | `bool` | No | Enable debug logging of the start request |
 | `Warn` | `func(string)` | No | Custom warning sink; defaults to logger |
@@ -251,7 +251,7 @@ Returns the App ID.
 ```go
 func (s *AgentSession) Raw() *agents.Client
 ```
-Returns the underlying Fern-generated agents client for direct API access.
+Returns the generated agents client for direct API access.
 
 ## Event System
 

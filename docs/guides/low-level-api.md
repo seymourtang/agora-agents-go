@@ -22,7 +22,7 @@ The SDK also exposes generated clients for API surfaces that are not part of the
 - `client.PhoneNumbers` for phone-number list, create, retrieve, update, and delete operations
 - `client.AgentManagement` for management actions such as `agent-think`
 
-Use these when you need direct REST API coverage. For new session starts, use AgentKit instead of manually constructing `StartAgentsRequest` because AgentKit owns token generation and Agora-managed model resolution.
+Use these when you need REST API operations outside the AgentKit session lifecycle. For new session starts, use AgentKit instead of manually constructing `StartAgentsRequest`; AgentKit handles token generation and supported Agora-managed models.
 
 ## App-Credentials Client
 

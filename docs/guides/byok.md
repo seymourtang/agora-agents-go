@@ -82,5 +82,5 @@ func main() {
 
 ## Agora-managed models vs BYOK
 
-- Agora-managed models: fastest path, no vendor keys in app code
+- Agora-managed models: supported models without vendor keys in app code
 - BYOK: most control, your keys and your vendor configuration
