@@ -26,6 +26,7 @@ AgentKit alignment for Conversational AI v2.7.
 ### Changed
 
 - **Repository and module path** — The repository has been updated to [`AgoraIO/agora-agents-go`](https://github.com/AgoraIO/agora-agents-go) (formerly `AgoraIO-Conversational-AI/agent-server-sdk-go`). Update imports to `github.com/AgoraIO/agora-agents-go/v2`.
+- **Go module v2 path alignment** — `go.mod` now declares `module github.com/AgoraIO/agora-agents-go/v2`, and all SDK imports/examples use `/v2` paths so standard Go module resolution works for `v2.0.0`.
 - **ConvoAI token options** — `GenerateConvoAIToken()` now accepts an integer `UID` and handles the internal token string conversion for users, agents, and avatars.
 - **Avatar token generation** — Removed the dedicated `GenerateAvatarRtcToken()` wrapper; avatar RTC tokens use the existing ConvoAI token helper.
 - **Session lifecycle naming** — Renamed the AgentKit lifecycle type to `AgentSessionLifecycle`; `SessionStatus` is now the generated API status alias.
@@ -45,6 +46,7 @@ AgentKit alignment for Conversational AI v2.7.
 - Deprecated aliases remain for compatibility. Use `NewXaiGrok` / `XaiGrok` / `XaiGrokOptions` instead of `NewXAIGrok` / `XAIGrok` / `XAIGrokOptions`, and `NewLiveAvatarAvatar` / `LiveAvatarAvatar` / `LiveAvatarAvatarOptions` instead of `NewHeyGenAvatar` / `HeyGenAvatar` / `HeyGenAvatarOptions`.
 - In v2.7, omitting `ThinkOptions.OnListeningAction` uses the server default `interrupt`. Pass `agentkit.ThinkOnListeningActionInject.Ptr()` to preserve inject-style behavior.
 - Avatar `AgoraUID` should be distinct from the session `AgentUID`. The SDK warns on collisions and preserves explicitly provided avatar tokens.
+- Go consumers should install and import via the `/v2` module path, for example: `go get github.com/AgoraIO/agora-agents-go/v2@v2.0.0`.
 
 ## [v1.4.0] — 2026-05-13
 
