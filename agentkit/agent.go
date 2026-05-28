@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	Agora "github.com/AgoraIO/agora-agents-go"
-	"github.com/AgoraIO/agora-agents-go/agentkit/vendors"
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	"github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
 )
 
 func mapToStruct(m map[string]interface{}, target interface{}) error {

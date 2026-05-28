@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
-	Agora "github.com/AgoraIO/agora-agents-go"
-	"github.com/AgoraIO/agora-agents-go/agentmanagement"
-	"github.com/AgoraIO/agora-agents-go/agents"
-	"github.com/AgoraIO/agora-agents-go/client"
-	"github.com/AgoraIO/agora-agents-go/core"
-	"github.com/AgoraIO/agora-agents-go/option"
-	"github.com/AgoraIO/agora-agents-go/phonenumbers"
-	"github.com/AgoraIO/agora-agents-go/telephony"
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	"github.com/AgoraIO/agora-agents-go/v2/agentmanagement"
+	"github.com/AgoraIO/agora-agents-go/v2/agents"
+	"github.com/AgoraIO/agora-agents-go/v2/client"
+	"github.com/AgoraIO/agora-agents-go/v2/core"
+	"github.com/AgoraIO/agora-agents-go/v2/option"
+	"github.com/AgoraIO/agora-agents-go/v2/phonenumbers"
+	"github.com/AgoraIO/agora-agents-go/v2/telephony"
 )
 
 // AuthMode represents the authentication mode for the Agora client.

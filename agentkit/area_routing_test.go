@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/AgoraIO/agora-agents-go/client"
-	"github.com/AgoraIO/agora-agents-go/option"
+	"github.com/AgoraIO/agora-agents-go/v2/client"
+	"github.com/AgoraIO/agora-agents-go/v2/option"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

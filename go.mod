@@ -1,4 +1,4 @@
-module github.com/AgoraIO/agora-agents-go
+module github.com/AgoraIO/agora-agents-go/v2
 
 go 1.21
 

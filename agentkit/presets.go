@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	Agora "github.com/AgoraIO/agora-agents-go"
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
 )
 
 var AgentPresets = struct {

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/AgoraIO/agora-agents-go/core"
+	"github.com/AgoraIO/agora-agents-go/v2/core"
 	"github.com/stretchr/testify/assert"
 )
 

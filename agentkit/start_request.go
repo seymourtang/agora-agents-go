@@ -3,9 +3,9 @@ package agentkit
 import (
 	"context"
 
-	Agora "github.com/AgoraIO/agora-agents-go"
-	"github.com/AgoraIO/agora-agents-go/agents"
-	"github.com/AgoraIO/agora-agents-go/option"
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	"github.com/AgoraIO/agora-agents-go/v2/agents"
+	"github.com/AgoraIO/agora-agents-go/v2/option"
 )
 
 func startAgentsWithMapBody(

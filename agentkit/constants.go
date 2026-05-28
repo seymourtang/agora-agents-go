@@ -1,6 +1,6 @@
 package agentkit
 
-import Agora "github.com/AgoraIO/agora-agents-go"
+import Agora "github.com/AgoraIO/agora-agents-go/v2"
 
 // =============================================================================
 // SAL mode constants

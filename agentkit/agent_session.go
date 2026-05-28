@@ -11,11 +11,11 @@ import (
 	"sync"
 	"time"
 
-	Agora "github.com/AgoraIO/agora-agents-go"
-	"github.com/AgoraIO/agora-agents-go/agentmanagement"
-	"github.com/AgoraIO/agora-agents-go/agents"
-	"github.com/AgoraIO/agora-agents-go/core"
-	"github.com/AgoraIO/agora-agents-go/option"
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	"github.com/AgoraIO/agora-agents-go/v2/agentmanagement"
+	"github.com/AgoraIO/agora-agents-go/v2/agents"
+	"github.com/AgoraIO/agora-agents-go/v2/core"
+	"github.com/AgoraIO/agora-agents-go/v2/option"
 )
 
 // AgentSessionLifecycle is the local client lifecycle state for AgentSession.

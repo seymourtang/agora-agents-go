@@ -4,10 +4,10 @@ package phonenumbers
 
 import (
 	context "context"
-	Agora "github.com/AgoraIO/agora-agents-go"
-	core "github.com/AgoraIO/agora-agents-go/core"
-	internal "github.com/AgoraIO/agora-agents-go/internal"
-	option "github.com/AgoraIO/agora-agents-go/option"
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	core "github.com/AgoraIO/agora-agents-go/v2/core"
+	internal "github.com/AgoraIO/agora-agents-go/v2/internal"
+	option "github.com/AgoraIO/agora-agents-go/v2/option"
 )
 
 type Client struct {
