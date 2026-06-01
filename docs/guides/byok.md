@@ -44,9 +44,6 @@ func main() {
     // In BYOK mode, each vendor carries its own credentials.
     agent := agentkit.NewAgent(
         agentkit.WithName("support-assistant"),
-        agentkit.WithInstructions("You are a concise support voice assistant."),
-        agentkit.WithGreeting("Hello! How can I help you today?"),
-        agentkit.WithMaxHistory(10),
     ).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
         APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
         Model:    "nova-3",
@@ -54,6 +51,11 @@ func main() {
     })).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey: os.Getenv("OPENAI_API_KEY"),
         Model:  "gpt-4o-mini",
+        SystemMessages: []map[string]interface{}{
+            {"role": "system", "content": "You are a concise support voice assistant."},
+        },
+        GreetingMessage: "Hello! How can I help you today?",
+        MaxHistory:      intPtr(10),
     })).WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:        os.Getenv("ELEVENLABS_API_KEY"),
         ModelID:    "eleven_flash_v2_5",

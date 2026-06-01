@@ -84,11 +84,14 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("avatar-agent"),
-        agentkit.WithInstructions("You are a friendly virtual assistant with a visual avatar."),
-        agentkit.WithGreeting("Hello! I can see you and you can see me!"),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
             APIKey: "<openai_key>",
+            Model:  "gpt-4o-mini",
+            SystemMessages: []map[string]interface{}{
+                {"role": "system", "content": "You are a friendly virtual assistant with a visual avatar."},
+            },
+            GreetingMessage: "Hello! I can see you and you can see me!",
         }),
     ).WithTts(
         // TTS sample rate MUST match the avatar's required rate (24kHz for LiveAvatar).
@@ -138,10 +141,13 @@ sr := vendors.SampleRate16kHz
 
 agent := agentkit.NewAgent(
     agentkit.WithName("akool-avatar"),
-    agentkit.WithInstructions("You are a virtual presenter."),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey: "<openai_key>",
+        Model:  "gpt-4o-mini",
+        SystemMessages: []map[string]interface{}{
+            {"role": "system", "content": "You are a virtual presenter."},
+        },
     }),
 ).WithTts(
     // Akool requires 16kHz

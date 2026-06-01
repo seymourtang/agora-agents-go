@@ -18,8 +18,8 @@ For string values with a finite set of options (e.g. `data_channel`, `sal_mode`,
 | `advancedFeatures` | `WithAdvancedFeatures` | Enable MLLM, RTM, SAL, tools |
 | `tools` | `WithTools` | Enable MCP tool invocation |
 | `parameters` | `WithParameters` | Silence config, farewell config, data channel |
-| `failureMessage` | `WithFailureMessage` | Message spoken when LLM fails |
-| `maxHistory` | `WithMaxHistory` | Max conversation turns in LLM context |
+| `failureMessage` | LLM/MLLM vendor option | Message spoken when LLM fails |
+| `maxHistory` | LLM vendor option | Max conversation turns in LLM context |
 | `geofence` | `WithGeofence` | Restrict backend server regions |
 | `labels` | `WithLabels` | Custom key-value labels (returned in callbacks) |
 | `rtc` | `WithRtc` | RTC media encryption |
@@ -40,7 +40,6 @@ import (
 
 agent := agentkit.NewAgent(
     agentkit.WithName("sal-assistant"),
-    agentkit.WithInstructions("You are a helpful assistant."),
     agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
         EnableSal: Agora.Bool(true),
     }),
@@ -50,7 +49,13 @@ agent := agentkit.NewAgent(
             "primary-speaker": "https://example.com/voiceprint.pcm",
         },
     }),
-).WithLlm(vendors.NewOpenAI(/* ... */)).
+).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
+    APIKey: "<key>",
+    Model:  "gpt-4o-mini",
+    SystemMessages: []map[string]interface{}{
+        {"role": "system", "content": "You are a helpful assistant."},
+    },
+})).
   WithTts(vendors.NewElevenLabsTTS(/* ... */)).
   WithStt(vendors.NewDeepgramSTT(/* ... */))
 ```
@@ -105,17 +110,13 @@ agent := agentkit.NewAgent(
 ## Failure Message and Max History
 
 ```go
-agent := agentkit.NewAgent(
-    agentkit.WithName("assistant"),
-    agentkit.WithFailureMessage("Sorry, I encountered an error. Please try again."),
-    agentkit.WithMaxHistory(20),
-).WithLlm(/* ... */).WithTts(/* ... */).WithStt(/* ... */)
-
-// Or via methods
 agent := agentkit.NewAgent().
-    WithFailureMessage("Something went wrong.").
-    WithMaxHistory(15).
-    WithLlm(/* ... */).WithTts(/* ... */).WithStt(/* ... */)
+    WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
+        APIKey:         "<key>",
+        Model:          "gpt-4o-mini",
+        FailureMessage: "Something went wrong.",
+        MaxHistory:     Agora.Int(15),
+    })).WithTts(/* ... */).WithStt(/* ... */)
 ```
 
 ## Geofence
@@ -200,7 +201,6 @@ Read back configuration via getter methods:
 
 ```go
 agent := agentkit.NewAgent(
-    agentkit.WithMaxHistory(20),
     agentkit.WithGeofence(&agentkit.GeofenceConfig{
         Area: agentkit.GeofenceAreaEurope,
     }),
@@ -208,7 +208,6 @@ agent := agentkit.NewAgent(
 )
 
 agent.Name()           // string
-agent.MaxHistory()     // *int
 agent.Geofence()       // *GeofenceConfig
 agent.Labels()         // map[string]string
 agent.Sal()            // *SalConfig
@@ -243,10 +242,6 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("full-featured-assistant"),
-        agentkit.WithInstructions("You are a helpful voice assistant."),
-        agentkit.WithGreeting("Hello! How can I help?"),
-        agentkit.WithFailureMessage("Sorry, I had trouble processing that."),
-        agentkit.WithMaxHistory(20),
         agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
             EnableRtm: Agora.Bool(true),
         }),
@@ -287,6 +282,12 @@ func main() {
     ).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey: "<openai_key>",
         Model:  "gpt-4o-mini",
+        SystemMessages: []map[string]interface{}{
+            {"role": "system", "content": "You are a helpful voice assistant."},
+        },
+        GreetingMessage: "Hello! How can I help?",
+        FailureMessage:  "Sorry, I had trouble processing that.",
+        MaxHistory:      Agora.Int(20),
     })).WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:     "<elevenlabs_key>",
         ModelID:  "eleven_turbo_v2_5",

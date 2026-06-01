@@ -40,9 +40,6 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("support-assistant"),
-        agentkit.WithInstructions("You are a concise support voice assistant."),
-        agentkit.WithGreeting("Hello! How can I help you today?"),
-        agentkit.WithMaxHistory(10),
     ).WithStt(
         vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
             Model:    "nova-3",
@@ -51,6 +48,11 @@ func main() {
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
             Model: "gpt-5-mini",
+            SystemMessages: []map[string]interface{}{
+                {"role": "system", "content": "You are a concise support voice assistant."},
+            },
+            GreetingMessage: "Hello! How can I help you today?",
+            MaxHistory:      intPtr(10),
         }),
     ).WithTts(
         vendors.NewOpenAITTS(vendors.OpenAITTSOptions{

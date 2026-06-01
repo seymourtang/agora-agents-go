@@ -77,10 +77,6 @@ func startConversation(ctx context.Context) (string, error) {
 
     agent := agentkit.NewAgent(
         agentkit.WithName(fmt.Sprintf("conversation-%d", time.Now().UnixMilli())),
-        agentkit.WithInstructions(agentPrompt),
-        agentkit.WithGreeting(greeting),
-        agentkit.WithFailureMessage("Please wait a moment."),
-        agentkit.WithMaxHistory(50),
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
             Config: &agentkit.TurnDetectionNestedConfig{
                 SpeechThreshold: float64Ptr(0.5),
@@ -112,9 +108,10 @@ func startConversation(ctx context.Context) (string, error) {
         Language: "en",
     })).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
         Model:           "gpt-4o-mini",
+        SystemMessages:  []map[string]interface{}{{"role": "system", "content": agentPrompt}},
         GreetingMessage: greeting,
         FailureMessage:  "Please wait a moment.",
-        MaxHistory:      intPtr(15),
+        MaxHistory:      intPtr(50),
         Params: map[string]interface{}{
             "max_tokens": 1024,
             "temperature": 0.7,
@@ -155,19 +152,18 @@ func main() {
 Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed models.
 
 ```go
-agent := agentkit.NewAgent(
-    agentkit.WithInstructions(agentPrompt),
-    agentkit.WithGreeting(greeting),
-).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
+agent := agentkit.NewAgent().WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
     APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
     Model:    "nova-3",
     Language: "en",
 })).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-    APIKey:      os.Getenv("OPENAI_API_KEY"),
-    Model:       "gpt-4o-mini",
-    MaxTokens:   intPtr(1024),
-    Temperature: float64Ptr(0.7),
-    TopP:        float64Ptr(0.95),
+    APIKey:          os.Getenv("OPENAI_API_KEY"),
+    Model:           "gpt-4o-mini",
+    SystemMessages:  []map[string]interface{}{{"role": "system", "content": agentPrompt}},
+    GreetingMessage: greeting,
+    MaxTokens:       intPtr(1024),
+    Temperature:     float64Ptr(0.7),
+    TopP:            float64Ptr(0.95),
 })).WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
     Key:     os.Getenv("MINIMAX_API_KEY"),
     GroupID: os.Getenv("MINIMAX_GROUP_ID"),

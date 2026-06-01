@@ -42,7 +42,7 @@ Sets the agent name identifier.
 func WithInstructions(instructions string) AgentOption
 ```
 
-Sets the system prompt injected into the LLM configuration.
+Deprecated. Configure `SystemMessages` on the LLM vendor instead.
 
 ### WithGreeting
 
@@ -51,7 +51,7 @@ Sets the system prompt injected into the LLM configuration.
 func WithGreeting(greeting string) AgentOption
 ```
 
-Sets the greeting message the agent speaks first.
+Deprecated. Configure `GreetingMessage` on the LLM or MLLM vendor instead.
 
 ### WithFailureMessage
 
@@ -60,7 +60,7 @@ Sets the greeting message the agent speaks first.
 func WithFailureMessage(msg string) AgentOption
 ```
 
-Sets the fallback message spoken when the LLM fails.
+Deprecated. Configure `FailureMessage` on the LLM or MLLM vendor instead.
 
 ### WithMaxHistory
 
@@ -69,7 +69,7 @@ Sets the fallback message spoken when the LLM fails.
 func WithMaxHistory(n int) AgentOption
 ```
 
-Sets the maximum number of conversation turns to retain.
+Deprecated. Configure `MaxHistory` on the LLM vendor instead.
 
 ### WithTurnDetectionConfig
 
@@ -96,7 +96,7 @@ Sets unified interruption control using the top-level `interruption` object. Use
 func WithGreetingConfigs(configs *LlmGreetingConfigs) AgentOption
 ```
 
-Sets `llm.greeting_configs`, including v2.7 `interruptable`.
+Deprecated. Configure `GreetingConfigs` on the LLM vendor instead.
 
 ### WithSalConfig
 
@@ -260,12 +260,16 @@ agent := agentkit.NewAgent(
 func (a *Agent) WithInstructions(instructions string) *Agent
 ```
 
+Deprecated. Configure `SystemMessages` on the LLM vendor instead.
+
 ### WithGreeting (method)
 
 <!-- snippet: fragment -->
 ```go
 func (a *Agent) WithGreeting(greeting string) *Agent
 ```
+
+Deprecated. Configure `GreetingMessage` on the LLM or MLLM vendor instead.
 
 ### WithName (method)
 
@@ -320,12 +324,16 @@ func (a *Agent) WithParameters(params *SessionParams) *Agent
 func (a *Agent) WithFailureMessage(msg string) *Agent
 ```
 
+Deprecated. Configure `FailureMessage` on the LLM or MLLM vendor instead.
+
 ### WithMaxHistory (method)
 
 <!-- snippet: fragment -->
 ```go
 func (a *Agent) WithMaxHistory(n int) *Agent
 ```
+
+Deprecated. Configure `MaxHistory` on the LLM vendor instead.
 
 ### WithGeofence (method)
 

@@ -18,6 +18,7 @@ import (
     "fmt"
     "log"
 
+    Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
     "github.com/AgoraIO/agora-agents-go/v2/option"
@@ -32,13 +33,15 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("openai-assistant"),
-        agentkit.WithInstructions("You are a helpful voice assistant. Keep responses under 3 sentences."),
-        agentkit.WithGreeting("Hi there! What can I help you with?"),
-        agentkit.WithMaxHistory(20),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
             APIKey: "<openai_key>",
             Model:  "gpt-4o-mini",
+            SystemMessages: []map[string]interface{}{
+                {"role": "system", "content": "You are a helpful voice assistant. Keep responses under 3 sentences."},
+            },
+            GreetingMessage: "Hi there! What can I help you with?",
+            MaxHistory:      Agora.Int(20),
         }),
     ).WithTts(
         vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
@@ -87,6 +90,7 @@ import (
     "fmt"
     "log"
 
+    Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
     "github.com/AgoraIO/agora-agents-go/v2/option"
@@ -101,13 +105,15 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("claude-assistant"),
-        agentkit.WithInstructions("You are a customer service agent for Acme Corp."),
-        agentkit.WithGreeting("Welcome to Acme Corp! How may I assist you?"),
-        agentkit.WithFailureMessage("I apologize for the inconvenience. Please try again shortly."),
     ).WithLlm(
         vendors.NewAnthropic(vendors.AnthropicOptions{
             APIKey: "<anthropic_key>",
             Model:  "claude-3-5-sonnet-20241022",
+            SystemMessages: []map[string]interface{}{
+                {"role": "system", "content": "You are a customer service agent for Acme Corp."},
+            },
+            GreetingMessage: "Welcome to Acme Corp! How may I assist you?",
+            FailureMessage:  "I apologize for the inconvenience. Please try again shortly.",
         }),
     ).WithTts(
         vendors.NewMicrosoftTTS(vendors.MicrosoftTTSOptions{
