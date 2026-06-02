@@ -64,7 +64,7 @@ agent := agentkit.NewAgent(...).WithLlm(llm)
 |---|---|---|
 | `NewElevenLabsTTS` | `ElevenLabsTTSOptions` | `Key`, `ModelID`, `VoiceID`, `BaseURL` |
 | `NewMicrosoftTTS` | `MicrosoftTTSOptions` | `Key`, `Region`, `VoiceName` |
-| `NewOpenAITTS` | `OpenAITTSOptions` | `Voice` for Agora-managed `tts-1`; `APIKey`, `Voice` for BYOK |
+| `NewOpenAITTS` | `OpenAITTSOptions` | `Voice` for Agora-managed `tts-1`; `APIKey`, `Model`, `BaseURL`, `Voice` for BYOK |
 | `NewCartesiaTTS` | `CartesiaTTSOptions` | `APIKey`, `VoiceID`, `ModelID` |
 | `NewGoogleTTS` | `GoogleTTSOptions` | `Key`, `VoiceName` |
 | `NewAmazonTTS` | `AmazonTTSOptions` | `AccessKey`, `SecretKey`, `Region`, `VoiceID`, `Engine` |
@@ -111,9 +111,9 @@ Use `Agent.WithInteractionLanguage()` for Agora `asr.language`; it defaults to `
 |---|---|---|
 | `NewSpeechmaticsSTT` | `SpeechmaticsSTTOptions` | `APIKey`, `Language` |
 | `NewDeepgramSTT` | `DeepgramSTTOptions` | `APIKey` for BYOK; none for supported Agora-managed Deepgram models |
-| `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region` |
+| `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region`, `Language` |
 | `NewOpenAISTT` | `OpenAISTTOptions` | `APIKey` |
-| `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString` |
+| `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString`, `Language` |
 | `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region`, `Language` |
 | `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey`, `Language` |
 | `NewAresSTT` | `AresSTTOptions` | None |

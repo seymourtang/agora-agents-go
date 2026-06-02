@@ -235,15 +235,16 @@ Panics if `Key`, `Region`, or `VoiceName` is empty.
 func NewOpenAITTS(opts OpenAITTSOptions) *OpenAITTS
 ```
 
-Panics if `Voice` is empty. `APIKey` is optional for the Agora-managed `tts-1` path. Always returns `SampleRate24kHz` from `GetSampleRate()`.
+Panics if `Voice` is empty. `APIKey`, `Model`, and `BaseURL` are required together for BYOK. `APIKey` is optional for the Agora-managed `tts-1` path. Always returns `SampleRate24kHz` from `GetSampleRate()`.
 
 #### OpenAITTSOptions
 
 | Field            | Type       | Required | Description                        |
 | ---------------- | ---------- | -------- | ---------------------------------- |
-| `APIKey`         | `string`   | No       | OpenAI API key. Optional for the Agora-managed `tts-1` path. |
+| `APIKey`         | `string`   | BYOK only | OpenAI API key. Optional for the Agora-managed `tts-1` path. |
 | `Voice`          | `string`   | Yes      | Voice name                         |
-| `Model`          | `string`   | No       | Model identifier                   |
+| `Model`          | `string`   | BYOK only | Model identifier                   |
+| `BaseURL`        | `string`   | BYOK only | OpenAI TTS endpoint URL            |
 | `ResponseFormat` | `string`   | No       | Audio format (e.g., `"pcm"`)       |
 | `Speed`          | `*float64` | No       | Speech speed multiplier            |
 | `SkipPatterns`   | `[]int`    | No       | Patterns to skip                   |
