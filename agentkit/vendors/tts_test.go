@@ -93,6 +93,23 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			},
 		},
 		{
+			name: "deepgram",
+			params: NewDeepgramTTS(DeepgramTTSOptions{
+				APIKey:           "deepgram-key",
+				Model:            "aura-2-thalia-en",
+				BaseURL:          "wss://api.deepgram.com/v1/speak",
+				SampleRate:       &sampleRate,
+				AdditionalParams: map[string]interface{}{"encoding": "linear16"},
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"api_key":     "deepgram-key",
+				"model":       "aura-2-thalia-en",
+				"base_url":    "wss://api.deepgram.com/v1/speak",
+				"sample_rate": 24000,
+				"encoding":    "linear16",
+			},
+		},
+		{
 			name: "openai byok",
 			params: NewOpenAITTS(OpenAITTSOptions{
 				APIKey:  "openai-key",

@@ -322,7 +322,7 @@ Panics if `APIKey` or `Model` is empty.
 | `Model`        | `string`                 | Yes      | Deepgram TTS model (e.g., `"aura-2-thalia-en"`) |
 | `BaseURL`      | `string`                 | No       | WebSocket endpoint; defaults server-side to `wss://api.deepgram.com/v1/speak` |
 | `SampleRate`   | `*SampleRate`            | No       | Output sample rate |
-| `Params`       | `map[string]interface{}` | No       | Additional Deepgram TTS parameters |
+| `AdditionalParams` | `map[string]interface{}` | No       | Additional Deepgram TTS parameters, flattened into `params` |
 | `SkipPatterns` | `[]int`                  | No       | Patterns to skip |
 
 ### NewHumeAITTS

@@ -366,12 +366,12 @@ func (a *AmazonTTS) ToConfig() map[string]interface{} {
 }
 
 type DeepgramTTSOptions struct {
-	APIKey       string
-	Model        string
-	BaseURL      string
-	SampleRate   *SampleRate
-	Params       map[string]interface{}
-	SkipPatterns []int
+	APIKey           string
+	Model            string
+	BaseURL          string
+	SampleRate       *SampleRate
+	AdditionalParams map[string]interface{}
+	SkipPatterns     []int
 }
 
 type DeepgramTTS struct {
@@ -397,8 +397,8 @@ func (d *DeepgramTTS) ToConfig() map[string]interface{} {
 		"api_key": d.options.APIKey,
 		"model":   d.options.Model,
 	}
-	for k, v := range d.options.Params {
-		params[k] = v
+	for key, value := range d.options.AdditionalParams {
+		params[key] = value
 	}
 	if d.options.BaseURL != "" {
 		params["base_url"] = d.options.BaseURL
@@ -406,7 +406,6 @@ func (d *DeepgramTTS) ToConfig() map[string]interface{} {
 	if d.options.SampleRate != nil {
 		params["sample_rate"] = int(*d.options.SampleRate)
 	}
-
 	config := map[string]interface{}{
 		"vendor": "deepgram",
 		"params": params,

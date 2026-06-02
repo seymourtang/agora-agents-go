@@ -22,6 +22,7 @@ go get github.com/AgoraIO/agora-agents-go/v2@v2.0.0
 ## Quick Start
 
 Start with the `Agent` builder: create a client with app credentials, choose your ASR, LLM, and TTS providers, then start a session. Omit vendor API keys for supported Agora-managed models, or provide keys when you want BYOK.
+Use `WithInteractionLanguage()` for Agora `asr.language`; provider-specific STT language values remain under `asr.params`.
 
 ```go
 package main
@@ -77,6 +78,7 @@ func startConversation(ctx context.Context) (string, error) {
 
     agent := agentkit.NewAgent(
         agentkit.WithName(fmt.Sprintf("conversation-%d", time.Now().UnixMilli())),
+        agentkit.WithInteractionLanguage("en-US"),
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
             Config: &agentkit.TurnDetectionNestedConfig{
                 SpeechThreshold: float64Ptr(0.5),
@@ -152,7 +154,7 @@ func main() {
 Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed models.
 
 ```go
-agent := agentkit.NewAgent().WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
+agent := agentkit.NewAgent(agentkit.WithInteractionLanguage("en-US")).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
     APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
     Model:    "nova-3",
     Language: "en",
