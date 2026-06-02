@@ -72,7 +72,7 @@ agent := agentkit.NewAgent(...).WithLlm(llm)
 | `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker`, `ModelID` |
 | `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID`, `Backend` |
 | `NewGroqTTS` | `GroqTTSOptions` | `Key` |
-| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed MiniMax models; `Key`, `GroupID`, `Model` for BYOK |
+| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed MiniMax models; `Key`, `GroupID`, `Model`, `VoiceID`, `URL` for BYOK |
 | `NewDeepgramTTS` | `DeepgramTTSOptions` | `APIKey`, `Model` |
 | `NewSarvamTTS` | `SarvamTTSOptions` | `APIKey` |
 

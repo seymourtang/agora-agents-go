@@ -134,14 +134,13 @@ func (m *MicrosoftTTS) ToConfig() map[string]interface{} {
 }
 
 type OpenAITTSOptions struct {
-	APIKey         string
-	Voice          string
-	Model          string
-	BaseURL        string
-	ResponseFormat string
-	Instructions   string
-	Speed          *float64
-	SkipPatterns   []int
+	APIKey       string
+	Voice        string
+	Model        string
+	BaseURL      string
+	Instructions string
+	Speed        *float64
+	SkipPatterns []int
 }
 
 type OpenAITTS struct {
@@ -186,9 +185,6 @@ func (o *OpenAITTS) ToConfig() map[string]interface{} {
 		params["model"] = o.options.Model
 	} else if o.options.Model != "" {
 		params["model"] = o.options.Model
-	}
-	if o.options.ResponseFormat != "" {
-		params["response_format"] = o.options.ResponseFormat
 	}
 	if o.options.Instructions != "" {
 		params["instructions"] = o.options.Instructions

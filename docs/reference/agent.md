@@ -449,13 +449,13 @@ type SessionParams = Agora.StartAgentsRequestPropertiesParameters
 type GeofenceConfig = Agora.StartAgentsRequestPropertiesGeofence
 type RtcConfig = Agora.StartAgentsRequestPropertiesRtc
 type FillerWordsConfig = Agora.StartAgentsRequestPropertiesFillerWords
-type LlmConfig = Agora.StartAgentsRequestPropertiesLlm
-type MllmConfig = Agora.StartAgentsRequestPropertiesMllm
-type AsrConfig = Agora.StartAgentsRequestPropertiesAsr
+type LlmConfig = Agora.Llm
+type MllmConfig = Agora.Mllm
+type AsrConfig = Agora.Asr
 type TtsConfig = Agora.Tts
 type AvatarConfig = Agora.StartAgentsRequestPropertiesAvatar
 type SttConfig = AsrConfig
-type LlmStyle = Agora.StartAgentsRequestPropertiesLlmStyle
+type LlmStyle = Agora.LlmStyle
 type SessionInfo = Agora.GetAgentsResponse
 type ThinkResponse = Agora.AgentThinkAgentManagementResponse
 ```

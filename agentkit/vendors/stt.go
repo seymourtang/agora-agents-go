@@ -2,6 +2,7 @@ package vendors
 
 import (
 	"fmt"
+	"strings"
 
 	Agora "github.com/AgoraIO/agora-agents-go/v2"
 )
@@ -84,6 +85,13 @@ type DeepgramSTT struct {
 }
 
 func NewDeepgramSTT(opts DeepgramSTTOptions) *DeepgramSTT {
+	if opts.APIKey == "" {
+		switch strings.ToLower(strings.TrimSpace(opts.Model)) {
+		case "nova-2", "nova-3":
+		default:
+			panic("DeepgramSTT requires APIKey unless using a supported Agora-managed model")
+		}
+	}
 	return &DeepgramSTT{options: opts}
 }
 

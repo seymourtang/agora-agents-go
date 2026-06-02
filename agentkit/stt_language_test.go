@@ -103,6 +103,15 @@ func TestSTTDefaultInteractionLanguageIsSentWithoutSTT(t *testing.T) {
 
 func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{
+		"model":    "nova-3",
+		"language": "en-US",
+	}, vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "nova-3", Language: "en-US"}).ToConfig()["params"])
+
+	assert.PanicsWithValue(t, "DeepgramSTT requires APIKey unless using a supported Agora-managed model", func() {
+		vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "enhanced"})
+	})
+
+	assert.Equal(t, map[string]interface{}{
 		"key":      "dg-key",
 		"language": "en",
 	}, vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{APIKey: "dg-key", Language: "en"}).ToConfig()["params"])

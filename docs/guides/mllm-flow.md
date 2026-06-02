@@ -101,9 +101,9 @@ agent := agentkit.NewAgent(
 ).WithMllm(
     vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
         APIKey: "<openai_key>",
-        TurnDetection: &Agora.StartAgentsRequestPropertiesMllmTurnDetection{
-            Mode: Agora.StartAgentsRequestPropertiesMllmTurnDetectionModeServerVad.Ptr(),
-            ServerVadConfig: &Agora.StartAgentsRequestPropertiesMllmTurnDetectionServerVadConfig{
+        TurnDetection: &Agora.MllmTurnDetection{
+            Mode: Agora.MllmTurnDetectionModeServerVad.Ptr(),
+            ServerVadConfig: &Agora.MllmTurnDetectionServerVadConfig{
                 IdleTimeoutMs: Agora.Int(5000),
             },
         },

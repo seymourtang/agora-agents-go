@@ -245,7 +245,6 @@ Panics if `Voice` is empty. `APIKey`, `Model`, and `BaseURL` are required togeth
 | `Voice`          | `string`   | Yes      | Voice name                         |
 | `Model`          | `string`   | BYOK only | Model identifier                   |
 | `BaseURL`        | `string`   | BYOK only | OpenAI TTS endpoint URL            |
-| `ResponseFormat` | `string`   | No       | Audio format (e.g., `"pcm"`)       |
 | `Speed`          | `*float64` | No       | Speech speed multiplier            |
 | `SkipPatterns`   | `[]int`    | No       | Patterns to skip                   |
 
@@ -390,7 +389,7 @@ Panics if `Key`, `ReferenceID`, or `Backend` is empty.
 func NewMiniMaxTTS(opts MiniMaxTTSOptions) *MiniMaxTTS
 ```
 
-Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMax models (`speech-2.6-turbo`, `speech_2_6_turbo`, `speech-2.8-turbo`, `speech_2_8_turbo`). BYOK still requires `Key` and `GroupID`, and Agora-managed mode must not set `GroupID`, `VoiceID`, or `URL`.
+Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMax models (`speech-2.6-turbo`, `speech_2_6_turbo`, `speech-2.8-turbo`, `speech_2_8_turbo`). BYOK requires `Key`, `GroupID`, `VoiceID`, and `URL`. In Agora-managed mode, `GroupID`, `VoiceID`, and `URL` are optional overrides.
 
 #### MiniMaxTTSOptions
 
@@ -399,8 +398,8 @@ Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMa
 | `Key`          | `string` | No       | MiniMax API key. Optional for supported Agora-managed MiniMax models. |
 | `GroupID`      | `string` | No       | MiniMax group ID. Required for BYOK.      |
 | `Model`        | `string` | Yes      | Model name (e.g., `speech-02-turbo`)      |
-| `VoiceID`      | `string` | No       | Voice style identifier. BYOK only.        |
-| `URL`          | `string` | No       | WebSocket endpoint. BYOK only.            |
+| `VoiceID`      | `string` | No       | Voice style identifier. Required for BYOK; optional override for Agora-managed mode. |
+| `URL`          | `string` | No       | WebSocket endpoint. Required for BYOK; optional override for Agora-managed mode. |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip                          |
 
 ### NewMurfTTS
@@ -475,13 +474,13 @@ Panics if `APIKey` or `Language` is empty.
 func NewDeepgramSTT(opts DeepgramSTTOptions) *DeepgramSTT
 ```
 
-Does not panic. `APIKey` is optional for Agora-managed Deepgram presets.
+Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed Deepgram models (`nova-2`, `nova-3`).
 
 #### DeepgramSTTOptions
 
 | Field              | Type                     | Required | Description              |
 | ------------------ | ------------------------ | -------- | ------------------------ |
-| `APIKey`           | `string`                 | No       | Deepgram API key         |
+| `APIKey`           | `string`                 | BYOK only | Deepgram API key. Optional only for Agora-managed `nova-2` and `nova-3`. |
 | `Model`            | `string`                 | No       | Model (e.g., `"nova-2"`) |
 | `Language`         | `string`                 | No       | Language code            |
 | `InteractionLanguage` | `string`              | No       | Agora `asr.language` override |
@@ -647,7 +646,7 @@ Panics if `APIKey` is empty.
 | `OutputModalities` | `[]string`                | No       | —                           | Output modalities                                  |
 | `Messages`        | `[]map[string]interface{}` | No       | —                           | Conversation messages for short-term memory        |
 | `Params`          | `map[string]interface{}`   | No       | —                           | Additional realtime params such as `voice`         |
-| `TurnDetection`   | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
+| `TurnDetection`   | `*Agora.MllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ### NewGeminiLive
 
@@ -673,7 +672,7 @@ Panics if `APIKey` or `Model` is empty.
 | `OutputModalities` | `[]string`                 | No       | —       | Output modalities |
 | `Messages`         | `[]map[string]interface{}` | No       | —       | Conversation messages |
 | `AdditionalParams` | `map[string]interface{}`   | No       | —       | Additional Gemini params |
-| `TurnDetection`    | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
+| `TurnDetection`    | `*Agora.MllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ### NewXaiGrok
 
@@ -714,7 +713,7 @@ Deprecated. Use `NewXaiGrok` instead.
 | `OutputModalities` | `[]string` | No | — | Output modalities |
 | `Messages` | `[]map[string]interface{}` | No | — | Conversation messages |
 | `Params` | `map[string]interface{}` | No | — | Additional xAI params |
-| `TurnDetection` | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | `agora_vad` / `server_vad` turn detection |
+| `TurnDetection` | `*Agora.MllmTurnDetection` | No | — | `agora_vad` / `server_vad` turn detection |
 
 ### NewVertexAI
 
@@ -742,7 +741,7 @@ func NewVertexAI(opts VertexAIOptions) *VertexAI
 | `InputModalities` | `[]string`                 | No       | —                        | Input modalities                                |
 | `OutputModalities` | `[]string`                | No       | —                        | Output modalities                               |
 | `AdditionalParams` | `map[string]interface{}`  | No       | —                        | Additional Vertex/Gemini params                 |
-| `TurnDetection`    | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
+| `TurnDetection`    | `*Agora.MllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ---
 
