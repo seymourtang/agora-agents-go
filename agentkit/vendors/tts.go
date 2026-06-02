@@ -713,7 +713,6 @@ type MurfTTSOptions struct {
 	Key          string
 	VoiceID      string
 	BaseURL      string
-	Style        string
 	Locale       string
 	Rate         *float64
 	Pitch        *float64
@@ -744,9 +743,6 @@ func (m *MurfTTS) ToConfig() map[string]interface{} {
 	}
 	if m.options.VoiceID != "" {
 		params["voiceId"] = m.options.VoiceID
-	}
-	if m.options.Style != "" {
-		params["style"] = m.options.Style
 	}
 	if m.options.Locale != "" {
 		params["locale"] = m.options.Locale

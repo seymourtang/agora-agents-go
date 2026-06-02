@@ -1,45 +1,19 @@
 package vendors
 
-var interactionLanguages = map[string]struct{}{
-	"ar-EG":  {},
-	"ar-JO":  {},
-	"ar-SA":  {},
-	"ar-AE":  {},
-	"bn-IN":  {},
-	"zh-CN":  {},
-	"zh-HK":  {},
-	"zh-TW":  {},
-	"nl-NL":  {},
-	"en-IN":  {},
-	"en-US":  {},
-	"fil-PH": {},
-	"fr-FR":  {},
-	"de-DE":  {},
-	"gu-IN":  {},
-	"he-IL":  {},
-	"hi-IN":  {},
-	"id-ID":  {},
-	"it-IT":  {},
-	"ja-JP":  {},
-	"kn-IN":  {},
-	"ko-KR":  {},
-	"ms-MY":  {},
-	"fa-IR":  {},
-	"pt-PT":  {},
-	"ru-RU":  {},
-	"es-ES":  {},
-	"ta-IN":  {},
-	"te-IN":  {},
-	"th-TH":  {},
-	"tr-TR":  {},
-	"vi-VN":  {},
-}
+import (
+	"fmt"
+
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
+)
 
 func interactionLanguage(language string, explicit string) string {
 	if explicit != "" {
+		if _, err := Agora.NewAsrLanguageFromString(explicit); err != nil {
+			panic(fmt.Sprintf("invalid interaction language: %s", explicit))
+		}
 		return explicit
 	}
-	if _, ok := interactionLanguages[language]; ok {
+	if _, err := Agora.NewAsrLanguageFromString(language); err == nil {
 		return language
 	}
 	return ""

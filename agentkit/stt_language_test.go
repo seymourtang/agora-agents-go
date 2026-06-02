@@ -79,6 +79,22 @@ func TestSTTExplicitInteractionLanguageCanDifferFromProviderLanguage(t *testing.
 	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
 }
 
+func TestInvalidExplicitInteractionLanguagePanics(t *testing.T) {
+	assert.PanicsWithValue(t, "invalid interaction language: en", func() {
+		NewAgent(WithInteractionLanguage("en"))
+	})
+	assert.PanicsWithValue(t, "invalid interaction language: xx-YY", func() {
+		baseAgentForSTTLanguage().WithInteractionLanguage("xx-YY")
+	})
+	assert.PanicsWithValue(t, "invalid interaction language: xx-YY", func() {
+		vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
+			APIKey:              "stt-key",
+			Language:            "en",
+			InteractionLanguage: "xx-YY",
+		}).ToConfig()
+	})
+}
+
 func TestSTTDefaultInteractionLanguageIsSentWithoutSTT(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage())
 

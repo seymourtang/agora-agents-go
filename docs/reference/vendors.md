@@ -62,15 +62,15 @@ type Avatar interface {
 func NewOpenAI(opts OpenAIOptions) *OpenAI
 ```
 
-Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed OpenAI models (`gpt-4o-mini`, `gpt-4.1-mini`, `gpt-5-nano`, `gpt-5-mini`) and `BaseURL` / `Vendor` are not set.
+Panics if `Model` is empty. Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed OpenAI models (`gpt-4o-mini`, `gpt-4.1-mini`, `gpt-5-nano`, `gpt-5-mini`) and `BaseURL` / `Vendor` are not set.
 
 #### OpenAIOptions
 
 | Field             | Type                       | Required | Default                                        | Description             |
 | ----------------- | -------------------------- | -------- | ---------------------------------------------- | ----------------------- |
-| `APIKey`          | `string`                   | No       | —                                              | OpenAI API key. Optional for supported Agora-managed OpenAI models. |
-| `Model`           | `string`                   | No       | `"gpt-4o-mini"`                                | Model identifier        |
-| `BaseURL`         | `string`                   | No       | `"https://api.openai.com/v1/chat/completions"` | API endpoint            |
+| `APIKey`          | `string`                   | BYOK only | —                                             | OpenAI API key. Optional for supported Agora-managed OpenAI models. |
+| `Model`           | `string`                   | Yes      | —                                              | Model identifier        |
+| `BaseURL`         | `string`                   | BYOK only | —                                             | API endpoint. Required when `APIKey` is set. |
 | `Temperature`     | `*float64`                 | No       | —                                              | Sampling temperature    |
 | `TopP`            | `*float64`                 | No       | —                                              | Nucleus sampling        |
 | `MaxTokens`       | `*int`                     | No       | —                                              | Max tokens in response  |
@@ -122,14 +122,14 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 func NewAnthropic(opts AnthropicOptions) *Anthropic
 ```
 
-Panics if `APIKey`, `URL`, `Headers`, or `MaxTokens` is empty.
+Panics if `APIKey`, `Model`, `URL`, `Headers`, or `MaxTokens` is empty.
 
 #### AnthropicOptions
 
 | Field             | Type                       | Required | Default                        | Description          |
 | ----------------- | -------------------------- | -------- | ------------------------------ | -------------------- |
 | `APIKey`          | `string`                   | Yes      | —                              | Anthropic API key    |
-| `Model`           | `string`                   | No       | `"claude-3-5-sonnet-20241022"` | Model identifier     |
+| `Model`           | `string`                   | Yes      | —                              | Model identifier     |
 | `URL`             | `string`                   | Yes      | —                              | Anthropic messages endpoint URL |
 | `Headers`         | `map[string]string`        | Yes      | —                              | Request headers, including Anthropic API version |
 | `MaxTokens`       | `*int`                     | Yes      | —                              | Max tokens           |
@@ -151,14 +151,14 @@ Panics if `APIKey`, `URL`, `Headers`, or `MaxTokens` is empty.
 func NewGemini(opts GeminiOptions) *Gemini
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey` or `Model` is empty.
 
 #### GeminiOptions
 
 | Field             | Type                       | Required | Default                  | Description          |
 | ----------------- | -------------------------- | -------- | ------------------------ | -------------------- |
 | `APIKey`          | `string`                   | Yes      | —                        | Google AI API key    |
-| `Model`           | `string`                   | No       | `"gemini-2.0-flash-exp"` | Model identifier     |
+| `Model`           | `string`                   | Yes      | —                        | Model identifier     |
 | `Temperature`     | `*float64`                 | No       | —                        | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                        | Nucleus sampling     |
 | `TopK`            | `*int`                     | No       | —                        | Top-K sampling       |
@@ -179,10 +179,10 @@ The SDK also includes named helpers for the remaining Agora-supported LLM provid
 
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
-| `NewGroq` | `GroqOptions` | `APIKey` |
-| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `ProjectID`, `Location` |
-| `NewAmazonBedrock` | `AmazonBedrockOptions` | `APIKey`, `URL`, `Model` |
-| `NewDify` | `DifyOptions` | `APIKey`, `URL` |
+| `NewGroq` | `GroqOptions` | `APIKey`, `Model`, `BaseURL` |
+| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `Model`, `ProjectID`, `Location` |
+| `NewAmazonBedrock` | `AmazonBedrockOptions` | `AccessKey`, `SecretKey`, `Region`, `Model` |
+| `NewDify` | `DifyOptions` | `APIKey`, `URL`, `Model` |
 | `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` |
 
 ---
@@ -419,7 +419,6 @@ Panics if `Key` is empty.
 | `Key`          | `string` | Yes      | Murf API key                             |
 | `VoiceID`      | `string` | No       | Voice ID (e.g., `Ariana`, `Natalie`)     |
 | `BaseURL`      | `string` | No       | WebSocket endpoint                       |
-| `Style`        | `string` | No       | Voice style (e.g., `Conversational`)     |
 | `Locale`       | `string` | No       | Voice locale                             |
 | `Rate`         | `*float64` | No      | Speech rate                              |
 | `Pitch`        | `*float64` | No      | Pitch adjustment                         |

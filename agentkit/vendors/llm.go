@@ -52,7 +52,7 @@ type OpenAI struct {
 
 func NewOpenAI(opts OpenAIOptions) *OpenAI {
 	if opts.Model == "" {
-		opts.Model = "gpt-4o-mini"
+		panic("OpenAI requires Model")
 	}
 	if opts.APIKey == "" {
 		switch strings.ToLower(strings.TrimSpace(opts.Model)) {
@@ -305,7 +305,7 @@ func NewAnthropic(opts AnthropicOptions) *Anthropic {
 		panic("Anthropic requires Headers")
 	}
 	if opts.Model == "" {
-		opts.Model = "claude-3-5-sonnet-20241022"
+		panic("Anthropic requires Model")
 	}
 	return &Anthropic{options: opts}
 }
@@ -407,7 +407,7 @@ func NewGemini(opts GeminiOptions) *Gemini {
 		panic("Gemini requires APIKey")
 	}
 	if opts.Model == "" {
-		opts.Model = "gemini-2.0-flash-exp"
+		panic("Gemini requires Model")
 	}
 	return &Gemini{options: opts}
 }
@@ -494,7 +494,7 @@ func NewGroq(opts GroqOptions) *Groq {
 		panic("Groq requires APIKey")
 	}
 	if opts.Model == "" {
-		opts.Model = "llama-3.3-70b-versatile"
+		panic("Groq requires Model")
 	}
 	if opts.BaseURL == "" {
 		panic("Groq requires BaseURL")
@@ -555,7 +555,7 @@ func NewVertexAILLM(opts VertexAILLMOptions) *VertexAILLM {
 		panic("VertexAILLM requires Location")
 	}
 	if opts.Model == "" {
-		opts.Model = "gemini-2.0-flash-exp"
+		panic("VertexAILLM requires Model")
 	}
 	return &VertexAILLM{options: opts}
 }

@@ -130,3 +130,58 @@ func TestDifySerializesConversationFields(t *testing.T) {
 		t.Fatalf("unexpected params: %#v", params)
 	}
 }
+
+func TestLLMVendorsRequireModels(t *testing.T) {
+	maxTokens := 1024
+	assertPanic(t, "OpenAI requires Model", func() {
+		NewOpenAI(OpenAIOptions{
+			APIKey:  "openai-key",
+			BaseURL: "https://api.openai.com/v1/chat/completions",
+		})
+	})
+	assertPanic(t, "Anthropic requires Model", func() {
+		NewAnthropic(AnthropicOptions{
+			APIKey:    "anthropic-key",
+			URL:       "https://api.anthropic.com/v1/messages",
+			Headers:   map[string]string{"anthropic-version": "2023-06-01"},
+			MaxTokens: &maxTokens,
+		})
+	})
+	assertPanic(t, "Gemini requires Model", func() {
+		NewGemini(GeminiOptions{APIKey: "google-key"})
+	})
+	assertPanic(t, "Groq requires Model", func() {
+		NewGroq(GroqOptions{
+			APIKey:  "groq-key",
+			BaseURL: "https://api.groq.com/openai/v1/chat/completions",
+		})
+	})
+	assertPanic(t, "VertexAILLM requires Model", func() {
+		NewVertexAILLM(VertexAILLMOptions{
+			GeminiOptions: GeminiOptions{APIKey: "vertex-token"},
+			ProjectID:     "project",
+			Location:      "us-central1",
+		})
+	})
+	assertPanic(t, "AmazonBedrock requires Model", func() {
+		NewAmazonBedrock(AmazonBedrockOptions{
+			AccessKey: "aws-access",
+			SecretKey: "aws-secret",
+			Region:    "us-east-1",
+		})
+	})
+}
+
+func assertPanic(t *testing.T, want string, fn func()) {
+	t.Helper()
+	defer func() {
+		got := recover()
+		if got == nil {
+			t.Fatalf("expected panic %q", want)
+		}
+		if got != want {
+			t.Fatalf("expected panic %q, got %q", want, got)
+		}
+	}()
+	fn()
+}

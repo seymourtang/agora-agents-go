@@ -39,14 +39,14 @@ type Avatar interface {
 
 | Constructor | Options Struct | Required Fields | Default Model |
 |---|---|---|---|
-| `NewOpenAI` | `OpenAIOptions` | `APIKey` for BYOK; none for supported Agora-managed OpenAI models | `gpt-4o-mini` |
+| `NewOpenAI` | `OpenAIOptions` | `Model` for Agora-managed models; `APIKey`, `BaseURL`, `Model` for BYOK | — |
 | `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Endpoint`, `DeploymentName` | — |
-| `NewAnthropic` | `AnthropicOptions` | `APIKey`, `URL`, `Headers`, `MaxTokens` | `claude-3-5-sonnet-20241022` |
-| `NewGemini` | `GeminiOptions` | `APIKey` | `gemini-2.0-flash-exp` |
-| `NewGroq` | `GroqOptions` | `APIKey` | `llama-3.3-70b-versatile` |
-| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `ProjectID`, `Location` | `gemini-2.0-flash-exp` |
-| `NewAmazonBedrock` | `AmazonBedrockOptions` | `APIKey`, `URL`, `Model` | — |
-| `NewDify` | `DifyOptions` | `APIKey`, `URL` | — |
+| `NewAnthropic` | `AnthropicOptions` | `APIKey`, `Model`, `URL`, `Headers`, `MaxTokens` | — |
+| `NewGemini` | `GeminiOptions` | `APIKey`, `Model` | — |
+| `NewGroq` | `GroqOptions` | `APIKey`, `Model`, `BaseURL` | — |
+| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `Model`, `ProjectID`, `Location` | — |
+| `NewAmazonBedrock` | `AmazonBedrockOptions` | `AccessKey`, `SecretKey`, `Region`, `Model` | — |
+| `NewDify` | `DifyOptions` | `APIKey`, `URL`, `Model` | — |
 | `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` | — |
 
 <!-- snippet: fragment -->

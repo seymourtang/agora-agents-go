@@ -12,46 +12,17 @@ import (
 
 type InteractionLanguage string
 
-const DefaultInteractionLanguage InteractionLanguage = "en-US"
-
-var interactionLanguages = map[string]struct{}{
-	"ar-EG":  {},
-	"ar-JO":  {},
-	"ar-SA":  {},
-	"ar-AE":  {},
-	"bn-IN":  {},
-	"zh-CN":  {},
-	"zh-HK":  {},
-	"zh-TW":  {},
-	"nl-NL":  {},
-	"en-IN":  {},
-	"en-US":  {},
-	"fil-PH": {},
-	"fr-FR":  {},
-	"de-DE":  {},
-	"gu-IN":  {},
-	"he-IL":  {},
-	"hi-IN":  {},
-	"id-ID":  {},
-	"it-IT":  {},
-	"ja-JP":  {},
-	"kn-IN":  {},
-	"ko-KR":  {},
-	"ms-MY":  {},
-	"fa-IR":  {},
-	"pt-PT":  {},
-	"ru-RU":  {},
-	"es-ES":  {},
-	"ta-IN":  {},
-	"te-IN":  {},
-	"th-TH":  {},
-	"tr-TR":  {},
-	"vi-VN":  {},
-}
+const DefaultInteractionLanguage InteractionLanguage = InteractionLanguage(Agora.AsrLanguageEnUs)
 
 func isInteractionLanguage(language string) bool {
-	_, ok := interactionLanguages[language]
-	return ok
+	_, err := Agora.NewAsrLanguageFromString(language)
+	return err == nil
+}
+
+func validateInteractionLanguage(language InteractionLanguage) {
+	if !isInteractionLanguage(string(language)) {
+		panic(fmt.Sprintf("invalid interaction language: %s", language))
+	}
 }
 
 func mapToStruct(m map[string]interface{}, target interface{}) error {
@@ -486,6 +457,7 @@ func WithParameters(params *SessionParams) AgentOption {
 
 func WithInteractionLanguage(language InteractionLanguage) AgentOption {
 	return func(a *Agent) {
+		validateInteractionLanguage(language)
 		a.interactionLanguage = language
 	}
 }
@@ -551,6 +523,7 @@ func (a *Agent) WithStt(vendor vendors.STT) *Agent {
 }
 
 func (a *Agent) WithInteractionLanguage(language InteractionLanguage) *Agent {
+	validateInteractionLanguage(language)
 	clone := a.clone()
 	clone.interactionLanguage = language
 	return clone
