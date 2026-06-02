@@ -39,14 +39,14 @@ type Avatar interface {
 
 | Constructor | Options Struct | Required Fields | Default Model |
 |---|---|---|---|
-| `NewOpenAI` | `OpenAIOptions` | `APIKey` for BYOK; none for supported Agora-managed OpenAI models | `gpt-4o-mini` |
-| `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Endpoint`, `DeploymentName` | — |
-| `NewAnthropic` | `AnthropicOptions` | `APIKey` | `claude-3-5-sonnet-20241022` |
-| `NewGemini` | `GeminiOptions` | `APIKey` | `gemini-2.0-flash-exp` |
-| `NewGroq` | `GroqOptions` | `APIKey` | `llama-3.3-70b-versatile` |
-| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `ProjectID`, `Location` | `gemini-2.0-flash-exp` |
-| `NewAmazonBedrock` | `AmazonBedrockOptions` | `APIKey`, `URL`, `Model` | — |
-| `NewDify` | `DifyOptions` | `APIKey`, `URL` | — |
+| `NewOpenAI` | `OpenAIOptions` | `Model` for Agora-managed models; `APIKey`, `BaseURL`, `Model` for BYOK | — |
+| `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Model`, `Endpoint`, `DeploymentName` | — |
+| `NewAnthropic` | `AnthropicOptions` | `APIKey`, `Model`, `URL`, `Headers`, `MaxTokens` | — |
+| `NewGemini` | `GeminiOptions` | `APIKey`, `Model` | — |
+| `NewGroq` | `GroqOptions` | `APIKey`, `Model`, `BaseURL` | — |
+| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `Model`, `ProjectID`, `Location` | — |
+| `NewAmazonBedrock` | `AmazonBedrockOptions` | `AccessKey`, `SecretKey`, `Region`, `Model` | — |
+| `NewDify` | `DifyOptions` | `APIKey`, `URL`, `Model` | — |
 | `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` | — |
 
 <!-- snippet: fragment -->
@@ -62,17 +62,17 @@ agent := agentkit.NewAgent(...).WithLlm(llm)
 
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
-| `NewElevenLabsTTS` | `ElevenLabsTTSOptions` | `Key`, `ModelID`, `VoiceID` |
+| `NewElevenLabsTTS` | `ElevenLabsTTSOptions` | `Key`, `ModelID`, `VoiceID`, `BaseURL` |
 | `NewMicrosoftTTS` | `MicrosoftTTSOptions` | `Key`, `Region`, `VoiceName` |
-| `NewOpenAITTS` | `OpenAITTSOptions` | `Voice` for Agora-managed `tts-1`; `APIKey`, `Voice` for BYOK |
-| `NewCartesiaTTS` | `CartesiaTTSOptions` | `Key`, `VoiceID` |
+| `NewOpenAITTS` | `OpenAITTSOptions` | `Voice` for Agora-managed `tts-1`; `APIKey`, `Model`, `BaseURL`, `Voice` for BYOK |
+| `NewCartesiaTTS` | `CartesiaTTSOptions` | `APIKey`, `VoiceID`, `ModelID` |
 | `NewGoogleTTS` | `GoogleTTSOptions` | `Key`, `VoiceName` |
-| `NewAmazonTTS` | `AmazonTTSOptions` | `AccessKey`, `SecretKey`, `Region`, `VoiceID` |
-| `NewHumeAITTS` | `HumeAITTSOptions` | `Key` |
-| `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker` |
-| `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID` |
+| `NewAmazonTTS` | `AmazonTTSOptions` | `AccessKey`, `SecretKey`, `Region`, `VoiceID`, `Engine` |
+| `NewHumeAITTS` | `HumeAITTSOptions` | `Key`, `VoiceID`, `Provider` |
+| `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker`, `ModelID` |
+| `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID`, `Backend` |
 | `NewGroqTTS` | `GroqTTSOptions` | `Key` |
-| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed MiniMax models; `Key`, `GroupID`, `Model` for BYOK |
+| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed MiniMax models; `Key`, `GroupID`, `Model`, `VoiceID`, `URL` for BYOK |
 | `NewDeepgramTTS` | `DeepgramTTSOptions` | `APIKey`, `Model` |
 | `NewSarvamTTS` | `SarvamTTSOptions` | `APIKey` |
 
@@ -82,6 +82,7 @@ tts := vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
     Key:        "<key>",
     ModelID:    "eleven_turbo_v2_5",
     VoiceID:    "<voice_id>",
+    BaseURL:    "wss://api.elevenlabs.io/v1",
     SampleRate: &vendors.SampleRate24kHz,
 })
 
@@ -104,17 +105,19 @@ Note: `OpenAITTS` always returns `SampleRate24kHz`. Other TTS vendors return the
 
 ## STT Vendors
 
+Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults to `en-US`. STT vendor `Language` fields are serialized under `asr.params` using each provider's own format.
+
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
-| `NewSpeechmaticsSTT` | `SpeechmaticsSTTOptions` | `APIKey` |
+| `NewSpeechmaticsSTT` | `SpeechmaticsSTTOptions` | `APIKey`, `Language` |
 | `NewDeepgramSTT` | `DeepgramSTTOptions` | `APIKey` for BYOK; none for supported Agora-managed Deepgram models |
-| `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region` |
+| `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region`, `Language` |
 | `NewOpenAISTT` | `OpenAISTTOptions` | `APIKey` |
-| `NewGoogleSTT` | `GoogleSTTOptions` | `Key` |
-| `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region` |
-| `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey` |
+| `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString`, `Language` |
+| `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region`, `Language` |
+| `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey`, `Language` |
 | `NewAresSTT` | `AresSTTOptions` | None |
-| `NewSarvamSTT` | `SarvamSTTOptions` | `APIKey` |
+| `NewSarvamSTT` | `SarvamSTTOptions` | `APIKey`, `Language` |
 
 <!-- snippet: fragment -->
 ```go

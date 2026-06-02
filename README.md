@@ -22,6 +22,7 @@ go get github.com/AgoraIO/agora-agents-go/v2@v2.0.0
 ## Quick Start
 
 Start with the `Agent` builder: create a client with app credentials, choose your ASR, LLM, and TTS providers, then start a session. Omit vendor API keys for supported Agora-managed models, or provide keys when you want BYOK.
+Set Agora interaction language with `TurnDetectionConfig.Language`; provider-specific STT language values remain under `asr.params`.
 
 ```go
 package main
@@ -32,6 +33,7 @@ import (
     "os"
     "time"
 
+    Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
     "github.com/AgoraIO/agora-agents-go/v2/option"
@@ -77,11 +79,8 @@ func startConversation(ctx context.Context) (string, error) {
 
     agent := agentkit.NewAgent(
         agentkit.WithName(fmt.Sprintf("conversation-%d", time.Now().UnixMilli())),
-        agentkit.WithInstructions(agentPrompt),
-        agentkit.WithGreeting(greeting),
-        agentkit.WithFailureMessage("Please wait a moment."),
-        agentkit.WithMaxHistory(50),
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+            Language: Agora.AsrLanguageEnUs.Ptr(),
             Config: &agentkit.TurnDetectionNestedConfig{
                 SpeechThreshold: float64Ptr(0.5),
                 StartOfSpeech: &agentkit.StartOfSpeechConfig{
@@ -112,9 +111,10 @@ func startConversation(ctx context.Context) (string, error) {
         Language: "en",
     })).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
         Model:           "gpt-4o-mini",
+        SystemMessages:  []map[string]interface{}{{"role": "system", "content": agentPrompt}},
         GreetingMessage: greeting,
         FailureMessage:  "Please wait a moment.",
-        MaxHistory:      intPtr(15),
+        MaxHistory:      intPtr(50),
         Params: map[string]interface{}{
             "max_tokens": 1024,
             "temperature": 0.7,
@@ -150,24 +150,56 @@ func main() {
 
 `AgoraClient` generates the required ConvoAI REST auth and RTC join tokens automatically when you provide `AppID` and `AppCertificate`. For supported Agora-managed models, leave vendor API keys unset; provide keys when you want BYOK.
 
+## AI Studio pipeline IDs
+
+Use `WithPipelineID` when you want a published AI Studio pipeline to provide the base agent configuration:
+
+```go
+agent := agentkit.NewAgent(
+    agentkit.WithName("support"),
+    agentkit.WithPipelineID("studio-pipeline-id"),
+)
+
+session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    Channel:    "support-room",
+    AgentUID:   "1",
+    RemoteUIDs: []string{"100"},
+})
+```
+
+You can override it per session:
+
+```go
+session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    Channel:    "support-room",
+    AgentUID:   "1",
+    RemoteUIDs: []string{"100"},
+    PipelineID: "session-pipeline-id",
+})
+```
+
+AgentKit sends the resolved value as the top-level `/join` field `pipeline_id`, not inside `properties`. Explicit Agent config such as `WithLlm`, `WithTts`, `WithStt`, `WithMllm`, and advanced features may send `properties` fields that override the saved pipeline settings.
+
 ### BYOK version
 
 Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed models.
 
 ```go
-agent := agentkit.NewAgent(
-    agentkit.WithInstructions(agentPrompt),
-    agentkit.WithGreeting(greeting),
-).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
+agent := agentkit.NewAgent(agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+    Language: Agora.AsrLanguageEnUs.Ptr(),
+})).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
     APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
     Model:    "nova-3",
     Language: "en",
 })).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-    APIKey:      os.Getenv("OPENAI_API_KEY"),
-    Model:       "gpt-4o-mini",
-    MaxTokens:   intPtr(1024),
-    Temperature: float64Ptr(0.7),
-    TopP:        float64Ptr(0.95),
+    APIKey:          os.Getenv("OPENAI_API_KEY"),
+    BaseURL:         "https://api.openai.com/v1/chat/completions",
+    Model:           "gpt-4o-mini",
+    SystemMessages:  []map[string]interface{}{{"role": "system", "content": agentPrompt}},
+    GreetingMessage: greeting,
+    MaxTokens:       intPtr(1024),
+    Temperature:     float64Ptr(0.7),
+    TopP:            float64Ptr(0.95),
 })).WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
     Key:     os.Getenv("MINIMAX_API_KEY"),
     GroupID: os.Getenv("MINIMAX_GROUP_ID"),

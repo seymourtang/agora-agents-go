@@ -35,6 +35,15 @@ func WithName(name string) AgentOption
 
 Sets the agent name identifier.
 
+### WithPipelineID
+
+<!-- snippet: fragment -->
+```go
+func WithPipelineID(pipelineID string) AgentOption
+```
+
+Sets the published AI Studio pipeline ID to use as this agent's base configuration. Explicit Agent config such as `WithLlm`, `WithTts`, `WithStt`, advanced features, and other builder options may send fields in `properties` that override the saved pipeline settings. Session-level `CreateSessionOptions.PipelineID` overrides this value.
+
 ### WithInstructions
 
 <!-- snippet: fragment -->
@@ -42,7 +51,7 @@ Sets the agent name identifier.
 func WithInstructions(instructions string) AgentOption
 ```
 
-Sets the system prompt injected into the LLM configuration.
+Deprecated. Configure `SystemMessages` on the LLM vendor instead.
 
 ### WithGreeting
 
@@ -51,7 +60,7 @@ Sets the system prompt injected into the LLM configuration.
 func WithGreeting(greeting string) AgentOption
 ```
 
-Sets the greeting message the agent speaks first.
+Deprecated. Configure `GreetingMessage` on the LLM or MLLM vendor instead.
 
 ### WithFailureMessage
 
@@ -60,7 +69,7 @@ Sets the greeting message the agent speaks first.
 func WithFailureMessage(msg string) AgentOption
 ```
 
-Sets the fallback message spoken when the LLM fails.
+Deprecated. Configure `FailureMessage` on the LLM or MLLM vendor instead.
 
 ### WithMaxHistory
 
@@ -69,7 +78,7 @@ Sets the fallback message spoken when the LLM fails.
 func WithMaxHistory(n int) AgentOption
 ```
 
-Sets the maximum number of conversation turns to retain.
+Deprecated. Configure `MaxHistory` on the LLM vendor instead.
 
 ### WithTurnDetectionConfig
 
@@ -78,7 +87,7 @@ Sets the maximum number of conversation turns to retain.
 func WithTurnDetectionConfig(td *TurnDetectionConfig) AgentOption
 ```
 
-Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection. Use interruption config for interruption behavior and MLLM vendor `TurnDetection` for MLLM turn detection.
+Sets cascading-flow turn detection configuration. Use `Language` for the Agora interaction language, `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection, interruption config for interruption behavior, and MLLM vendor `TurnDetection` for MLLM turn detection.
 
 ### WithInterruptionConfig
 
@@ -96,7 +105,7 @@ Sets unified interruption control using the top-level `interruption` object. Use
 func WithGreetingConfigs(configs *LlmGreetingConfigs) AgentOption
 ```
 
-Sets `llm.greeting_configs`, including v2.7 `interruptable`.
+Deprecated. Configure `GreetingConfigs` on the LLM vendor instead.
 
 ### WithSalConfig
 
@@ -183,6 +192,8 @@ Sets filler words configuration (played while waiting for LLM response).
 
 All vendor-chaining methods return a **new** `*Agent` (immutable clone). The original agent is not modified.
 
+Accessor methods include `Name()`, `PipelineID()`, vendor config getters, and getters for optional advanced configuration.
+
 ### WithLlm
 
 <!-- snippet: fragment -->
@@ -229,7 +240,7 @@ func (a *Agent) WithAvatar(vendor vendors.Avatar) *Agent
 func (a *Agent) WithTurnDetection(td *TurnDetectionConfig) *Agent
 ```
 
-Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection. Use interruption config for interruption behavior and MLLM vendor `TurnDetection` for MLLM turn detection.
+Sets cascading-flow turn detection configuration. Use `Language` for the Agora interaction language, `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection, interruption config for interruption behavior, and MLLM vendor `TurnDetection` for MLLM turn detection.
 
 Example with `pause_state_enabled`:
 
@@ -260,12 +271,16 @@ agent := agentkit.NewAgent(
 func (a *Agent) WithInstructions(instructions string) *Agent
 ```
 
+Deprecated. Configure `SystemMessages` on the LLM vendor instead.
+
 ### WithGreeting (method)
 
 <!-- snippet: fragment -->
 ```go
 func (a *Agent) WithGreeting(greeting string) *Agent
 ```
+
+Deprecated. Configure `GreetingMessage` on the LLM or MLLM vendor instead.
 
 ### WithName (method)
 
@@ -320,12 +335,16 @@ func (a *Agent) WithParameters(params *SessionParams) *Agent
 func (a *Agent) WithFailureMessage(msg string) *Agent
 ```
 
+Deprecated. Configure `FailureMessage` on the LLM or MLLM vendor instead.
+
 ### WithMaxHistory (method)
 
 <!-- snippet: fragment -->
 ```go
 func (a *Agent) WithMaxHistory(n int) *Agent
 ```
+
+Deprecated. Configure `MaxHistory` on the LLM vendor instead.
 
 ### WithGeofence (method)
 
@@ -441,13 +460,13 @@ type SessionParams = Agora.StartAgentsRequestPropertiesParameters
 type GeofenceConfig = Agora.StartAgentsRequestPropertiesGeofence
 type RtcConfig = Agora.StartAgentsRequestPropertiesRtc
 type FillerWordsConfig = Agora.StartAgentsRequestPropertiesFillerWords
-type LlmConfig = Agora.StartAgentsRequestPropertiesLlm
-type MllmConfig = Agora.StartAgentsRequestPropertiesMllm
-type AsrConfig = Agora.StartAgentsRequestPropertiesAsr
+type LlmConfig = Agora.Llm
+type MllmConfig = Agora.Mllm
+type AsrConfig = Agora.Asr
 type TtsConfig = Agora.Tts
 type AvatarConfig = Agora.StartAgentsRequestPropertiesAvatar
 type SttConfig = AsrConfig
-type LlmStyle = Agora.StartAgentsRequestPropertiesLlmStyle
+type LlmStyle = Agora.LlmStyle
 type SessionInfo = Agora.GetAgentsResponse
 type ThinkResponse = Agora.AgentThinkAgentManagementResponse
 ```

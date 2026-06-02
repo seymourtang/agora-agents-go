@@ -18,6 +18,7 @@ import (
     "fmt"
     "log"
 
+    Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
     "github.com/AgoraIO/agora-agents-go/v2/option"
@@ -32,19 +33,23 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("openai-assistant"),
-        agentkit.WithInstructions("You are a helpful voice assistant. Keep responses under 3 sentences."),
-        agentkit.WithGreeting("Hi there! What can I help you with?"),
-        agentkit.WithMaxHistory(20),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
-            APIKey: "<openai_key>",
-            Model:  "gpt-4o-mini",
+            APIKey:  "<openai_key>",
+            BaseURL: "https://api.openai.com/v1/chat/completions",
+            Model:   "gpt-4o-mini",
+            SystemMessages: []map[string]interface{}{
+                {"role": "system", "content": "You are a helpful voice assistant. Keep responses under 3 sentences."},
+            },
+            GreetingMessage: "Hi there! What can I help you with?",
+            MaxHistory:      Agora.Int(20),
         }),
     ).WithTts(
         vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
             Key:     "<elevenlabs_key>",
-            ModelID: "eleven_turbo_v2_5",
-            VoiceID: "<voice_id>",
+            ModelID:    "eleven_turbo_v2_5",
+            VoiceID:    "<voice_id>",
+            BaseURL:    "wss://api.elevenlabs.io/v1",
         }),
     ).WithStt(
         vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
@@ -87,6 +92,7 @@ import (
     "fmt"
     "log"
 
+    Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
     "github.com/AgoraIO/agora-agents-go/v2/option"
@@ -101,13 +107,18 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("claude-assistant"),
-        agentkit.WithInstructions("You are a customer service agent for Acme Corp."),
-        agentkit.WithGreeting("Welcome to Acme Corp! How may I assist you?"),
-        agentkit.WithFailureMessage("I apologize for the inconvenience. Please try again shortly."),
     ).WithLlm(
         vendors.NewAnthropic(vendors.AnthropicOptions{
-            APIKey: "<anthropic_key>",
-            Model:  "claude-3-5-sonnet-20241022",
+            APIKey:    "<anthropic_key>",
+            URL:       "https://api.anthropic.com/v1/messages",
+            Headers:   map[string]string{"anthropic-version": "2023-06-01"},
+            Model:     "claude-3-5-sonnet-20241022",
+            MaxTokens: Agora.Int(1024),
+            SystemMessages: []map[string]interface{}{
+                {"role": "system", "content": "You are a customer service agent for Acme Corp."},
+            },
+            GreetingMessage: "Welcome to Acme Corp! How may I assist you?",
+            FailureMessage:  "I apologize for the inconvenience. Please try again shortly.",
         }),
     ).WithTts(
         vendors.NewMicrosoftTTS(vendors.MicrosoftTTSOptions{

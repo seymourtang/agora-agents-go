@@ -10,6 +10,21 @@ import (
 	"github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
 )
 
+type turnDetectionLanguage string
+
+const defaultTurnDetectionLanguage turnDetectionLanguage = turnDetectionLanguage(Agora.AsrLanguageEnUs)
+
+func isTurnDetectionLanguage(language string) bool {
+	_, err := Agora.NewAsrLanguageFromString(language)
+	return err == nil
+}
+
+func validateTurnDetectionLanguage(language string) {
+	if !isTurnDetectionLanguage(string(language)) {
+		panic(fmt.Sprintf("invalid interaction language: %s", language))
+	}
+}
+
 func mapToStruct(m map[string]interface{}, target interface{}) error {
 	data, err := json.Marshal(m)
 	if err != nil {
@@ -170,13 +185,13 @@ type Eagerness = Agora.StartAgentsRequestPropertiesTurnDetectionEagerness
 
 // LlmGreetingConfigs configures how greeting messages are broadcast when multiple
 // remote users are in the channel (llm.greeting_configs).
-type LlmGreetingConfigs = Agora.StartAgentsRequestPropertiesLlmGreetingConfigs
+type LlmGreetingConfigs = map[string]interface{}
 
 // LlmGreetingConfigsMode is the greeting broadcast mode: "single_every" | "single_first".
-type LlmGreetingConfigsMode = Agora.StartAgentsRequestPropertiesLlmGreetingConfigsMode
+type LlmGreetingConfigsMode = string
 
 // McpServersItem is a single MCP server config entry (llm.mcp_servers[]).
-type McpServersItem = Agora.StartAgentsRequestPropertiesLlmMcpServersItem
+type McpServersItem = map[string]interface{}
 
 // =============================================================================
 // Parameters (SessionParams) sub-type aliases
@@ -218,31 +233,31 @@ type GeofenceExcludeArea = Agora.StartAgentsRequestPropertiesGeofenceExcludeArea
 // =============================================================================
 
 // LlmConfig is the concrete LLM configuration payload (start_agents_request_properties.llm).
-type LlmConfig = Agora.StartAgentsRequestPropertiesLlm
+type LlmConfig = Agora.Llm
 
 // MllmConfig is the concrete MLLM configuration payload (start_agents_request_properties.mllm).
-type MllmConfig = Agora.StartAgentsRequestPropertiesMllm
+type MllmConfig = Agora.Mllm
 
 // MllmTurnDetectionConfig configures MLLM turn detection (`mllm.turn_detection`).
-type MllmTurnDetectionConfig = Agora.StartAgentsRequestPropertiesMllmTurnDetection
+type MllmTurnDetectionConfig = Agora.MllmTurnDetection
 
 // MllmTurnDetectionMode controls MLLM turn detection mode.
-type MllmTurnDetectionMode = Agora.StartAgentsRequestPropertiesMllmTurnDetectionMode
+type MllmTurnDetectionMode = Agora.MllmTurnDetectionMode
 
 // AsrConfig is the concrete ASR/STT configuration payload (start_agents_request_properties.asr).
-type AsrConfig = Agora.StartAgentsRequestPropertiesAsr
+type AsrConfig = Agora.Asr
 
 // SttConfig is an alias for AsrConfig (wire field remains `asr`).
 type SttConfig = AsrConfig
 
 // LlmStyle is the LLM request style (openai, gemini, anthropic, dify).
-type LlmStyle = Agora.StartAgentsRequestPropertiesLlmStyle
+type LlmStyle = Agora.LlmStyle
 
 // SttVendor is the ASR/STT vendor identifier.
-type SttVendor = Agora.StartAgentsRequestPropertiesAsrVendor
+type SttVendor = string
 
 // MllmVendor is the MLLM vendor identifier.
-type MllmVendor = Agora.StartAgentsRequestPropertiesMllmVendor
+type MllmVendor = Agora.MllmVendor
 
 // AvatarVendor is the avatar vendor identifier.
 type AvatarVendor = Agora.StartAgentsRequestPropertiesAvatarVendor
@@ -325,6 +340,7 @@ type FillerWordsContentSelectionRule = Agora.StartAgentsRequestPropertiesFillerW
 
 type Agent struct {
 	name                     string
+	pipelineID               string
 	instructions             string
 	greeting                 string
 	failureMessage           string
@@ -365,24 +381,38 @@ func WithName(name string) AgentOption {
 	}
 }
 
+// WithPipelineID sets the published AI Studio pipeline ID to use as this agent's
+// base configuration. Explicit Agent config such as WithLlm, WithTts, WithStt,
+// advanced features, and other builder options may send fields in properties
+// that override the saved pipeline settings.
+func WithPipelineID(pipelineID string) AgentOption {
+	return func(a *Agent) {
+		a.pipelineID = pipelineID
+	}
+}
+
+// Deprecated: Configure system messages on the LLM vendor instead.
 func WithInstructions(instructions string) AgentOption {
 	return func(a *Agent) {
 		a.instructions = instructions
 	}
 }
 
+// Deprecated: Configure the greeting on the LLM or MLLM vendor instead.
 func WithGreeting(greeting string) AgentOption {
 	return func(a *Agent) {
 		a.greeting = greeting
 	}
 }
 
+// Deprecated: Configure the failure message on the LLM or MLLM vendor instead.
 func WithFailureMessage(msg string) AgentOption {
 	return func(a *Agent) {
 		a.failureMessage = msg
 	}
 }
 
+// Deprecated: Configure max history on the LLM vendor instead.
 func WithMaxHistory(n int) AgentOption {
 	return func(a *Agent) {
 		a.maxHistory = &n
@@ -401,6 +431,7 @@ func WithInterruptionConfig(interruption *InterruptionConfig) AgentOption {
 	}
 }
 
+// Deprecated: Configure greeting playback on the LLM vendor instead.
 func WithGreetingConfigs(configs *LlmGreetingConfigs) AgentOption {
 	return func(a *Agent) {
 		a.greetingConfigs = configs
@@ -544,18 +575,21 @@ func (a *Agent) WithInterruption(interruption *InterruptionConfig) *Agent {
 	return clone
 }
 
+// Deprecated: Configure greeting playback on the LLM vendor instead.
 func (a *Agent) WithGreetingConfigs(configs *LlmGreetingConfigs) *Agent {
 	clone := a.clone()
 	clone.greetingConfigs = configs
 	return clone
 }
 
+// Deprecated: Configure system messages on the LLM vendor instead.
 func (a *Agent) WithInstructions(instructions string) *Agent {
 	clone := a.clone()
 	clone.instructions = instructions
 	return clone
 }
 
+// Deprecated: Configure the greeting on the LLM or MLLM vendor instead.
 func (a *Agent) WithGreeting(greeting string) *Agent {
 	clone := a.clone()
 	clone.greeting = greeting
@@ -604,12 +638,14 @@ func (a *Agent) WithAudioScenario(audioScenario ParametersAudioScenario) *Agent 
 	return clone
 }
 
+// Deprecated: Configure the failure message on the LLM or MLLM vendor instead.
 func (a *Agent) WithFailureMessage(msg string) *Agent {
 	clone := a.clone()
 	clone.failureMessage = msg
 	return clone
 }
 
+// Deprecated: Configure max history on the LLM vendor instead.
 func (a *Agent) WithMaxHistory(n int) *Agent {
 	clone := a.clone()
 	clone.maxHistory = &n
@@ -641,6 +677,7 @@ func (a *Agent) WithFillerWords(fw *FillerWordsConfig) *Agent {
 }
 
 func (a *Agent) Name() string                      { return a.name }
+func (a *Agent) PipelineID() string                { return a.pipelineID }
 func (a *Agent) Instructions() string              { return a.instructions }
 func (a *Agent) Greeting() string                  { return a.greeting }
 func (a *Agent) LlmConfig() map[string]interface{} { return a.llm }
@@ -780,11 +817,6 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	if a.mllm != nil {
 		propsMap["mllm"] = a.buildMllmConfigMap()
 	}
-	if a.turnDetection != nil {
-		if err := setStructMap(propsMap, "turn_detection", a.turnDetection); err != nil {
-			return nil, err
-		}
-	}
 	if a.interruption != nil {
 		if err := setStructMap(propsMap, "interruption", a.interruption); err != nil {
 			return nil, err
@@ -851,8 +883,20 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	}
 
 	if a.mllm != nil {
+		if a.turnDetection != nil {
+			if err := setStructMap(propsMap, "turn_detection", a.turnDetection); err != nil {
+				return nil, err
+			}
+		}
 		return propsMap, nil
 	}
+
+	propsMap["asr"] = a.resolveAsrConfig()
+	turnDetection, err := a.resolveTurnDetectionConfig()
+	if err != nil {
+		return nil, err
+	}
+	propsMap["turn_detection"] = turnDetection
 
 	if !opts.SkipVendorValidation {
 		if a.tts == nil {
@@ -869,11 +913,46 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	if a.tts != nil {
 		propsMap["tts"] = cloneConfig(a.tts)
 	}
-	if a.stt != nil {
-		propsMap["asr"] = cloneConfig(a.stt)
-	}
 
 	return propsMap, nil
+}
+
+func (a *Agent) resolveAsrConfig() map[string]interface{} {
+	asrConfig := cloneConfig(a.stt)
+	if asrConfig == nil {
+		asrConfig = map[string]interface{}{"vendor": "ares"}
+	}
+	delete(asrConfig, "language")
+	if len(asrConfig) == 0 {
+		asrConfig["vendor"] = "ares"
+	}
+	return asrConfig
+}
+
+func (a *Agent) resolveTurnDetectionConfig() (map[string]interface{}, error) {
+	turnDetection := map[string]interface{}{}
+	if a.turnDetection != nil {
+		var err error
+		turnDetection, err = structToMap(a.turnDetection)
+		if err != nil {
+			return nil, fmt.Errorf("failed to serialize turn detection config: %w", err)
+		}
+	}
+
+	language := ""
+	if existing, ok := turnDetection["language"].(string); ok && existing != "" {
+		language = existing
+	}
+	if language == "" {
+		if existing, ok := a.stt["language"].(string); ok && isTurnDetectionLanguage(existing) {
+			language = existing
+		} else {
+			language = string(defaultTurnDetectionLanguage)
+		}
+	}
+	validateTurnDetectionLanguage(language)
+	turnDetection["language"] = language
+	return turnDetection, nil
 }
 
 func (a *Agent) buildMllmConfigMap() map[string]interface{} {

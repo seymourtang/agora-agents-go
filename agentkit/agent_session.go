@@ -254,6 +254,11 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 	s.status = StatusStarting
 	s.mu.Unlock()
 
+	pipelineID := s.pipelineID
+	if pipelineID == "" {
+		pipelineID = s.agent.PipelineID()
+	}
+
 	propOpts := ToPropertiesOptions{
 		Channel:              s.channel,
 		AgentUID:             s.agentUID,
@@ -264,7 +269,7 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		ExpiresIn:            s.expiresIn,
 		IdleTimeout:          s.idleTimeout,
 		EnableStringUID:      s.enableStringUID,
-		SkipVendorValidation: len(s.preset) > 0 || s.pipelineID != "",
+		SkipVendorValidation: len(s.preset) > 0 || pipelineID != "",
 		Warn:                 s.warnf,
 	}
 
@@ -301,8 +306,8 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		if resolvedPreset != "" {
 			debugPayload["preset"] = resolvedPreset
 		}
-		if s.pipelineID != "" {
-			debugPayload["pipeline_id"] = s.pipelineID
+		if pipelineID != "" {
+			debugPayload["pipeline_id"] = pipelineID
 		}
 		if payload, err := json.Marshal(debugPayload); err == nil {
 			log.Printf("[Agora Debug] Starting agent session: %s", payload)
@@ -319,7 +324,7 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		s.emit("error", err)
 		return "", err
 	}
-	resp, err := startAgentsWithMapBody(ctx, s.client, s.appID, s.name, resolvedPreset, s.pipelineID, resolvedProperties, reqOpts...)
+	resp, err := startAgentsWithMapBody(ctx, s.client, s.appID, s.name, resolvedPreset, pipelineID, resolvedProperties, reqOpts...)
 	if err != nil {
 		s.mu.Lock()
 		s.status = StatusError

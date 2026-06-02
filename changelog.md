@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [v2.1.0] — 2026-06-02
+
+### Added
+
+- **Turn detection language** — AgentKit now manages Agora interaction language through `TurnDetectionConfig.Language`, validates it against the supported BCP-47 language list, and sends the default `en-US` when no language is provided.
+- **Provider parameter parity** — ASR, LLM, MLLM, TTS, and avatar wrappers expose typed provider parameters plus passthrough fields where the generated core supports additional properties.
+
+### Changed
+
+- **Generated core refresh** — Regenerated core types from the v2.1 API schema.
+- **Deepgram TTS passthrough** — `NewDeepgramTTS` now uses `AdditionalParams` for passthrough fields and flattens them into `tts.params`; the removed nested `params.params` shape is no longer documented or emitted.
+- **OpenAI TTS** — Docs and tests now reflect the generated core shape, including `Instructions` and `Speed` under `tts.params`.
+- **TTS provider docs** — Updated TTS provider reference tables to match implemented wrapper fields and generated core params.
+
+### Fixed
+
+- **Managed-provider validation** — AgentKit validation now distinguishes preset-backed providers from BYOK providers so required provider fields are only required when credentials are caller-supplied.
+- **Language placement** — Provider-specific STT language values remain under `asr.params`, while Agora interaction language is emitted separately as `turn_detection.language`.
+- **Deepgram TTS explicit fields** — `AdditionalParams` can no longer override explicit `APIKey`, `Model`, `BaseURL`, or `SampleRate` values.
+
 ## [v2.0.0] — 2026-05-21
 
 AgentKit alignment for Conversational AI v2.7.
@@ -52,7 +72,7 @@ AgentKit alignment for Conversational AI v2.7.
 
 ### Added
 
-- **`NewDeepgramTTS`** — New TTS vendor wrapper for Deepgram (Beta). Accepts `APIKey`, `Model`, `BaseURL`, `SampleRate`, `Params`, and `SkipPatterns`.
+- **`NewDeepgramTTS`** — New TTS vendor wrapper for Deepgram (Beta). Accepts `APIKey`, `Model`, `BaseURL`, `SampleRate`, `AdditionalParams`, and `SkipPatterns`.
 - **`Agent.WithTools(enabled bool)` / `WithTools` option** — Dedicated builder method and constructor option to enable MCP tool invocation (`advanced_features.enable_tools`). Replaces the raw `WithAdvancedFeatures(&AdvancedFeatures{EnableTools: Agora.Bool(true)})` call.
 - **LLM vendors: `Headers` field** — All four LLM vendors (`OpenAI`, `AzureOpenAI`, `Anthropic`, `Gemini`) now accept an optional `Headers map[string]string` field. Use this to pass custom HTTP headers to the LLM provider (e.g., tenant identifiers, routing headers).
 - **`AgentSession.Think()` / `ThinkWithOptions()`** — Send a custom instruction to a running agent through the agent management API.
@@ -123,7 +143,7 @@ AgentKit alignment for Conversational AI v2.7.
 
 ### Added
 
-- **`OpenAITTS`** — New optional fields: `ResponseFormat` (string) and `Speed` (float64).
+- **`OpenAITTS`** — New optional fields: `Instructions` (string) and `Speed` (float64).
 - **`CartesiaTTS`** — `VoiceID` user-facing field is preserved; serialized to the required nested object format automatically.
 - **`RimeTTS`** — New optional fields: `Lang` (string), `SamplingRate` (int), `SpeedAlpha` (float64).
 - **`OpenAIRealtime`** — New optional fields: `PredefinedTools` ([]string), `FailureMessage` (string), `MaxHistory` (int).

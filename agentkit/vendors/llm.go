@@ -52,7 +52,7 @@ type OpenAI struct {
 
 func NewOpenAI(opts OpenAIOptions) *OpenAI {
 	if opts.Model == "" {
-		opts.Model = "gpt-4o-mini"
+		panic("OpenAI requires Model")
 	}
 	if opts.APIKey == "" {
 		switch strings.ToLower(strings.TrimSpace(opts.Model)) {
@@ -66,6 +66,9 @@ func NewOpenAI(opts OpenAIOptions) *OpenAI {
 		default:
 			panic("OpenAI requires APIKey unless using a supported Agora-managed model")
 		}
+	}
+	if opts.APIKey != "" && opts.BaseURL == "" {
+		panic("OpenAI requires BaseURL when APIKey is set")
 	}
 	return &OpenAI{options: opts}
 }
@@ -181,6 +184,9 @@ func NewAzureOpenAI(opts AzureOpenAIOptions) *AzureOpenAI {
 	if opts.DeploymentName == "" {
 		panic("AzureOpenAI requires DeploymentName")
 	}
+	if opts.Model == "" {
+		panic("AzureOpenAI requires Model")
+	}
 	if opts.APIVersion == "" {
 		opts.APIVersion = "2024-08-01-preview"
 	}
@@ -289,8 +295,17 @@ func NewAnthropic(opts AnthropicOptions) *Anthropic {
 	if opts.APIKey == "" {
 		panic("Anthropic requires APIKey")
 	}
+	if opts.MaxTokens == nil {
+		panic("Anthropic requires MaxTokens")
+	}
+	if opts.URL == "" {
+		panic("Anthropic requires URL")
+	}
+	if opts.Headers == nil {
+		panic("Anthropic requires Headers")
+	}
 	if opts.Model == "" {
-		opts.Model = "claude-3-5-sonnet-20241022"
+		panic("Anthropic requires Model")
 	}
 	return &Anthropic{options: opts}
 }
@@ -325,15 +340,13 @@ func (a *Anthropic) ToConfig() map[string]interface{} {
 		"url":              url,
 		"api_key":          a.options.APIKey,
 		"params":           params,
+		"headers":          a.options.Headers,
 		"style":            "anthropic",
 		"input_modalities": inputMod,
 	}
 
 	if a.options.SystemMessages != nil {
 		config["system_messages"] = a.options.SystemMessages
-	}
-	if a.options.Headers != nil {
-		config["headers"] = a.options.Headers
 	}
 	if a.options.GreetingMessage != "" {
 		config["greeting_message"] = a.options.GreetingMessage
@@ -394,7 +407,7 @@ func NewGemini(opts GeminiOptions) *Gemini {
 		panic("Gemini requires APIKey")
 	}
 	if opts.Model == "" {
-		opts.Model = "gemini-2.0-flash-exp"
+		panic("Gemini requires Model")
 	}
 	return &Gemini{options: opts}
 }
@@ -481,16 +494,16 @@ func NewGroq(opts GroqOptions) *Groq {
 		panic("Groq requires APIKey")
 	}
 	if opts.Model == "" {
-		opts.Model = "llama-3.3-70b-versatile"
+		panic("Groq requires Model")
+	}
+	if opts.BaseURL == "" {
+		panic("Groq requires BaseURL")
 	}
 	return &Groq{options: opts}
 }
 
 func (g *Groq) ToConfig() map[string]interface{} {
 	opts := g.options
-	if opts.BaseURL == "" {
-		opts.BaseURL = "https://api.groq.com/openai/v1/chat/completions"
-	}
 	return (&OpenAI{options: opts}).ToConfig()
 }
 
@@ -542,7 +555,7 @@ func NewVertexAILLM(opts VertexAILLMOptions) *VertexAILLM {
 		panic("VertexAILLM requires Location")
 	}
 	if opts.Model == "" {
-		opts.Model = "gemini-2.0-flash-exp"
+		panic("VertexAILLM requires Model")
 	}
 	return &VertexAILLM{options: opts}
 }
@@ -563,18 +576,42 @@ func (v *VertexAILLM) ToConfig() map[string]interface{} {
 	return config
 }
 
-type AmazonBedrockOptions = AnthropicOptions
+type AmazonBedrockOptions struct {
+	AccessKey         string
+	SecretKey         string
+	Region            string
+	Model             string
+	MaxHistory        *int
+	MaxTokens         *int
+	Temperature       *float64
+	TopP              *float64
+	TopK              *int
+	SystemMessages    []map[string]interface{}
+	GreetingMessage   string
+	FailureMessage    string
+	InputModalities   []string
+	Params            map[string]interface{}
+	Headers           map[string]string
+	OutputModalities  []string
+	GreetingConfigs   map[string]interface{}
+	TemplateVariables map[string]string
+	Vendor            string
+	McpServers        []map[string]interface{}
+}
 
 type AmazonBedrock struct {
 	options AmazonBedrockOptions
 }
 
 func NewAmazonBedrock(opts AmazonBedrockOptions) *AmazonBedrock {
-	if opts.APIKey == "" {
-		panic("AmazonBedrock requires APIKey")
+	if opts.AccessKey == "" {
+		panic("AmazonBedrock requires AccessKey")
 	}
-	if opts.URL == "" {
-		panic("AmazonBedrock requires URL")
+	if opts.SecretKey == "" {
+		panic("AmazonBedrock requires SecretKey")
+	}
+	if opts.Region == "" {
+		panic("AmazonBedrock requires Region")
 	}
 	if opts.Model == "" {
 		panic("AmazonBedrock requires Model")
@@ -583,12 +620,73 @@ func NewAmazonBedrock(opts AmazonBedrockOptions) *AmazonBedrock {
 }
 
 func (a *AmazonBedrock) ToConfig() map[string]interface{} {
-	return (&Anthropic{options: a.options}).ToConfig()
+	params := map[string]interface{}{}
+	for k, v := range a.options.Params {
+		params[k] = v
+	}
+	if a.options.MaxTokens != nil {
+		params["max_tokens"] = *a.options.MaxTokens
+	}
+	if a.options.Temperature != nil {
+		params["temperature"] = *a.options.Temperature
+	}
+	if a.options.TopP != nil {
+		params["top_p"] = *a.options.TopP
+	}
+	if a.options.TopK != nil {
+		params["top_k"] = *a.options.TopK
+	}
+
+	config := map[string]interface{}{
+		"url":              fmt.Sprintf("https://bedrock-runtime.%s.amazonaws.com/model/%s/converse-stream", a.options.Region, a.options.Model),
+		"access_key":       a.options.AccessKey,
+		"secret_key":       a.options.SecretKey,
+		"region":           a.options.Region,
+		"model":            a.options.Model,
+		"params":           params,
+		"style":            "bedrock",
+		"input_modalities": []string{"text"},
+	}
+	if a.options.InputModalities != nil {
+		config["input_modalities"] = a.options.InputModalities
+	}
+	if a.options.OutputModalities != nil {
+		config["output_modalities"] = a.options.OutputModalities
+	}
+	if a.options.Headers != nil {
+		config["headers"] = a.options.Headers
+	}
+	if a.options.MaxHistory != nil {
+		config["max_history"] = *a.options.MaxHistory
+	}
+	if a.options.SystemMessages != nil {
+		config["system_messages"] = a.options.SystemMessages
+	}
+	if a.options.GreetingMessage != "" {
+		config["greeting_message"] = a.options.GreetingMessage
+	}
+	if a.options.FailureMessage != "" {
+		config["failure_message"] = a.options.FailureMessage
+	}
+	if a.options.GreetingConfigs != nil {
+		config["greeting_configs"] = a.options.GreetingConfigs
+	}
+	if a.options.TemplateVariables != nil {
+		config["template_variables"] = a.options.TemplateVariables
+	}
+	if a.options.Vendor != "" {
+		config["vendor"] = a.options.Vendor
+	}
+	if a.options.McpServers != nil {
+		config["mcp_servers"] = ensureMcpTransport(a.options.McpServers)
+	}
+	return config
 }
 
 type DifyOptions struct {
 	APIKey            string
 	URL               string
+	Model             string
 	User              string
 	ConversationID    string
 	MaxHistory        *int
@@ -616,6 +714,9 @@ func NewDify(opts DifyOptions) *Dify {
 	if opts.URL == "" {
 		panic("Dify requires URL")
 	}
+	if opts.Model == "" {
+		panic("Dify requires Model")
+	}
 	return &Dify{options: opts}
 }
 
@@ -624,7 +725,7 @@ func (d *Dify) ToConfig() map[string]interface{} {
 	if inputMod == nil {
 		inputMod = []string{"text"}
 	}
-	params := map[string]interface{}{}
+	params := map[string]interface{}{"model": d.options.Model}
 	for k, v := range d.options.Params {
 		params[k] = v
 	}

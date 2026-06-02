@@ -62,15 +62,15 @@ type Avatar interface {
 func NewOpenAI(opts OpenAIOptions) *OpenAI
 ```
 
-Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed OpenAI models (`gpt-4o-mini`, `gpt-4.1-mini`, `gpt-5-nano`, `gpt-5-mini`) and `BaseURL` / `Vendor` are not set.
+Panics if `Model` is empty. Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed OpenAI models (`gpt-4o-mini`, `gpt-4.1-mini`, `gpt-5-nano`, `gpt-5-mini`) and `BaseURL` / `Vendor` are not set.
 
 #### OpenAIOptions
 
 | Field             | Type                       | Required | Default                                        | Description             |
 | ----------------- | -------------------------- | -------- | ---------------------------------------------- | ----------------------- |
-| `APIKey`          | `string`                   | No       | —                                              | OpenAI API key. Optional for supported Agora-managed OpenAI models. |
-| `Model`           | `string`                   | No       | `"gpt-4o-mini"`                                | Model identifier        |
-| `BaseURL`         | `string`                   | No       | `"https://api.openai.com/v1/chat/completions"` | API endpoint            |
+| `APIKey`          | `string`                   | BYOK only | —                                             | OpenAI API key. Optional for supported Agora-managed OpenAI models. |
+| `Model`           | `string`                   | Yes      | —                                              | Model identifier        |
+| `BaseURL`         | `string`                   | BYOK only | —                                             | API endpoint. Required when `APIKey` is set. |
 | `Temperature`     | `*float64`                 | No       | —                                              | Sampling temperature    |
 | `TopP`            | `*float64`                 | No       | —                                              | Nucleus sampling        |
 | `MaxTokens`       | `*int`                     | No       | —                                              | Max tokens in response  |
@@ -91,7 +91,7 @@ Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed
 func NewAzureOpenAI(opts AzureOpenAIOptions) *AzureOpenAI
 ```
 
-Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
+Panics if `APIKey`, `Model`, `Endpoint`, or `DeploymentName` is empty.
 
 #### AzureOpenAIOptions
 
@@ -101,7 +101,7 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 | `Endpoint`        | `string`                   | Yes      | —                      | Azure endpoint URL   |
 | `DeploymentName`  | `string`                   | Yes      | —                      | Deployment name      |
 | `APIVersion`      | `string`                   | No       | `"2024-08-01-preview"` | API version          |
-| `Model`           | `string`                   | No       | —                      | Deployment's base model name (e.g., `"gpt-4o"`). Emitted as `params.model` for parity with the TypeScript SDK. |
+| `Model`           | `string`                   | Yes      | —                      | Deployment's base model name (e.g., `"gpt-4o"`). Emitted as `params.model` for parity with the TypeScript SDK. |
 | `Temperature`     | `*float64`                 | No       | —                      | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                      | Nucleus sampling     |
 | `MaxTokens`       | `*int`                     | No       | —                      | Max tokens           |
@@ -122,15 +122,17 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 func NewAnthropic(opts AnthropicOptions) *Anthropic
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey`, `Model`, `URL`, `Headers`, or `MaxTokens` is empty.
 
 #### AnthropicOptions
 
 | Field             | Type                       | Required | Default                        | Description          |
 | ----------------- | -------------------------- | -------- | ------------------------------ | -------------------- |
 | `APIKey`          | `string`                   | Yes      | —                              | Anthropic API key    |
-| `Model`           | `string`                   | No       | `"claude-3-5-sonnet-20241022"` | Model identifier     |
-| `MaxTokens`       | `*int`                     | No       | —                              | Max tokens           |
+| `Model`           | `string`                   | Yes      | —                              | Model identifier     |
+| `URL`             | `string`                   | Yes      | —                              | Anthropic messages endpoint URL |
+| `Headers`         | `map[string]string`        | Yes      | —                              | Request headers, including Anthropic API version |
+| `MaxTokens`       | `*int`                     | Yes      | —                              | Max tokens           |
 | `Temperature`     | `*float64`                 | No       | —                              | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                              | Nucleus sampling     |
 | `SystemMessages`  | `[]map[string]interface{}` | No       | —                              | System messages      |
@@ -139,7 +141,6 @@ Panics if `APIKey` is empty.
 | `InputModalities` | `[]string`                 | No       | `["text"]`                     | Input modality types |
 | `OutputModalities` | `[]string`                | No       | —                              | Output modality types |
 | `Params`          | `map[string]interface{}`   | No       | —                              | Additional model params |
-| `Headers`         | `map[string]string`        | No       | —                              | Custom HTTP headers forwarded to the LLM provider |
 | `GreetingConfigs` | `map[string]interface{}`   | No       | —                              | Greeting playback configuration |
 | `TemplateVariables` | `map[string]string`      | No       | —                              | Template variables for messages |
 
@@ -150,14 +151,14 @@ Panics if `APIKey` is empty.
 func NewGemini(opts GeminiOptions) *Gemini
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey` or `Model` is empty.
 
 #### GeminiOptions
 
 | Field             | Type                       | Required | Default                  | Description          |
 | ----------------- | -------------------------- | -------- | ------------------------ | -------------------- |
 | `APIKey`          | `string`                   | Yes      | —                        | Google AI API key    |
-| `Model`           | `string`                   | No       | `"gemini-2.0-flash-exp"` | Model identifier     |
+| `Model`           | `string`                   | Yes      | —                        | Model identifier     |
 | `Temperature`     | `*float64`                 | No       | —                        | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                        | Nucleus sampling     |
 | `TopK`            | `*int`                     | No       | —                        | Top-K sampling       |
@@ -178,10 +179,10 @@ The SDK also includes named helpers for the remaining Agora-supported LLM provid
 
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
-| `NewGroq` | `GroqOptions` | `APIKey` |
-| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `ProjectID`, `Location` |
-| `NewAmazonBedrock` | `AmazonBedrockOptions` | `APIKey`, `URL`, `Model` |
-| `NewDify` | `DifyOptions` | `APIKey`, `URL` |
+| `NewGroq` | `GroqOptions` | `APIKey`, `Model`, `BaseURL` |
+| `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `Model`, `ProjectID`, `Location` |
+| `NewAmazonBedrock` | `AmazonBedrockOptions` | `AccessKey`, `SecretKey`, `Region`, `Model` |
+| `NewDify` | `DifyOptions` | `APIKey`, `URL`, `Model` |
 | `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` |
 
 ---
@@ -195,7 +196,7 @@ The SDK also includes named helpers for the remaining Agora-supported LLM provid
 func NewElevenLabsTTS(opts ElevenLabsTTSOptions) *ElevenLabsTTS
 ```
 
-Panics if `Key`, `ModelID`, or `VoiceID` is empty.
+Panics if `Key`, `ModelID`, `VoiceID`, or `BaseURL` is empty.
 
 #### ElevenLabsTTSOptions
 
@@ -204,8 +205,13 @@ Panics if `Key`, `ModelID`, or `VoiceID` is empty.
 | `Key`          | `string`      | Yes      | ElevenLabs API key                             |
 | `ModelID`      | `string`      | Yes      | Model identifier (e.g., `"eleven_turbo_v2_5"`) |
 | `VoiceID`      | `string`      | Yes      | Voice identifier                               |
-| `BaseURL`      | `string`      | No       | Custom API endpoint                            |
+| `BaseURL`      | `string`      | Yes      | WebSocket base URL                             |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                             |
+| `OptimizeStreamingLatency` | `*int` | No | Latency optimization level, 0-4 |
+| `Stability` | `*float64` | No | Voice stability, 0.0-1.0 |
+| `SimilarityBoost` | `*float64` | No | Voice similarity boost, 0.0-1.0 |
+| `Style` | `*float64` | No | Voice style exaggeration, 0.0-1.0 |
+| `UseSpeakerBoost` | `*bool` | No | Enable speaker boost |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip in TTS output                 |
 
 ### NewMicrosoftTTS
@@ -225,6 +231,8 @@ Panics if `Key`, `Region`, or `VoiceName` is empty.
 | `Region`       | `string`      | Yes      | Azure region (e.g., `"eastus"`)          |
 | `VoiceName`    | `string`      | Yes      | Voice name (e.g., `"en-US-JennyNeural"`) |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                       |
+| `Speed`        | `*float64`    | No       | Speaking rate multiplier                 |
+| `Volume`       | `*float64`    | No       | Audio volume                             |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip                         |
 
 ### NewOpenAITTS
@@ -234,16 +242,17 @@ Panics if `Key`, `Region`, or `VoiceName` is empty.
 func NewOpenAITTS(opts OpenAITTSOptions) *OpenAITTS
 ```
 
-Panics if `Voice` is empty. `APIKey` is optional for the Agora-managed `tts-1` path. Always returns `SampleRate24kHz` from `GetSampleRate()`.
+Panics if `Voice` is empty. `APIKey`, `Model`, and `BaseURL` are required together for BYOK. `APIKey` is optional for the Agora-managed `tts-1` path. Always returns `SampleRate24kHz` from `GetSampleRate()`.
 
 #### OpenAITTSOptions
 
 | Field            | Type       | Required | Description                        |
 | ---------------- | ---------- | -------- | ---------------------------------- |
-| `APIKey`         | `string`   | No       | OpenAI API key. Optional for the Agora-managed `tts-1` path. |
+| `APIKey`         | `string`   | BYOK only | OpenAI API key. Optional for the Agora-managed `tts-1` path. |
 | `Voice`          | `string`   | Yes      | Voice name                         |
-| `Model`          | `string`   | No       | Model identifier                   |
-| `ResponseFormat` | `string`   | No       | Audio format (e.g., `"pcm"`)       |
+| `Model`          | `string`   | BYOK only | Model identifier                   |
+| `BaseURL`        | `string`   | BYOK only | OpenAI TTS endpoint URL            |
+| `Instructions`   | `string`   | No       | Custom instructions for voice style, accent, pace, and tone |
 | `Speed`          | `*float64` | No       | Speech speed multiplier            |
 | `SkipPatterns`   | `[]int`    | No       | Patterns to skip                   |
 
@@ -254,7 +263,7 @@ Panics if `Voice` is empty. `APIKey` is optional for the Agora-managed `tts-1` p
 func NewCartesiaTTS(opts CartesiaTTSOptions) *CartesiaTTS
 ```
 
-Panics if `APIKey` or `VoiceID` is empty.
+Panics if `APIKey`, `VoiceID`, or `ModelID` is empty.
 
 #### CartesiaTTSOptions
 
@@ -262,7 +271,9 @@ Panics if `APIKey` or `VoiceID` is empty.
 | -------------- | ------------- | -------- | ---------------------------------------------------- |
 | `APIKey`       | `string`      | Yes      | Cartesia API key                                     |
 | `VoiceID`      | `string`      | Yes      | Voice identifier (serialized as `{"mode":"id","id":"..."}`) |
-| `ModelID`      | `string`      | No       | Model identifier                                     |
+| `ModelID`      | `string`      | Yes      | Model identifier                                     |
+| `BaseURL`      | `string`      | No       | WebSocket URL for the Cartesia streaming API         |
+| `Language`     | `string`      | No       | Target language for speech synthesis                 |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                                   |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip                                     |
 
@@ -282,6 +293,7 @@ Panics if `Key` or `VoiceName` is empty.
 | `Key`          | `string` | Yes      | Google Cloud API key |
 | `VoiceName`    | `string` | Yes      | Voice name           |
 | `LanguageCode` | `string` | No       | Language code        |
+| `SampleRate`   | `*SampleRate` | No | Output sample rate |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip     |
 
 ### NewAmazonTTS
@@ -291,7 +303,7 @@ Panics if `Key` or `VoiceName` is empty.
 func NewAmazonTTS(opts AmazonTTSOptions) *AmazonTTS
 ```
 
-Panics if `AccessKey`, `SecretKey`, `Region`, or `VoiceID` is empty.
+Panics if `AccessKey`, `SecretKey`, `Region`, `VoiceID`, or `Engine` is empty.
 
 #### AmazonTTSOptions
 
@@ -301,6 +313,7 @@ Panics if `AccessKey`, `SecretKey`, `Region`, or `VoiceID` is empty.
 | `SecretKey`    | `string` | Yes      | AWS secret key   |
 | `Region`       | `string` | Yes      | AWS region       |
 | `VoiceID`      | `string` | Yes      | Polly voice ID   |
+| `Engine`       | `string` | Yes      | Polly engine type |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip |
 
 ### NewDeepgramTTS
@@ -320,7 +333,7 @@ Panics if `APIKey` or `Model` is empty.
 | `Model`        | `string`                 | Yes      | Deepgram TTS model (e.g., `"aura-2-thalia-en"`) |
 | `BaseURL`      | `string`                 | No       | WebSocket endpoint; defaults server-side to `wss://api.deepgram.com/v1/speak` |
 | `SampleRate`   | `*SampleRate`            | No       | Output sample rate |
-| `Params`       | `map[string]interface{}` | No       | Additional Deepgram TTS parameters |
+| `AdditionalParams` | `map[string]interface{}` | No       | Additional Deepgram TTS parameters, flattened into `params` |
 | `SkipPatterns` | `[]int`                  | No       | Patterns to skip |
 
 ### NewHumeAITTS
@@ -330,14 +343,19 @@ Panics if `APIKey` or `Model` is empty.
 func NewHumeAITTS(opts HumeAITTSOptions) *HumeAITTS
 ```
 
-Panics if `Key` is empty.
+Panics if `Key`, `VoiceID`, or `Provider` is empty.
 
 #### HumeAITTSOptions
 
 | Field          | Type     | Required | Description      |
 | -------------- | -------- | -------- | ---------------- |
 | `Key`          | `string` | Yes      | Hume AI API key  |
+| `VoiceID`      | `string` | Yes      | Hume AI voice ID |
+| `Provider`     | `string` | Yes      | Voice provider type, such as `CUSTOM_VOICE` or `HUME_AI` |
 | `ConfigID`     | `string` | No       | Configuration ID |
+| `BaseURL`      | `string` | No       | Base URL         |
+| `Speed`        | `*float64` | No     | Playback speed |
+| `TrailingSilence` | `*float64` | No | Trailing silence in seconds |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip |
 
 ### NewRimeTTS
@@ -347,7 +365,7 @@ Panics if `Key` is empty.
 func NewRimeTTS(opts RimeTTSOptions) *RimeTTS
 ```
 
-Panics if `Key` or `Speaker` is empty.
+Panics if `Key`, `Speaker`, or `ModelID` is empty.
 
 #### RimeTTSOptions
 
@@ -355,10 +373,8 @@ Panics if `Key` or `Speaker` is empty.
 | -------------- | ---------- | -------- | --------------------------------------------- |
 | `Key`          | `string`   | Yes      | Rime API key                                  |
 | `Speaker`      | `string`   | Yes      | Speaker identifier                            |
-| `ModelID`      | `string`   | No       | Model identifier                              |
-| `Lang`         | `string`   | No       | Language code                                 |
-| `SamplingRate` | `*int`     | No       | Sampling rate in Hz (serialized as `samplingRate`) |
-| `SpeedAlpha`   | `*float64` | No       | Speed multiplier (serialized as `speedAlpha`) |
+| `ModelID`      | `string`   | Yes      | Model identifier                              |
+| `BaseURL`      | `string`   | No       | WebSocket URL                                 |
 | `SkipPatterns` | `[]int`    | No       | Patterns to skip                              |
 
 ### NewFishAudioTTS
@@ -368,7 +384,7 @@ Panics if `Key` or `Speaker` is empty.
 func NewFishAudioTTS(opts FishAudioTTSOptions) *FishAudioTTS
 ```
 
-Panics if `Key` or `ReferenceID` is empty.
+Panics if `Key`, `ReferenceID`, or `Backend` is empty.
 
 #### FishAudioTTSOptions
 
@@ -376,6 +392,7 @@ Panics if `Key` or `ReferenceID` is empty.
 | -------------- | -------- | -------- | ------------------ |
 | `Key`          | `string` | Yes      | FishAudio API key  |
 | `ReferenceID`  | `string` | Yes      | Reference audio ID |
+| `Backend`      | `string` | Yes      | Backend model version |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip   |
 
 ### NewMiniMaxTTS
@@ -385,7 +402,7 @@ Panics if `Key` or `ReferenceID` is empty.
 func NewMiniMaxTTS(opts MiniMaxTTSOptions) *MiniMaxTTS
 ```
 
-Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMax models (`speech-2.6-turbo`, `speech_2_6_turbo`, `speech-2.8-turbo`, `speech_2_8_turbo`). BYOK still requires `Key` and `GroupID`, and Agora-managed mode must not set `GroupID`, `VoiceID`, or `URL`.
+Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMax models (`speech-2.6-turbo`, `speech_2_6_turbo`, `speech-2.8-turbo`, `speech_2_8_turbo`). BYOK requires `Key`, `GroupID`, `VoiceID`, and `URL`. In Agora-managed mode, `GroupID`, `VoiceID`, and `URL` are optional overrides.
 
 #### MiniMaxTTSOptions
 
@@ -394,8 +411,8 @@ Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMa
 | `Key`          | `string` | No       | MiniMax API key. Optional for supported Agora-managed MiniMax models. |
 | `GroupID`      | `string` | No       | MiniMax group ID. Required for BYOK.      |
 | `Model`        | `string` | Yes      | Model name (e.g., `speech-02-turbo`)      |
-| `VoiceID`      | `string` | No       | Voice style identifier. BYOK only.        |
-| `URL`          | `string` | No       | WebSocket endpoint. BYOK only.            |
+| `VoiceID`      | `string` | No       | Voice style identifier. Required for BYOK; optional override for Agora-managed mode. |
+| `URL`          | `string` | No       | WebSocket endpoint. Required for BYOK; optional override for Agora-managed mode. |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip                          |
 
 ### NewMurfTTS
@@ -405,15 +422,20 @@ Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMa
 func NewMurfTTS(opts MurfTTSOptions) *MurfTTS
 ```
 
-Panics if `Key` or `VoiceID` is empty.
+Panics if `Key` is empty.
 
 #### MurfTTSOptions
 
 | Field          | Type     | Required | Description                              |
 | -------------- | -------- | -------- | ---------------------------------------- |
 | `Key`          | `string` | Yes      | Murf API key                             |
-| `VoiceID`      | `string` | Yes      | Voice ID (e.g., `Ariana`, `Natalie`)     |
-| `Style`        | `string` | No       | Voice style (e.g., `Conversational`)     |
+| `VoiceID`      | `string` | No       | Voice ID (e.g., `Ariana`, `Natalie`)     |
+| `BaseURL`      | `string` | No       | WebSocket endpoint                       |
+| `Locale`       | `string` | No       | Voice locale                             |
+| `Rate`         | `*float64` | No      | Speech rate                              |
+| `Pitch`        | `*float64` | No      | Pitch adjustment                         |
+| `Model`        | `string` | No       | TTS model                                |
+| `SampleRate`   | `*int`   | No       | Audio sample rate                        |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip                         |
 
 ### NewSarvamTTS
@@ -432,6 +454,10 @@ Panics if `Key`, `Speaker`, or `TargetLanguageCode` is empty.
 | `Key`                | `string` | Yes      | Sarvam API key       |
 | `Speaker`            | `string` | Yes      | Speaker name         |
 | `TargetLanguageCode` | `string` | Yes      | Target language code |
+| `Pitch`              | `*float64` | No     | Pitch adjustment |
+| `Pace`               | `*float64` | No     | Speed of speech |
+| `Loudness`           | `*float64` | No     | Volume level |
+| `SampleRate`         | `*int`   | No       | Audio sample rate |
 | `SkipPatterns`       | `[]int`  | No       | Patterns to skip     |
 
 ---
@@ -445,15 +471,17 @@ Panics if `Key`, `Speaker`, or `TargetLanguageCode` is empty.
 func NewSpeechmaticsSTT(opts SpeechmaticsSTTOptions) *SpeechmaticsSTT
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey` or `Language` is empty.
 
 #### SpeechmaticsSTTOptions
 
-| Field      | Type     | Required | Description          |
-| ---------- | -------- | -------- | -------------------- |
-| `APIKey`   | `string` | Yes      | Speechmatics API key |
-| `Language` | `string` | No       | Language code        |
-| `Model`    | `string` | No       | Model identifier     |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | Speechmatics API key |
+| `Language` | `string` | Yes | Speechmatics language code |
+| `Model` | `string` | No | Model identifier |
+| `URI` | `string` | No | Speechmatics streaming WebSocket URL |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ### NewDeepgramSTT
 
@@ -462,13 +490,13 @@ Panics if `APIKey` is empty.
 func NewDeepgramSTT(opts DeepgramSTTOptions) *DeepgramSTT
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed Deepgram models (`nova-2`, `nova-3`).
 
 #### DeepgramSTTOptions
 
 | Field              | Type                     | Required | Description              |
 | ------------------ | ------------------------ | -------- | ------------------------ |
-| `APIKey`           | `string`                 | Yes      | Deepgram API key         |
+| `APIKey`           | `string`                 | BYOK only | Deepgram API key. Optional only for Agora-managed `nova-2` and `nova-3`. |
 | `Model`            | `string`                 | No       | Model (e.g., `"nova-2"`) |
 | `Language`         | `string`                 | No       | Language code            |
 | `SmartFormat`      | `*bool`                  | No       | Enable smart formatting  |
@@ -482,7 +510,7 @@ Panics if `APIKey` is empty.
 func NewMicrosoftSTT(opts MicrosoftSTTOptions) *MicrosoftSTT
 ```
 
-Panics if `Key` or `Region` is empty.
+Panics if `Key`, `Region`, or `Language` is empty.
 
 #### MicrosoftSTTOptions
 
@@ -490,7 +518,7 @@ Panics if `Key` or `Region` is empty.
 | ---------- | -------- | -------- | ------------------------- |
 | `Key`      | `string` | Yes      | Azure Speech Services key |
 | `Region`   | `string` | Yes      | Azure region              |
-| `Language` | `string` | No       | Language code             |
+| `Language` | `string` | Yes      | Language code             |
 
 ### NewOpenAISTT
 
@@ -503,11 +531,14 @@ Panics if `APIKey` is empty.
 
 #### OpenAISTTOptions
 
-| Field      | Type     | Required | Description      |
-| ---------- | -------- | -------- | ---------------- |
-| `APIKey`   | `string` | Yes      | OpenAI API key   |
-| `Model`    | `string` | No       | Model identifier |
-| `Language` | `string` | No       | Language code    |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | OpenAI API key |
+| `Model` | `string` | No | Transcription model |
+| `Language` | `string` | No | OpenAI transcription language |
+| `Prompt` | `string` | No | Prompt for OpenAI transcription |
+| `InputAudioTranscription` | `map[string]interface{}` | No | OpenAI transcription settings |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ### NewGoogleSTT
 
@@ -516,15 +547,18 @@ Panics if `APIKey` is empty.
 func NewGoogleSTT(opts GoogleSTTOptions) *GoogleSTT
 ```
 
-Panics if `Key` is empty.
+Panics if `ProjectID`, `Location`, `ADCCredentialsString`, or `Language` is empty.
 
 #### GoogleSTTOptions
 
-| Field      | Type     | Required | Description          |
-| ---------- | -------- | -------- | -------------------- |
-| `Key`      | `string` | Yes      | Google Cloud API key |
-| `Language` | `string` | No       | Language code        |
-| `Model`    | `string` | No       | Model identifier     |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `ProjectID` | `string` | Yes | Google Cloud project ID |
+| `Location` | `string` | Yes | Google Cloud region |
+| `ADCCredentialsString` | `string` | Yes | Google service account credentials JSON string |
+| `Language` | `string` | Yes | Google recognition language |
+| `Model` | `string` | No | Model identifier |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ### NewAmazonSTT
 
@@ -533,7 +567,7 @@ Panics if `Key` is empty.
 func NewAmazonSTT(opts AmazonSTTOptions) *AmazonSTT
 ```
 
-Panics if `AccessKey`, `SecretKey`, or `Region` is empty.
+Panics if `AccessKey`, `SecretKey`, `Region`, or `Language` is empty.
 
 #### AmazonSTTOptions
 
@@ -542,7 +576,8 @@ Panics if `AccessKey`, `SecretKey`, or `Region` is empty.
 | `AccessKey` | `string` | Yes      | AWS access key |
 | `SecretKey` | `string` | Yes      | AWS secret key |
 | `Region`    | `string` | Yes      | AWS region     |
-| `Language`  | `string` | No       | Language code  |
+| `Language`  | `string` | Yes      | Amazon `language_code` |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ### NewAssemblyAISTT
 
@@ -551,13 +586,16 @@ Panics if `AccessKey`, `SecretKey`, or `Region` is empty.
 func NewAssemblyAISTT(opts AssemblyAISTTOptions) *AssemblyAISTT
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey` or `Language` is empty.
 
 #### AssemblyAISTTOptions
 
-| Field    | Type     | Required | Description        |
-| -------- | -------- | -------- | ------------------ |
-| `APIKey` | `string` | Yes      | AssemblyAI API key |
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | AssemblyAI API key |
+| `Language` | `string` | Yes | AssemblyAI language code |
+| `URI` | `string` | No | AssemblyAI streaming WebSocket URL |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ### NewAresSTT
 
@@ -618,7 +656,7 @@ Panics if `APIKey` is empty.
 | `OutputModalities` | `[]string`                | No       | —                           | Output modalities                                  |
 | `Messages`        | `[]map[string]interface{}` | No       | —                           | Conversation messages for short-term memory        |
 | `Params`          | `map[string]interface{}`   | No       | —                           | Additional realtime params such as `voice`         |
-| `TurnDetection`   | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
+| `TurnDetection`   | `*Agora.MllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ### NewGeminiLive
 
@@ -644,7 +682,7 @@ Panics if `APIKey` or `Model` is empty.
 | `OutputModalities` | `[]string`                 | No       | —       | Output modalities |
 | `Messages`         | `[]map[string]interface{}` | No       | —       | Conversation messages |
 | `AdditionalParams` | `map[string]interface{}`   | No       | —       | Additional Gemini params |
-| `TurnDetection`    | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
+| `TurnDetection`    | `*Agora.MllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ### NewXaiGrok
 
@@ -685,7 +723,7 @@ Deprecated. Use `NewXaiGrok` instead.
 | `OutputModalities` | `[]string` | No | — | Output modalities |
 | `Messages` | `[]map[string]interface{}` | No | — | Conversation messages |
 | `Params` | `map[string]interface{}` | No | — | Additional xAI params |
-| `TurnDetection` | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | `agora_vad` / `server_vad` turn detection |
+| `TurnDetection` | `*Agora.MllmTurnDetection` | No | — | `agora_vad` / `server_vad` turn detection |
 
 ### NewVertexAI
 
@@ -713,7 +751,7 @@ func NewVertexAI(opts VertexAIOptions) *VertexAI
 | `InputModalities` | `[]string`                 | No       | —                        | Input modalities                                |
 | `OutputModalities` | `[]string`                | No       | —                        | Output modalities                               |
 | `AdditionalParams` | `map[string]interface{}`  | No       | —                        | Additional Vertex/Gemini params                 |
-| `TurnDetection`    | `*Agora.StartAgentsRequestPropertiesMllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
+| `TurnDetection`    | `*Agora.MllmTurnDetection` | No | — | MLLM turn detection configuration; overrides top-level turn detection |
 
 ---
 

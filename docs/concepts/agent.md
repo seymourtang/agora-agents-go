@@ -6,7 +6,7 @@ description: The Agent builder — functional options pattern, vendor chaining, 
 
 # Agent
 
-The `agentkit.Agent` is the central configuration object. It defines what LLM, TTS, STT, MLLM, and avatar vendors your agent uses, along with instructions, greeting messages, and advanced settings.
+The `agentkit.Agent` is the central configuration object. It defines what LLM, TTS, STT, MLLM, and avatar vendors your agent uses, along with session-level settings.
 
 ## Functional Options Pattern
 
@@ -16,11 +16,17 @@ The `agentkit.Agent` is the central configuration object. It defines what LLM, T
 ```go
 agent := agentkit.NewAgent(
     agentkit.WithName("my-assistant"),
-    agentkit.WithInstructions("You are a helpful voice assistant."),
-    agentkit.WithGreeting("Hello! How can I help?"),
-    agentkit.WithFailureMessage("Sorry, something went wrong."),
-    agentkit.WithMaxHistory(10),
-)
+).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
+    APIKey:  "your-openai-key",
+    BaseURL: "https://api.openai.com/v1/chat/completions",
+    Model:   "gpt-4o-mini",
+    SystemMessages: []map[string]interface{}{
+        {"role": "system", "content": "You are a helpful voice assistant."},
+    },
+    GreetingMessage: "Hello! How can I help?",
+    FailureMessage:  "Sorry, something went wrong.",
+    MaxHistory:      intPtr(10),
+}))
 ```
 
 Each `With*` function has the signature `func(...) AgentOption`, where `AgentOption` is `func(*Agent)`. This pattern lets you:
@@ -36,11 +42,11 @@ These are passed to `agentkit.NewAgent(opts ...AgentOption)`:
 | Function | Parameter | Description |
 |---|---|---|
 | `WithName(name string)` | Agent name | Identifier for the agent |
-| `WithInstructions(instructions string)` | System prompt | Injected as the LLM system message |
-| `WithGreeting(greeting string)` | Greeting text | First message the agent speaks |
-| `WithFailureMessage(msg string)` | Fallback message | Spoken when the LLM fails |
-| `WithMaxHistory(n int)` | History depth | Max conversation turns to retain |
-| `WithTurnDetectionConfig(td *TurnDetectionConfig)` | Turn detection config | Cascading-flow SOS/EOS detection |
+| `WithInstructions(instructions string)` | System prompt | Deprecated. Use LLM vendor `SystemMessages` instead. |
+| `WithGreeting(greeting string)` | Greeting text | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
+| `WithFailureMessage(msg string)` | Fallback message | Deprecated. Use LLM/MLLM vendor `FailureMessage` instead. |
+| `WithMaxHistory(n int)` | History depth | Deprecated. Use LLM vendor `MaxHistory` instead. |
+| `WithTurnDetectionConfig(td *TurnDetectionConfig)` | Turn detection config | Configure `turn_detection.language` and cascading-flow SOS/EOS detection |
 | `WithSalConfig(sal *SalConfig)` | SAL config | Speech analytics configuration |
 | `WithAdvancedFeatures(af *AdvancedFeatures)` | Feature flags | RTM, tools, and other advanced features |
 | `WithParameters(params *SessionParams)` | Session params | Additional session parameters |
@@ -57,17 +63,21 @@ After creating an agent with `NewAgent`, attach vendors using method chaining. E
 ```go
 agent := agentkit.NewAgent(
     agentkit.WithName("assistant"),
-    agentkit.WithInstructions("You are helpful."),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
-        APIKey: "<key>",
-        Model:  "gpt-4o-mini",
+        APIKey:  "<key>",
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+        Model:   "gpt-4o-mini",
+        SystemMessages: []map[string]interface{}{
+            {"role": "system", "content": "You are helpful."},
+        },
     }),
 ).WithTts(
     vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:     "<key>",
-        ModelID: "eleven_turbo_v2_5",
-        VoiceID: "<voice_id>",
+        ModelID:    "eleven_turbo_v2_5",
+        VoiceID:    "<voice_id>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
     }),
 ).WithStt(
     vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
@@ -83,21 +93,21 @@ agent := agentkit.NewAgent(
 | `WithStt(vendor vendors.STT)` | `vendors.STT` interface | Set the STT vendor |
 | `WithMllm(vendor vendors.MLLM)` | `vendors.MLLM` interface | Set the MLLM vendor (for multimodal flow) |
 | `WithAvatar(vendor vendors.Avatar)` | `vendors.Avatar` interface | Set the avatar vendor (validates sample rate) |
-| `WithTurnDetection(td *TurnDetectionConfig)` | Pointer to config | Override cascading-flow SOS/EOS detection; use interruption config for interruption behavior |
-| `WithInstructions(instructions string)` | String | Override instructions on a cloned agent |
-| `WithGreeting(greeting string)` | String | Override greeting on a cloned agent |
+| `WithTurnDetection(td *TurnDetectionConfig)` | Pointer to config | Configure `turn_detection.language` and cascading-flow SOS/EOS detection; use interruption config for interruption behavior |
+| `WithInstructions(instructions string)` | String | Deprecated. Use LLM vendor `SystemMessages` instead. |
+| `WithGreeting(greeting string)` | String | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
 | `WithName(name string)` | String | Override name on a cloned agent |
 | `WithSal(sal *SalConfig)` | Pointer to config | Set SAL configuration |
 | `WithAdvancedFeatures(af *AdvancedFeatures)` | Pointer to config | Set advanced features |
 | `WithParameters(params *SessionParams)` | Pointer to config | Set session parameters |
-| `WithFailureMessage(msg string)` | String | Set failure message |
-| `WithMaxHistory(n int)` | Int | Set max history length |
+| `WithFailureMessage(msg string)` | String | Deprecated. Use LLM/MLLM vendor `FailureMessage` instead. |
+| `WithMaxHistory(n int)` | Int | Deprecated. Use LLM vendor `MaxHistory` instead. |
 | `WithGeofence(gf *GeofenceConfig)` | Pointer to config | Set geofence configuration |
 | `WithLabels(labels map[string]string)` | Map | Set custom labels |
 | `WithRtc(rtc *RtcConfig)` | Pointer to config | Set RTC configuration |
 | `WithFillerWords(fw *FillerWordsConfig)` | Pointer to config | Set filler words configuration |
 
-Note: `WithInstructions`, `WithGreeting`, and `WithName` exist as both `AgentOption` functions (for `NewAgent`) and as methods on `*Agent` (for cloning with overrides). The same applies to `WithSal`, `WithAdvancedFeatures`, `WithParameters`, `WithFailureMessage`, `WithMaxHistory`, `WithGeofence`, `WithLabels`, `WithRtc`, and `WithFillerWords`.
+Note: `WithInstructions`, `WithGreeting`, `WithFailureMessage`, and `WithMaxHistory` are compatibility shims. New code should configure those values on the LLM or MLLM vendor because that matches the core request schema.
 
 ## Agent Getters
 
@@ -175,9 +185,9 @@ type SessionParams = Agora.StartAgentsRequestPropertiesParameters
 type GeofenceConfig = Agora.StartAgentsRequestPropertiesGeofence
 type RtcConfig = Agora.StartAgentsRequestPropertiesRtc
 type FillerWordsConfig = Agora.StartAgentsRequestPropertiesFillerWords
-type LlmConfig = Agora.StartAgentsRequestPropertiesLlm
-type MllmConfig = Agora.StartAgentsRequestPropertiesMllm
-type AsrConfig = Agora.StartAgentsRequestPropertiesAsr
+type LlmConfig = Agora.Llm
+type MllmConfig = Agora.Mllm
+type AsrConfig = Agora.Asr
 type TtsConfig = Agora.Tts
 type AvatarConfig = Agora.StartAgentsRequestPropertiesAvatar
 ```

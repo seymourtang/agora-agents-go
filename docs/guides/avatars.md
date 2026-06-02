@@ -37,12 +37,16 @@ sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 agent := agentkit.NewAgent(
     agentkit.WithName("generic-avatar"),
 ).WithLlm(
-    vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "<openai_key>"}),
+    vendors.NewOpenAI(vendors.OpenAIOptions{
+        APIKey:  "<openai_key>",
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+    }),
 ).WithTts(
     vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:        "<elevenlabs_key>",
         ModelID:    "eleven_turbo_v2_5",
         VoiceID:    "<voice_id>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         // Choose the sample rate required by your generic avatar provider.
         SampleRate: &sampleRate,
     }),
@@ -84,11 +88,15 @@ func main() {
 
     agent := agentkit.NewAgent(
         agentkit.WithName("avatar-agent"),
-        agentkit.WithInstructions("You are a friendly virtual assistant with a visual avatar."),
-        agentkit.WithGreeting("Hello! I can see you and you can see me!"),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
-            APIKey: "<openai_key>",
+            APIKey:  "<openai_key>",
+            BaseURL: "https://api.openai.com/v1/chat/completions",
+            Model:   "gpt-4o-mini",
+            SystemMessages: []map[string]interface{}{
+                {"role": "system", "content": "You are a friendly virtual assistant with a visual avatar."},
+            },
+            GreetingMessage: "Hello! I can see you and you can see me!",
         }),
     ).WithTts(
         // TTS sample rate MUST match the avatar's required rate (24kHz for LiveAvatar).
@@ -96,6 +104,7 @@ func main() {
             Key:        "<elevenlabs_key>",
             ModelID:    "eleven_turbo_v2_5",
             VoiceID:    "<voice_id>",
+            BaseURL:    "wss://api.elevenlabs.io/v1",
             SampleRate: &sr,
         }),
     ).WithStt(
@@ -138,10 +147,14 @@ sr := vendors.SampleRate16kHz
 
 agent := agentkit.NewAgent(
     agentkit.WithName("akool-avatar"),
-    agentkit.WithInstructions("You are a virtual presenter."),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
-        APIKey: "<openai_key>",
+        APIKey:  "<openai_key>",
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+        Model:   "gpt-4o-mini",
+        SystemMessages: []map[string]interface{}{
+            {"role": "system", "content": "You are a virtual presenter."},
+        },
     }),
 ).WithTts(
     // Akool requires 16kHz
@@ -149,6 +162,7 @@ agent := agentkit.NewAgent(
         Key:        "<elevenlabs_key>",
         ModelID:    "eleven_turbo_v2_5",
         VoiceID:    "<voice_id>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         SampleRate: &sr,
     }),
 ).WithStt(
@@ -190,6 +204,7 @@ agent := agentkit.NewAgent(...).
         Key:        "<key>",
         ModelID:    "<model>",
         VoiceID:    "<voice>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         SampleRate: &sr,           // 24kHz for LiveAvatar
     })).
     WithAvatar(vendors.NewLiveAvatarAvatar(vendors.LiveAvatarAvatarOptions{
@@ -207,6 +222,7 @@ agent := agentkit.NewAgent(...).
         Key:        "<key>",
         ModelID:    "<model>",
         VoiceID:    "<voice>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         SampleRate: &sr,           // 16kHz — mismatch!
     })).
     WithAvatar(vendors.NewLiveAvatarAvatar(vendors.LiveAvatarAvatarOptions{
