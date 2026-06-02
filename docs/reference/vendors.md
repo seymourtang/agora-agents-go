@@ -207,6 +207,11 @@ Panics if `Key`, `ModelID`, `VoiceID`, or `BaseURL` is empty.
 | `VoiceID`      | `string`      | Yes      | Voice identifier                               |
 | `BaseURL`      | `string`      | Yes      | WebSocket base URL                             |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                             |
+| `OptimizeStreamingLatency` | `*int` | No | Latency optimization level, 0-4 |
+| `Stability` | `*float64` | No | Voice stability, 0.0-1.0 |
+| `SimilarityBoost` | `*float64` | No | Voice similarity boost, 0.0-1.0 |
+| `Style` | `*float64` | No | Voice style exaggeration, 0.0-1.0 |
+| `UseSpeakerBoost` | `*bool` | No | Enable speaker boost |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip in TTS output                 |
 
 ### NewMicrosoftTTS
@@ -226,6 +231,8 @@ Panics if `Key`, `Region`, or `VoiceName` is empty.
 | `Region`       | `string`      | Yes      | Azure region (e.g., `"eastus"`)          |
 | `VoiceName`    | `string`      | Yes      | Voice name (e.g., `"en-US-JennyNeural"`) |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                       |
+| `Speed`        | `*float64`    | No       | Speaking rate multiplier                 |
+| `Volume`       | `*float64`    | No       | Audio volume                             |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip                         |
 
 ### NewOpenAITTS
@@ -265,6 +272,8 @@ Panics if `APIKey`, `VoiceID`, or `ModelID` is empty.
 | `APIKey`       | `string`      | Yes      | Cartesia API key                                     |
 | `VoiceID`      | `string`      | Yes      | Voice identifier (serialized as `{"mode":"id","id":"..."}`) |
 | `ModelID`      | `string`      | Yes      | Model identifier                                     |
+| `BaseURL`      | `string`      | No       | WebSocket URL for the Cartesia streaming API         |
+| `Language`     | `string`      | No       | Target language for speech synthesis                 |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                                   |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip                                     |
 
@@ -284,6 +293,7 @@ Panics if `Key` or `VoiceName` is empty.
 | `Key`          | `string` | Yes      | Google Cloud API key |
 | `VoiceName`    | `string` | Yes      | Voice name           |
 | `LanguageCode` | `string` | No       | Language code        |
+| `SampleRate`   | `*SampleRate` | No | Output sample rate |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip     |
 
 ### NewAmazonTTS
@@ -344,6 +354,8 @@ Panics if `Key`, `VoiceID`, or `Provider` is empty.
 | `Provider`     | `string` | Yes      | Voice provider type, such as `CUSTOM_VOICE` or `HUME_AI` |
 | `ConfigID`     | `string` | No       | Configuration ID |
 | `BaseURL`      | `string` | No       | Base URL         |
+| `Speed`        | `*float64` | No     | Playback speed |
+| `TrailingSilence` | `*float64` | No | Trailing silence in seconds |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip |
 
 ### NewRimeTTS
@@ -442,6 +454,10 @@ Panics if `Key`, `Speaker`, or `TargetLanguageCode` is empty.
 | `Key`                | `string` | Yes      | Sarvam API key       |
 | `Speaker`            | `string` | Yes      | Speaker name         |
 | `TargetLanguageCode` | `string` | Yes      | Target language code |
+| `Pitch`              | `*float64` | No     | Pitch adjustment |
+| `Pace`               | `*float64` | No     | Speed of speech |
+| `Loudness`           | `*float64` | No     | Volume level |
+| `SampleRate`         | `*int`   | No       | Audio sample rate |
 | `SkipPatterns`       | `[]int`  | No       | Patterns to skip     |
 
 ---
