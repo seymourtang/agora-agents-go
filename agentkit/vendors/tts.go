@@ -393,13 +393,12 @@ func (d *DeepgramTTS) GetSampleRate() *SampleRate {
 }
 
 func (d *DeepgramTTS) ToConfig() map[string]interface{} {
-	params := map[string]interface{}{
-		"api_key": d.options.APIKey,
-		"model":   d.options.Model,
-	}
+	params := map[string]interface{}{}
 	for key, value := range d.options.AdditionalParams {
 		params[key] = value
 	}
+	params["api_key"] = d.options.APIKey
+	params["model"] = d.options.Model
 	if d.options.BaseURL != "" {
 		params["base_url"] = d.options.BaseURL
 	}

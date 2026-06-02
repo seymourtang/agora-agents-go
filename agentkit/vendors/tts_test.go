@@ -95,11 +95,17 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 		{
 			name: "deepgram",
 			params: NewDeepgramTTS(DeepgramTTSOptions{
-				APIKey:           "deepgram-key",
-				Model:            "aura-2-thalia-en",
-				BaseURL:          "wss://api.deepgram.com/v1/speak",
-				SampleRate:       &sampleRate,
-				AdditionalParams: map[string]interface{}{"encoding": "linear16"},
+				APIKey:     "deepgram-key",
+				Model:      "aura-2-thalia-en",
+				BaseURL:    "wss://api.deepgram.com/v1/speak",
+				SampleRate: &sampleRate,
+				AdditionalParams: map[string]interface{}{
+					"api_key":     "override-key",
+					"model":       "override-model",
+					"base_url":    "wss://override.example.com",
+					"sample_rate": 16000,
+					"encoding":    "linear16",
+				},
 			}).ToConfig()["params"].(map[string]interface{}),
 			want: map[string]interface{}{
 				"api_key":     "deepgram-key",
