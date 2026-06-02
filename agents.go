@@ -828,7 +828,7 @@ type AmazonTtsParams struct {
 	// Amazon Polly voice ID
 	Voice string `json:"voice" url:"voice"`
 	// Amazon Polly engine type
-	Engine *AmazonTtsParamsEngine `json:"engine,omitempty" url:"engine,omitempty"`
+	Engine AmazonTtsParamsEngine `json:"engine" url:"engine"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -866,9 +866,9 @@ func (a *AmazonTtsParams) GetVoice() string {
 	return a.Voice
 }
 
-func (a *AmazonTtsParams) GetEngine() *AmazonTtsParamsEngine {
+func (a *AmazonTtsParams) GetEngine() AmazonTtsParamsEngine {
 	if a == nil {
-		return nil
+		return ""
 	}
 	return a.Engine
 }
@@ -914,7 +914,7 @@ func (a *AmazonTtsParams) SetVoice(voice string) {
 
 // SetEngine sets the Engine field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (a *AmazonTtsParams) SetEngine(engine *AmazonTtsParamsEngine) {
+func (a *AmazonTtsParams) SetEngine(engine AmazonTtsParamsEngine) {
 	a.Engine = engine
 	a.require(amazonTtsParamsFieldEngine)
 }
@@ -2823,7 +2823,7 @@ var (
 
 type ElevenLabsTtsParams struct {
 	// WebSocket URL (e.g., "wss://api.elevenlabs.io/v1")
-	BaseURL *string `json:"base_url,omitempty" url:"base_url,omitempty"`
+	BaseURL string `json:"base_url" url:"base_url"`
 	// ElevenLabs API key
 	Key string `json:"key" url:"key"`
 	// Model ID (e.g., "eleven_flash_v2_5")
@@ -2851,9 +2851,9 @@ type ElevenLabsTtsParams struct {
 	rawJSON json.RawMessage
 }
 
-func (e *ElevenLabsTtsParams) GetBaseURL() *string {
+func (e *ElevenLabsTtsParams) GetBaseURL() string {
 	if e == nil {
-		return nil
+		return ""
 	}
 	return e.BaseURL
 }
@@ -2934,7 +2934,7 @@ func (e *ElevenLabsTtsParams) require(field *big.Int) {
 
 // SetBaseURL sets the BaseURL field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (e *ElevenLabsTtsParams) SetBaseURL(baseURL *string) {
+func (e *ElevenLabsTtsParams) SetBaseURL(baseURL string) {
 	e.BaseURL = baseURL
 	e.require(elevenLabsTtsParamsFieldBaseURL)
 }
@@ -3154,7 +3154,7 @@ type FishAudioTtsParams struct {
 	// Fish Audio reference ID
 	ReferenceID string `json:"reference_id" url:"reference_id"`
 	// Backend model version to use
-	Backend *string `json:"backend,omitempty" url:"backend,omitempty"`
+	Backend string `json:"backend" url:"backend"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -3178,9 +3178,9 @@ func (f *FishAudioTtsParams) GetReferenceID() string {
 	return f.ReferenceID
 }
 
-func (f *FishAudioTtsParams) GetBackend() *string {
+func (f *FishAudioTtsParams) GetBackend() string {
 	if f == nil {
-		return nil
+		return ""
 	}
 	return f.Backend
 }
@@ -3212,7 +3212,7 @@ func (f *FishAudioTtsParams) SetReferenceID(referenceID string) {
 
 // SetBackend sets the Backend field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (f *FishAudioTtsParams) SetBackend(backend *string) {
+func (f *FishAudioTtsParams) SetBackend(backend string) {
 	f.Backend = backend
 	f.require(fishAudioTtsParamsFieldBackend)
 }
@@ -4024,11 +4024,11 @@ type HumeAiTtsParams struct {
 	// Hume AI API key
 	Key string `json:"key" url:"key"`
 	// Hume AI voice ID
-	VoiceID *string `json:"voice_id,omitempty" url:"voice_id,omitempty"`
+	VoiceID string `json:"voice_id" url:"voice_id"`
 	// Base URL for the Hume AI API
 	BaseURL *string `json:"base_url,omitempty" url:"base_url,omitempty"`
 	// Voice provider type
-	Provider *HumeAiTtsParamsProvider `json:"provider,omitempty" url:"provider,omitempty"`
+	Provider HumeAiTtsParamsProvider `json:"provider" url:"provider"`
 	// Playback speed of the generated speech
 	Speed *float64 `json:"speed,omitempty" url:"speed,omitempty"`
 	// Duration of silence in seconds to add at the end of each utterance
@@ -4051,9 +4051,9 @@ func (h *HumeAiTtsParams) GetKey() string {
 	return h.Key
 }
 
-func (h *HumeAiTtsParams) GetVoiceID() *string {
+func (h *HumeAiTtsParams) GetVoiceID() string {
 	if h == nil {
-		return nil
+		return ""
 	}
 	return h.VoiceID
 }
@@ -4065,9 +4065,9 @@ func (h *HumeAiTtsParams) GetBaseURL() *string {
 	return h.BaseURL
 }
 
-func (h *HumeAiTtsParams) GetProvider() *HumeAiTtsParamsProvider {
+func (h *HumeAiTtsParams) GetProvider() HumeAiTtsParamsProvider {
 	if h == nil {
-		return nil
+		return ""
 	}
 	return h.Provider
 }
@@ -4113,7 +4113,7 @@ func (h *HumeAiTtsParams) SetKey(key string) {
 
 // SetVoiceID sets the VoiceID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (h *HumeAiTtsParams) SetVoiceID(voiceID *string) {
+func (h *HumeAiTtsParams) SetVoiceID(voiceID string) {
 	h.VoiceID = voiceID
 	h.require(humeAiTtsParamsFieldVoiceID)
 }
@@ -4127,7 +4127,7 @@ func (h *HumeAiTtsParams) SetBaseURL(baseURL *string) {
 
 // SetProvider sets the Provider field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (h *HumeAiTtsParams) SetProvider(provider *HumeAiTtsParamsProvider) {
+func (h *HumeAiTtsParams) SetProvider(provider HumeAiTtsParamsProvider) {
 	h.Provider = provider
 	h.require(humeAiTtsParamsFieldProvider)
 }
@@ -7104,9 +7104,9 @@ type MurfTtsParams struct {
 	// Murf API key
 	APIKey string `json:"api_key" url:"api_key"`
 	// WebSocket endpoint for streaming TTS output
-	BaseURL string `json:"base_url" url:"base_url"`
+	BaseURL *string `json:"base_url,omitempty" url:"base_url,omitempty"`
 	// Voice ID (e.g., Matthew)
-	VoiceID string `json:"voiceId" url:"voiceId"`
+	VoiceID *string `json:"voiceId,omitempty" url:"voiceId,omitempty"`
 	// Locale for the selected voice
 	Locale *string `json:"locale,omitempty" url:"locale,omitempty"`
 	// Speech rate adjustment
@@ -7133,16 +7133,16 @@ func (m *MurfTtsParams) GetAPIKey() string {
 	return m.APIKey
 }
 
-func (m *MurfTtsParams) GetBaseURL() string {
+func (m *MurfTtsParams) GetBaseURL() *string {
 	if m == nil {
-		return ""
+		return nil
 	}
 	return m.BaseURL
 }
 
-func (m *MurfTtsParams) GetVoiceID() string {
+func (m *MurfTtsParams) GetVoiceID() *string {
 	if m == nil {
-		return ""
+		return nil
 	}
 	return m.VoiceID
 }
@@ -7202,14 +7202,14 @@ func (m *MurfTtsParams) SetAPIKey(apiKey string) {
 
 // SetBaseURL sets the BaseURL field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (m *MurfTtsParams) SetBaseURL(baseURL string) {
+func (m *MurfTtsParams) SetBaseURL(baseURL *string) {
 	m.BaseURL = baseURL
 	m.require(murfTtsParamsFieldBaseURL)
 }
 
 // SetVoiceID sets the VoiceID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (m *MurfTtsParams) SetVoiceID(voiceID string) {
+func (m *MurfTtsParams) SetVoiceID(voiceID *string) {
 	m.VoiceID = voiceID
 	m.require(murfTtsParamsFieldVoiceID)
 }
@@ -7988,7 +7988,7 @@ type RimeTtsParams struct {
 	// Rime speaker ID
 	Speaker string `json:"speaker" url:"speaker"`
 	// Rime TTS model ID
-	ModelID *string `json:"modelId,omitempty" url:"modelId,omitempty"`
+	ModelID string `json:"modelId" url:"modelId"`
 	// WebSocket URL for the Rime streaming API
 	BaseURL *string `json:"base_url,omitempty" url:"base_url,omitempty"`
 
@@ -8014,9 +8014,9 @@ func (r *RimeTtsParams) GetSpeaker() string {
 	return r.Speaker
 }
 
-func (r *RimeTtsParams) GetModelID() *string {
+func (r *RimeTtsParams) GetModelID() string {
 	if r == nil {
-		return nil
+		return ""
 	}
 	return r.ModelID
 }
@@ -8055,7 +8055,7 @@ func (r *RimeTtsParams) SetSpeaker(speaker string) {
 
 // SetModelID sets the ModelID field and marks it as non-optional;
 // this prevents an empty or null value for this field from being omitted during serialization.
-func (r *RimeTtsParams) SetModelID(modelID *string) {
+func (r *RimeTtsParams) SetModelID(modelID string) {
 	r.ModelID = modelID
 	r.require(rimeTtsParamsFieldModelID)
 }
