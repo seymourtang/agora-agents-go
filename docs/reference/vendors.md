@@ -91,7 +91,7 @@ Panics if `Model` is empty. Panics if `APIKey` is empty unless `Model` is one of
 func NewAzureOpenAI(opts AzureOpenAIOptions) *AzureOpenAI
 ```
 
-Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
+Panics if `APIKey`, `Model`, `Endpoint`, or `DeploymentName` is empty.
 
 #### AzureOpenAIOptions
 
@@ -101,7 +101,7 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 | `Endpoint`        | `string`                   | Yes      | —                      | Azure endpoint URL   |
 | `DeploymentName`  | `string`                   | Yes      | —                      | Deployment name      |
 | `APIVersion`      | `string`                   | No       | `"2024-08-01-preview"` | API version          |
-| `Model`           | `string`                   | No       | —                      | Deployment's base model name (e.g., `"gpt-4o"`). Emitted as `params.model` for parity with the TypeScript SDK. |
+| `Model`           | `string`                   | Yes      | —                      | Deployment's base model name (e.g., `"gpt-4o"`). Emitted as `params.model` for parity with the TypeScript SDK. |
 | `Temperature`     | `*float64`                 | No       | —                      | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                      | Nucleus sampling     |
 | `MaxTokens`       | `*int`                     | No       | —                      | Max tokens           |

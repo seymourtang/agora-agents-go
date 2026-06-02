@@ -40,7 +40,7 @@ type Avatar interface {
 | Constructor | Options Struct | Required Fields | Default Model |
 |---|---|---|---|
 | `NewOpenAI` | `OpenAIOptions` | `Model` for Agora-managed models; `APIKey`, `BaseURL`, `Model` for BYOK | — |
-| `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Endpoint`, `DeploymentName` | — |
+| `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Model`, `Endpoint`, `DeploymentName` | — |
 | `NewAnthropic` | `AnthropicOptions` | `APIKey`, `Model`, `URL`, `Headers`, `MaxTokens` | — |
 | `NewGemini` | `GeminiOptions` | `APIKey`, `Model` | — |
 | `NewGroq` | `GroqOptions` | `APIKey`, `Model`, `BaseURL` | — |

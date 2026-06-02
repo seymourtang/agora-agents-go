@@ -172,6 +172,21 @@ func TestLLMVendorsRequireModels(t *testing.T) {
 	})
 }
 
+func TestOpenAIManagedModeIsRestrictedToSupportedModels(t *testing.T) {
+	config := NewOpenAI(OpenAIOptions{Model: "gpt-5-mini"}).ToConfig()
+	params := config["params"].(map[string]interface{})
+	if params["model"] != "gpt-5-mini" {
+		t.Fatalf("unexpected params: %#v", params)
+	}
+
+	assertPanic(t, "OpenAI requires APIKey unless using a supported Agora-managed model", func() {
+		NewOpenAI(OpenAIOptions{Model: "gpt-4o"})
+	})
+	assertPanic(t, "OpenAI Agora-managed mode does not allow Vendor", func() {
+		NewOpenAI(OpenAIOptions{Model: "gpt-5-mini", Vendor: "custom"})
+	})
+}
+
 func assertPanic(t *testing.T, want string, fn func()) {
 	t.Helper()
 	defer func() {
