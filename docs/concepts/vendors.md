@@ -62,15 +62,15 @@ agent := agentkit.NewAgent(...).WithLlm(llm)
 
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
-| `NewElevenLabsTTS` | `ElevenLabsTTSOptions` | `Key`, `ModelID`, `VoiceID` |
+| `NewElevenLabsTTS` | `ElevenLabsTTSOptions` | `Key`, `ModelID`, `VoiceID`, `BaseURL` |
 | `NewMicrosoftTTS` | `MicrosoftTTSOptions` | `Key`, `Region`, `VoiceName` |
 | `NewOpenAITTS` | `OpenAITTSOptions` | `Voice` for Agora-managed `tts-1`; `APIKey`, `Voice` for BYOK |
-| `NewCartesiaTTS` | `CartesiaTTSOptions` | `Key`, `VoiceID` |
+| `NewCartesiaTTS` | `CartesiaTTSOptions` | `APIKey`, `VoiceID`, `ModelID` |
 | `NewGoogleTTS` | `GoogleTTSOptions` | `Key`, `VoiceName` |
-| `NewAmazonTTS` | `AmazonTTSOptions` | `AccessKey`, `SecretKey`, `Region`, `VoiceID` |
-| `NewHumeAITTS` | `HumeAITTSOptions` | `Key` |
-| `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker` |
-| `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID` |
+| `NewAmazonTTS` | `AmazonTTSOptions` | `AccessKey`, `SecretKey`, `Region`, `VoiceID`, `Engine` |
+| `NewHumeAITTS` | `HumeAITTSOptions` | `Key`, `VoiceID`, `Provider` |
+| `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker`, `ModelID` |
+| `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID`, `Backend` |
 | `NewGroqTTS` | `GroqTTSOptions` | `Key` |
 | `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed MiniMax models; `Key`, `GroupID`, `Model` for BYOK |
 | `NewDeepgramTTS` | `DeepgramTTSOptions` | `APIKey`, `Model` |
@@ -82,6 +82,7 @@ tts := vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
     Key:        "<key>",
     ModelID:    "eleven_turbo_v2_5",
     VoiceID:    "<voice_id>",
+    BaseURL:    "wss://api.elevenlabs.io/v1",
     SampleRate: &vendors.SampleRate24kHz,
 })
 

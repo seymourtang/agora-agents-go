@@ -43,6 +43,7 @@ agent := agentkit.NewAgent(
         Key:        "<elevenlabs_key>",
         ModelID:    "eleven_turbo_v2_5",
         VoiceID:    "<voice_id>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         // Choose the sample rate required by your generic avatar provider.
         SampleRate: &sampleRate,
     }),
@@ -99,6 +100,7 @@ func main() {
             Key:        "<elevenlabs_key>",
             ModelID:    "eleven_turbo_v2_5",
             VoiceID:    "<voice_id>",
+            BaseURL:    "wss://api.elevenlabs.io/v1",
             SampleRate: &sr,
         }),
     ).WithStt(
@@ -155,6 +157,7 @@ agent := agentkit.NewAgent(
         Key:        "<elevenlabs_key>",
         ModelID:    "eleven_turbo_v2_5",
         VoiceID:    "<voice_id>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         SampleRate: &sr,
     }),
 ).WithStt(
@@ -196,6 +199,7 @@ agent := agentkit.NewAgent(...).
         Key:        "<key>",
         ModelID:    "<model>",
         VoiceID:    "<voice>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         SampleRate: &sr,           // 24kHz for LiveAvatar
     })).
     WithAvatar(vendors.NewLiveAvatarAvatar(vendors.LiveAvatarAvatarOptions{
@@ -213,6 +217,7 @@ agent := agentkit.NewAgent(...).
         Key:        "<key>",
         ModelID:    "<model>",
         VoiceID:    "<voice>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
         SampleRate: &sr,           // 16kHz — mismatch!
     })).
     WithAvatar(vendors.NewLiveAvatarAvatar(vendors.LiveAvatarAvatarOptions{

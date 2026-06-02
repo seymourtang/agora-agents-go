@@ -195,7 +195,7 @@ The SDK also includes named helpers for the remaining Agora-supported LLM provid
 func NewElevenLabsTTS(opts ElevenLabsTTSOptions) *ElevenLabsTTS
 ```
 
-Panics if `Key`, `ModelID`, or `VoiceID` is empty.
+Panics if `Key`, `ModelID`, `VoiceID`, or `BaseURL` is empty.
 
 #### ElevenLabsTTSOptions
 
@@ -204,7 +204,7 @@ Panics if `Key`, `ModelID`, or `VoiceID` is empty.
 | `Key`          | `string`      | Yes      | ElevenLabs API key                             |
 | `ModelID`      | `string`      | Yes      | Model identifier (e.g., `"eleven_turbo_v2_5"`) |
 | `VoiceID`      | `string`      | Yes      | Voice identifier                               |
-| `BaseURL`      | `string`      | No       | Custom API endpoint                            |
+| `BaseURL`      | `string`      | Yes      | WebSocket base URL                             |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                             |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip in TTS output                 |
 
@@ -254,7 +254,7 @@ Panics if `Voice` is empty. `APIKey` is optional for the Agora-managed `tts-1` p
 func NewCartesiaTTS(opts CartesiaTTSOptions) *CartesiaTTS
 ```
 
-Panics if `APIKey` or `VoiceID` is empty.
+Panics if `APIKey`, `VoiceID`, or `ModelID` is empty.
 
 #### CartesiaTTSOptions
 
@@ -262,7 +262,7 @@ Panics if `APIKey` or `VoiceID` is empty.
 | -------------- | ------------- | -------- | ---------------------------------------------------- |
 | `APIKey`       | `string`      | Yes      | Cartesia API key                                     |
 | `VoiceID`      | `string`      | Yes      | Voice identifier (serialized as `{"mode":"id","id":"..."}`) |
-| `ModelID`      | `string`      | No       | Model identifier                                     |
+| `ModelID`      | `string`      | Yes      | Model identifier                                     |
 | `SampleRate`   | `*SampleRate` | No       | Output sample rate                                   |
 | `SkipPatterns` | `[]int`       | No       | Patterns to skip                                     |
 
@@ -291,7 +291,7 @@ Panics if `Key` or `VoiceName` is empty.
 func NewAmazonTTS(opts AmazonTTSOptions) *AmazonTTS
 ```
 
-Panics if `AccessKey`, `SecretKey`, `Region`, or `VoiceID` is empty.
+Panics if `AccessKey`, `SecretKey`, `Region`, `VoiceID`, or `Engine` is empty.
 
 #### AmazonTTSOptions
 
@@ -301,6 +301,7 @@ Panics if `AccessKey`, `SecretKey`, `Region`, or `VoiceID` is empty.
 | `SecretKey`    | `string` | Yes      | AWS secret key   |
 | `Region`       | `string` | Yes      | AWS region       |
 | `VoiceID`      | `string` | Yes      | Polly voice ID   |
+| `Engine`       | `string` | Yes      | Polly engine type |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip |
 
 ### NewDeepgramTTS
@@ -330,14 +331,17 @@ Panics if `APIKey` or `Model` is empty.
 func NewHumeAITTS(opts HumeAITTSOptions) *HumeAITTS
 ```
 
-Panics if `Key` is empty.
+Panics if `Key`, `VoiceID`, or `Provider` is empty.
 
 #### HumeAITTSOptions
 
 | Field          | Type     | Required | Description      |
 | -------------- | -------- | -------- | ---------------- |
 | `Key`          | `string` | Yes      | Hume AI API key  |
+| `VoiceID`      | `string` | Yes      | Hume AI voice ID |
+| `Provider`     | `string` | Yes      | Voice provider type, such as `CUSTOM_VOICE` or `HUME_AI` |
 | `ConfigID`     | `string` | No       | Configuration ID |
+| `BaseURL`      | `string` | No       | Base URL         |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip |
 
 ### NewRimeTTS
@@ -347,7 +351,7 @@ Panics if `Key` is empty.
 func NewRimeTTS(opts RimeTTSOptions) *RimeTTS
 ```
 
-Panics if `Key` or `Speaker` is empty.
+Panics if `Key`, `Speaker`, or `ModelID` is empty.
 
 #### RimeTTSOptions
 
@@ -355,10 +359,8 @@ Panics if `Key` or `Speaker` is empty.
 | -------------- | ---------- | -------- | --------------------------------------------- |
 | `Key`          | `string`   | Yes      | Rime API key                                  |
 | `Speaker`      | `string`   | Yes      | Speaker identifier                            |
-| `ModelID`      | `string`   | No       | Model identifier                              |
-| `Lang`         | `string`   | No       | Language code                                 |
-| `SamplingRate` | `*int`     | No       | Sampling rate in Hz (serialized as `samplingRate`) |
-| `SpeedAlpha`   | `*float64` | No       | Speed multiplier (serialized as `speedAlpha`) |
+| `ModelID`      | `string`   | Yes      | Model identifier                              |
+| `BaseURL`      | `string`   | No       | WebSocket URL                                 |
 | `SkipPatterns` | `[]int`    | No       | Patterns to skip                              |
 
 ### NewFishAudioTTS
@@ -368,7 +370,7 @@ Panics if `Key` or `Speaker` is empty.
 func NewFishAudioTTS(opts FishAudioTTSOptions) *FishAudioTTS
 ```
 
-Panics if `Key` or `ReferenceID` is empty.
+Panics if `Key`, `ReferenceID`, or `Backend` is empty.
 
 #### FishAudioTTSOptions
 
@@ -376,6 +378,7 @@ Panics if `Key` or `ReferenceID` is empty.
 | -------------- | -------- | -------- | ------------------ |
 | `Key`          | `string` | Yes      | FishAudio API key  |
 | `ReferenceID`  | `string` | Yes      | Reference audio ID |
+| `Backend`      | `string` | Yes      | Backend model version |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip   |
 
 ### NewMiniMaxTTS
@@ -405,15 +408,21 @@ Panics if `Model` is empty. `Key` is optional for supported Agora-managed MiniMa
 func NewMurfTTS(opts MurfTTSOptions) *MurfTTS
 ```
 
-Panics if `Key` or `VoiceID` is empty.
+Panics if `Key` is empty.
 
 #### MurfTTSOptions
 
 | Field          | Type     | Required | Description                              |
 | -------------- | -------- | -------- | ---------------------------------------- |
 | `Key`          | `string` | Yes      | Murf API key                             |
-| `VoiceID`      | `string` | Yes      | Voice ID (e.g., `Ariana`, `Natalie`)     |
+| `VoiceID`      | `string` | No       | Voice ID (e.g., `Ariana`, `Natalie`)     |
+| `BaseURL`      | `string` | No       | WebSocket endpoint                       |
 | `Style`        | `string` | No       | Voice style (e.g., `Conversational`)     |
+| `Locale`       | `string` | No       | Voice locale                             |
+| `Rate`         | `*float64` | No      | Speech rate                              |
+| `Pitch`        | `*float64` | No      | Pitch adjustment                         |
+| `Model`        | `string` | No       | TTS model                                |
+| `SampleRate`   | `*int`   | No       | Audio sample rate                        |
 | `SkipPatterns` | `[]int`  | No       | Patterns to skip                         |
 
 ### NewSarvamTTS

@@ -42,6 +42,7 @@ func main() {
     })
 
     // In BYOK mode, each vendor carries its own credentials.
+    sampleRate := vendors.SampleRate24kHz
     agent := agentkit.NewAgent(
         agentkit.WithName("support-assistant"),
     ).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
@@ -60,7 +61,8 @@ func main() {
         Key:        os.Getenv("ELEVENLABS_API_KEY"),
         ModelID:    "eleven_flash_v2_5",
         VoiceID:    os.Getenv("ELEVENLABS_VOICE_ID"),
-        SampleRate: 24000,
+        BaseURL:    "wss://api.elevenlabs.io/v1",
+        SampleRate: &sampleRate,
     }))
 
     session := agent.CreateSession(client, agentkit.CreateSessionOptions{

@@ -291,7 +291,8 @@ func main() {
     })).WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:     "<elevenlabs_key>",
         ModelID:  "eleven_turbo_v2_5",
-        VoiceID:  "<voice_id>",
+        VoiceID:    "<voice_id>",
+        BaseURL:    "wss://api.elevenlabs.io/v1",
     })).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
         APIKey:   "<deepgram_key>",
         Model:    "nova-2",
