@@ -81,7 +81,7 @@ func TestSTTExplicitInteractionLanguageCanDifferFromProviderLanguage(t *testing.
 func TestSTTDefaultInteractionLanguageIsSentWithoutSTT(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage())
 
-	assert.Equal(t, map[string]interface{}{"language": "en-US"}, props["asr"])
+	assert.Equal(t, map[string]interface{}{"vendor": "ares", "language": "en-US"}, props["asr"])
 }
 
 func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {

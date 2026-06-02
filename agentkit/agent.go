@@ -946,7 +946,7 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 func (a *Agent) resolveAsrConfig() map[string]interface{} {
 	asrConfig := cloneConfig(a.stt)
 	if asrConfig == nil {
-		asrConfig = map[string]interface{}{}
+		asrConfig = map[string]interface{}{"vendor": "ares"}
 	}
 
 	language := string(a.interactionLanguage)

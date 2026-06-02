@@ -329,6 +329,9 @@ func NewAmazonTTS(opts AmazonTTSOptions) *AmazonTTS {
 	if opts.VoiceID == "" {
 		panic("AmazonTTS requires VoiceID")
 	}
+	if opts.Engine == "" {
+		panic("AmazonTTS requires Engine")
+	}
 	return &AmazonTTS{options: opts}
 }
 
@@ -487,6 +490,9 @@ func NewRimeTTS(opts RimeTTSOptions) *RimeTTS {
 	if opts.Speaker == "" {
 		panic("RimeTTS requires Speaker")
 	}
+	if opts.ModelID == "" {
+		panic("RimeTTS requires ModelID")
+	}
 	return &RimeTTS{options: opts}
 }
 
@@ -533,6 +539,9 @@ func NewFishAudioTTS(opts FishAudioTTSOptions) *FishAudioTTS {
 	}
 	if opts.ReferenceID == "" {
 		panic("FishAudioTTS requires ReferenceID")
+	}
+	if opts.Backend == "" {
+		panic("FishAudioTTS requires Backend")
 	}
 	return &FishAudioTTS{options: opts}
 }
@@ -701,12 +710,6 @@ func NewMurfTTS(opts MurfTTSOptions) *MurfTTS {
 	if opts.Key == "" {
 		panic("MurfTTS requires Key")
 	}
-	if opts.VoiceID == "" {
-		panic("MurfTTS requires VoiceID")
-	}
-	if opts.BaseURL == "" {
-		panic("MurfTTS requires BaseURL")
-	}
 	return &MurfTTS{options: opts}
 }
 
@@ -715,10 +718,12 @@ func (m *MurfTTS) GetSampleRate() *SampleRate {
 }
 
 func (m *MurfTTS) ToConfig() map[string]interface{} {
-	params := map[string]interface{}{
-		"api_key":  m.options.Key,
-		"base_url": m.options.BaseURL,
-		"voiceId":  m.options.VoiceID,
+	params := map[string]interface{}{"api_key": m.options.Key}
+	if m.options.BaseURL != "" {
+		params["base_url"] = m.options.BaseURL
+	}
+	if m.options.VoiceID != "" {
+		params["voiceId"] = m.options.VoiceID
 	}
 	if m.options.Style != "" {
 		params["style"] = m.options.Style

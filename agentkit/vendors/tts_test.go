@@ -101,6 +101,13 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			}).ToConfig()["params"].(map[string]interface{}),
 			want: map[string]interface{}{"api_key": "murf-key", "base_url": "wss://murf.example/ws", "voiceId": "Ariana"},
 		},
+		{
+			name: "murf minimal",
+			params: NewMurfTTS(MurfTTSOptions{
+				Key: "murf-key",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{"api_key": "murf-key"},
+		},
 	}
 
 	for _, tc := range cases {
