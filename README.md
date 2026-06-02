@@ -22,7 +22,7 @@ go get github.com/AgoraIO/agora-agents-go/v2@v2.0.0
 ## Quick Start
 
 Start with the `Agent` builder: create a client with app credentials, choose your ASR, LLM, and TTS providers, then start a session. Omit vendor API keys for supported Agora-managed models, or provide keys when you want BYOK.
-Use `WithInteractionLanguage()` for Agora `asr.language`; provider-specific STT language values remain under `asr.params`.
+Set Agora interaction language with `TurnDetectionConfig.Language`; provider-specific STT language values remain under `asr.params`.
 
 ```go
 package main
@@ -33,6 +33,7 @@ import (
     "os"
     "time"
 
+    Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
     "github.com/AgoraIO/agora-agents-go/v2/option"
@@ -78,8 +79,8 @@ func startConversation(ctx context.Context) (string, error) {
 
     agent := agentkit.NewAgent(
         agentkit.WithName(fmt.Sprintf("conversation-%d", time.Now().UnixMilli())),
-        agentkit.WithInteractionLanguage("en-US"),
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+            Language: Agora.AsrLanguageEnUs.Ptr(),
             Config: &agentkit.TurnDetectionNestedConfig{
                 SpeechThreshold: float64Ptr(0.5),
                 StartOfSpeech: &agentkit.StartOfSpeechConfig{
@@ -154,7 +155,9 @@ func main() {
 Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed models.
 
 ```go
-agent := agentkit.NewAgent(agentkit.WithInteractionLanguage("en-US")).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
+agent := agentkit.NewAgent(agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+    Language: Agora.AsrLanguageEnUs.Ptr(),
+})).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
     APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
     Model:    "nova-3",
     Language: "en",

@@ -46,7 +46,7 @@ These are passed to `agentkit.NewAgent(opts ...AgentOption)`:
 | `WithGreeting(greeting string)` | Greeting text | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
 | `WithFailureMessage(msg string)` | Fallback message | Deprecated. Use LLM/MLLM vendor `FailureMessage` instead. |
 | `WithMaxHistory(n int)` | History depth | Deprecated. Use LLM vendor `MaxHistory` instead. |
-| `WithTurnDetectionConfig(td *TurnDetectionConfig)` | Turn detection config | Cascading-flow SOS/EOS detection |
+| `WithTurnDetectionConfig(td *TurnDetectionConfig)` | Turn detection config | Configure `turn_detection.language` and cascading-flow SOS/EOS detection |
 | `WithSalConfig(sal *SalConfig)` | SAL config | Speech analytics configuration |
 | `WithAdvancedFeatures(af *AdvancedFeatures)` | Feature flags | RTM, tools, and other advanced features |
 | `WithParameters(params *SessionParams)` | Session params | Additional session parameters |
@@ -93,7 +93,7 @@ agent := agentkit.NewAgent(
 | `WithStt(vendor vendors.STT)` | `vendors.STT` interface | Set the STT vendor |
 | `WithMllm(vendor vendors.MLLM)` | `vendors.MLLM` interface | Set the MLLM vendor (for multimodal flow) |
 | `WithAvatar(vendor vendors.Avatar)` | `vendors.Avatar` interface | Set the avatar vendor (validates sample rate) |
-| `WithTurnDetection(td *TurnDetectionConfig)` | Pointer to config | Override cascading-flow SOS/EOS detection; use interruption config for interruption behavior |
+| `WithTurnDetection(td *TurnDetectionConfig)` | Pointer to config | Configure `turn_detection.language` and cascading-flow SOS/EOS detection; use interruption config for interruption behavior |
 | `WithInstructions(instructions string)` | String | Deprecated. Use LLM vendor `SystemMessages` instead. |
 | `WithGreeting(greeting string)` | String | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
 | `WithName(name string)` | String | Override name on a cloned agent |

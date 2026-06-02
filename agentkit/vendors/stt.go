@@ -1,19 +1,12 @@
 package vendors
 
 import (
-	"fmt"
 	"strings"
 
 	Agora "github.com/AgoraIO/agora-agents-go/v2"
 )
 
-func interactionLanguage(language string, explicit string) string {
-	if explicit != "" {
-		if _, err := Agora.NewAsrLanguageFromString(explicit); err != nil {
-			panic(fmt.Sprintf("invalid interaction language: %s", explicit))
-		}
-		return explicit
-	}
+func interactionLanguage(language string) string {
 	if _, err := Agora.NewAsrLanguageFromString(language); err == nil {
 		return language
 	}
@@ -21,12 +14,11 @@ func interactionLanguage(language string, explicit string) string {
 }
 
 type SpeechmaticsSTTOptions struct {
-	APIKey              string
-	Language            string
-	InteractionLanguage string
-	Model               string
-	URI                 string
-	AdditionalParams    map[string]interface{}
+	APIKey           string
+	Language         string
+	Model            string
+	URI              string
+	AdditionalParams map[string]interface{}
 }
 
 type SpeechmaticsSTT struct {
@@ -64,20 +56,19 @@ func (s *SpeechmaticsSTT) ToConfig() map[string]interface{} {
 		"vendor": "speechmatics",
 		"params": params,
 	}
-	if language := interactionLanguage(s.options.Language, s.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(s.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config
 }
 
 type DeepgramSTTOptions struct {
-	APIKey              string
-	Model               string
-	Language            string
-	InteractionLanguage string
-	SmartFormat         *bool
-	Punctuation         *bool
-	AdditionalParams    map[string]interface{}
+	APIKey           string
+	Model            string
+	Language         string
+	SmartFormat      *bool
+	Punctuation      *bool
+	AdditionalParams map[string]interface{}
 }
 
 type DeepgramSTT struct {
@@ -120,18 +111,17 @@ func (d *DeepgramSTT) ToConfig() map[string]interface{} {
 		"vendor": "deepgram",
 		"params": params,
 	}
-	if language := interactionLanguage(d.options.Language, d.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(d.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config
 }
 
 type MicrosoftSTTOptions struct {
-	Key                 string
-	Region              string
-	Language            string
-	InteractionLanguage string
-	AdditionalParams    map[string]interface{}
+	Key              string
+	Region           string
+	Language         string
+	AdditionalParams map[string]interface{}
 }
 
 type MicrosoftSTT struct {
@@ -166,7 +156,7 @@ func (m *MicrosoftSTT) ToConfig() map[string]interface{} {
 		"vendor": "microsoft",
 		"params": params,
 	}
-	if language := interactionLanguage(m.options.Language, m.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(m.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config
@@ -178,7 +168,6 @@ type OpenAISTTOptions struct {
 	Language                string
 	Prompt                  string
 	InputAudioTranscription map[string]interface{}
-	InteractionLanguage     string
 	AdditionalParams        map[string]interface{}
 }
 
@@ -220,7 +209,7 @@ func (o *OpenAISTT) ToConfig() map[string]interface{} {
 		"vendor": "openai",
 		"params": params,
 	}
-	if language := interactionLanguage(o.options.Language, o.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(o.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config
@@ -231,7 +220,6 @@ type GoogleSTTOptions struct {
 	Location             string
 	ADCCredentialsString string
 	Language             string
-	InteractionLanguage  string
 	Model                string
 	AdditionalParams     map[string]interface{}
 }
@@ -275,19 +263,18 @@ func (g *GoogleSTT) ToConfig() map[string]interface{} {
 		"vendor": "google",
 		"params": params,
 	}
-	if language := interactionLanguage(g.options.Language, g.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(g.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config
 }
 
 type AmazonSTTOptions struct {
-	AccessKey           string
-	SecretKey           string
-	Region              string
-	Language            string
-	InteractionLanguage string
-	AdditionalParams    map[string]interface{}
+	AccessKey        string
+	SecretKey        string
+	Region           string
+	Language         string
+	AdditionalParams map[string]interface{}
 }
 
 type AmazonSTT struct {
@@ -326,18 +313,17 @@ func (a *AmazonSTT) ToConfig() map[string]interface{} {
 		"vendor": "amazon",
 		"params": params,
 	}
-	if language := interactionLanguage(a.options.Language, a.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(a.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config
 }
 
 type AssemblyAISTTOptions struct {
-	APIKey              string
-	Language            string
-	InteractionLanguage string
-	URI                 string
-	AdditionalParams    map[string]interface{}
+	APIKey           string
+	Language         string
+	URI              string
+	AdditionalParams map[string]interface{}
 }
 
 type AssemblyAISTT struct {
@@ -371,7 +357,7 @@ func (a *AssemblyAISTT) ToConfig() map[string]interface{} {
 		"vendor": "assemblyai",
 		"params": params,
 	}
-	if language := interactionLanguage(a.options.Language, a.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(a.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config
@@ -408,11 +394,10 @@ func (a *AresSTT) ToConfig() map[string]interface{} {
 }
 
 type SarvamSTTOptions struct {
-	APIKey              string
-	Language            string
-	InteractionLanguage string
-	Model               string
-	AdditionalParams    map[string]interface{}
+	APIKey           string
+	Language         string
+	Model            string
+	AdditionalParams map[string]interface{}
 }
 
 type SarvamSTT struct {
@@ -444,7 +429,7 @@ func (s *SarvamSTT) ToConfig() map[string]interface{} {
 		"vendor": "sarvam",
 		"params": params,
 	}
-	if language := interactionLanguage(s.options.Language, s.options.InteractionLanguage); language != "" {
+	if language := interactionLanguage(s.options.Language); language != "" {
 		config["language"] = language
 	}
 	return config

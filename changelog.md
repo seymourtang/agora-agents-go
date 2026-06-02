@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- **ASR interaction language** — AgentKit now manages Agora `asr.language` through `InteractionLanguage` / `WithInteractionLanguage()`, validates it against the supported BCP-47 interaction language list, and sends the default `en-US` when no language is provided.
+- **Turn detection language** — AgentKit now manages Agora interaction language through `TurnDetectionConfig.Language`, validates it against the supported BCP-47 language list, and sends the default `en-US` when no language is provided.
 - **Provider parameter parity** — ASR, LLM, MLLM, TTS, and avatar wrappers expose typed provider parameters plus passthrough fields where the generated core supports additional properties.
 
 ### Changed
@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 
 - **Managed-provider validation** — AgentKit validation now distinguishes preset-backed providers from BYOK providers so required provider fields are only required when credentials are caller-supplied.
-- **ASR language separation** — Provider-specific STT language values remain under `asr.params`, while Agora interaction language is emitted separately as `asr.language`.
+- **Language placement** — Provider-specific STT language values remain under `asr.params`, while Agora interaction language is emitted separately as `turn_detection.language`.
 - **Deepgram TTS explicit fields** — `AdditionalParams` can no longer override explicit `APIKey`, `Model`, `BaseURL`, or `SampleRate` values.
 
 ## [v2.0.0] — 2026-05-21

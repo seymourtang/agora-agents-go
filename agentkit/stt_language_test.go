@@ -3,6 +3,7 @@ package agentkit
 import (
 	"testing"
 
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
 	"github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,7 +41,7 @@ func asrFromProperties(t *testing.T, props map[string]interface{}) map[string]in
 	return asr
 }
 
-func TestSTTLanguageSerializesBCP47ToASRAndProviderParams(t *testing.T) {
+func TestSTTLanguageSerializesBCP47ToTurnDetectionAndProviderParams(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage().
 		WithStt(vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
 			APIKey:   "stt-key",
@@ -49,11 +50,12 @@ func TestSTTLanguageSerializesBCP47ToASRAndProviderParams(t *testing.T) {
 
 	asr := asrFromProperties(t, props)
 	assert.Equal(t, "speechmatics", asr["vendor"])
-	assert.Equal(t, "en-US", asr["language"])
+	assert.NotContains(t, asr, "language")
+	assert.Equal(t, "en-US", props["turn_detection"].(map[string]interface{})["language"])
 	assert.Equal(t, "en-US", asr["params"].(map[string]interface{})["language"])
 }
 
-func TestSTTProviderLanguageDefaultsInteractionLanguageWhenUnsupportedByAres(t *testing.T) {
+func TestSTTProviderLanguageDefaultsTurnDetectionLanguageWhenUnsupportedByAres(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage().
 		WithStt(vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
 			APIKey:   "stt-key",
@@ -61,44 +63,45 @@ func TestSTTProviderLanguageDefaultsInteractionLanguageWhenUnsupportedByAres(t *
 		})))
 
 	asr := asrFromProperties(t, props)
-	assert.Equal(t, "en-US", asr["language"])
+	assert.NotContains(t, asr, "language")
+	assert.Equal(t, "en-US", props["turn_detection"].(map[string]interface{})["language"])
 	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
-	assert.NotContains(t, props, "turn_detection")
 }
 
-func TestSTTExplicitInteractionLanguageCanDifferFromProviderLanguage(t *testing.T) {
+func TestTurnDetectionLanguageCanDifferFromProviderLanguage(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage().
-		WithInteractionLanguage("fr-FR").
+		WithTurnDetection(&TurnDetectionConfig{
+			Language: Agora.AsrLanguageFrFr.Ptr(),
+		}).
 		WithStt(vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
 			APIKey:   "stt-key",
 			Language: "en",
 		})))
 
 	asr := asrFromProperties(t, props)
-	assert.Equal(t, "fr-FR", asr["language"])
+	assert.NotContains(t, asr, "language")
+	assert.Equal(t, "fr-FR", props["turn_detection"].(map[string]interface{})["language"])
 	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
 }
 
-func TestInvalidExplicitInteractionLanguagePanics(t *testing.T) {
+func TestInvalidTurnDetectionLanguagePanics(t *testing.T) {
 	assert.PanicsWithValue(t, "invalid interaction language: en", func() {
-		NewAgent(WithInteractionLanguage("en"))
-	})
-	assert.PanicsWithValue(t, "invalid interaction language: xx-YY", func() {
-		baseAgentForSTTLanguage().WithInteractionLanguage("xx-YY")
-	})
-	assert.PanicsWithValue(t, "invalid interaction language: xx-YY", func() {
-		vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
-			APIKey:              "stt-key",
-			Language:            "en",
-			InteractionLanguage: "xx-YY",
-		}).ToConfig()
+		baseAgentForSTTLanguage().WithTurnDetection(&TurnDetectionConfig{
+			Language: Agora.AsrLanguage("en").Ptr(),
+		}).ToPropertiesMap(ToPropertiesOptions{
+			Channel:    "channel",
+			Token:      "token",
+			AgentUID:   "1001",
+			RemoteUIDs: []string{"1002"},
+		})
 	})
 }
 
-func TestSTTDefaultInteractionLanguageIsSentWithoutSTT(t *testing.T) {
+func TestSTTDefaultTurnDetectionLanguageIsSentWithoutSTT(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage())
 
-	assert.Equal(t, map[string]interface{}{"vendor": "ares", "language": "en-US"}, props["asr"])
+	assert.Equal(t, map[string]interface{}{"vendor": "ares"}, props["asr"])
+	assert.Equal(t, map[string]interface{}{"language": "en-US"}, props["turn_detection"])
 }
 
 func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {

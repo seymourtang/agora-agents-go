@@ -105,7 +105,7 @@ Note: `OpenAITTS` always returns `SampleRate24kHz`. Other TTS vendors return the
 
 ## STT Vendors
 
-Use `Agent.WithInteractionLanguage()` for Agora `asr.language`; it defaults to `en-US`. STT vendor `Language` fields are serialized under `asr.params` using each provider's own format.
+Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults to `en-US`. STT vendor `Language` fields are serialized under `asr.params` using each provider's own format.
 
 | Constructor | Options Struct | Required Fields |
 |---|---|---|

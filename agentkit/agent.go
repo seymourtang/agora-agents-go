@@ -10,17 +10,17 @@ import (
 	"github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
 )
 
-type InteractionLanguage string
+type turnDetectionLanguage string
 
-const DefaultInteractionLanguage InteractionLanguage = InteractionLanguage(Agora.AsrLanguageEnUs)
+const defaultTurnDetectionLanguage turnDetectionLanguage = turnDetectionLanguage(Agora.AsrLanguageEnUs)
 
-func isInteractionLanguage(language string) bool {
+func isTurnDetectionLanguage(language string) bool {
 	_, err := Agora.NewAsrLanguageFromString(language)
 	return err == nil
 }
 
-func validateInteractionLanguage(language InteractionLanguage) {
-	if !isInteractionLanguage(string(language)) {
+func validateTurnDetectionLanguage(language string) {
+	if !isTurnDetectionLanguage(string(language)) {
 		panic(fmt.Sprintf("invalid interaction language: %s", language))
 	}
 }
@@ -357,7 +357,6 @@ type Agent struct {
 	sal                      *SalConfig
 	advancedFeatures         *AdvancedFeatures
 	parameters               *SessionParams
-	interactionLanguage      InteractionLanguage
 	audioScenario            *ParametersAudioScenario
 	geofence                 *GeofenceConfig
 	labels                   map[string]string
@@ -455,13 +454,6 @@ func WithParameters(params *SessionParams) AgentOption {
 	}
 }
 
-func WithInteractionLanguage(language InteractionLanguage) AgentOption {
-	return func(a *Agent) {
-		validateInteractionLanguage(language)
-		a.interactionLanguage = language
-	}
-}
-
 func WithAudioScenario(audioScenario ParametersAudioScenario) AgentOption {
 	return func(a *Agent) {
 		a.audioScenario = &audioScenario
@@ -519,13 +511,6 @@ func (a *Agent) WithTts(vendor vendors.TTS) *Agent {
 func (a *Agent) WithStt(vendor vendors.STT) *Agent {
 	clone := a.clone()
 	clone.stt = vendor.ToConfig()
-	return clone
-}
-
-func (a *Agent) WithInteractionLanguage(language InteractionLanguage) *Agent {
-	validateInteractionLanguage(language)
-	clone := a.clone()
-	clone.interactionLanguage = language
 	return clone
 }
 
@@ -701,7 +686,6 @@ func (a *Agent) GreetingConfigs() *LlmGreetingConfigs          { return a.greeti
 func (a *Agent) Sal() *SalConfig                               { return a.sal }
 func (a *Agent) AdvancedFeatures() *AdvancedFeatures           { return a.advancedFeatures }
 func (a *Agent) Parameters() *SessionParams                    { return a.parameters }
-func (a *Agent) InteractionLanguage() InteractionLanguage      { return a.interactionLanguage }
 func (a *Agent) Geofence() *GeofenceConfig                     { return a.geofence }
 func (a *Agent) Labels() map[string]string                     { return a.labels }
 func (a *Agent) Rtc() *RtcConfig                               { return a.rtc }
@@ -821,11 +805,6 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	if a.mllm != nil {
 		propsMap["mllm"] = a.buildMllmConfigMap()
 	}
-	if a.turnDetection != nil {
-		if err := setStructMap(propsMap, "turn_detection", a.turnDetection); err != nil {
-			return nil, err
-		}
-	}
 	if a.interruption != nil {
 		if err := setStructMap(propsMap, "interruption", a.interruption); err != nil {
 			return nil, err
@@ -892,10 +871,20 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	}
 
 	if a.mllm != nil {
+		if a.turnDetection != nil {
+			if err := setStructMap(propsMap, "turn_detection", a.turnDetection); err != nil {
+				return nil, err
+			}
+		}
 		return propsMap, nil
 	}
 
 	propsMap["asr"] = a.resolveAsrConfig()
+	turnDetection, err := a.resolveTurnDetectionConfig()
+	if err != nil {
+		return nil, err
+	}
+	propsMap["turn_detection"] = turnDetection
 
 	if !opts.SkipVendorValidation {
 		if a.tts == nil {
@@ -921,17 +910,37 @@ func (a *Agent) resolveAsrConfig() map[string]interface{} {
 	if asrConfig == nil {
 		asrConfig = map[string]interface{}{"vendor": "ares"}
 	}
+	delete(asrConfig, "language")
+	if len(asrConfig) == 0 {
+		asrConfig["vendor"] = "ares"
+	}
+	return asrConfig
+}
 
-	language := string(a.interactionLanguage)
-	if language == "" {
-		if existing, ok := asrConfig["language"].(string); ok && isInteractionLanguage(existing) {
-			language = existing
-		} else {
-			language = string(DefaultInteractionLanguage)
+func (a *Agent) resolveTurnDetectionConfig() (map[string]interface{}, error) {
+	turnDetection := map[string]interface{}{}
+	if a.turnDetection != nil {
+		var err error
+		turnDetection, err = structToMap(a.turnDetection)
+		if err != nil {
+			return nil, fmt.Errorf("failed to serialize turn detection config: %w", err)
 		}
 	}
-	asrConfig["language"] = language
-	return asrConfig
+
+	language := ""
+	if existing, ok := turnDetection["language"].(string); ok && existing != "" {
+		language = existing
+	}
+	if language == "" {
+		if existing, ok := a.stt["language"].(string); ok && isTurnDetectionLanguage(existing) {
+			language = existing
+		} else {
+			language = string(defaultTurnDetectionLanguage)
+		}
+	}
+	validateTurnDetectionLanguage(language)
+	turnDetection["language"] = language
+	return turnDetection, nil
 }
 
 func (a *Agent) buildMllmConfigMap() map[string]interface{} {

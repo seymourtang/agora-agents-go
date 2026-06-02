@@ -78,7 +78,7 @@ Deprecated. Configure `MaxHistory` on the LLM vendor instead.
 func WithTurnDetectionConfig(td *TurnDetectionConfig) AgentOption
 ```
 
-Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection. Use interruption config for interruption behavior and MLLM vendor `TurnDetection` for MLLM turn detection.
+Sets cascading-flow turn detection configuration. Use `Language` for the Agora interaction language, `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection, interruption config for interruption behavior, and MLLM vendor `TurnDetection` for MLLM turn detection.
 
 ### WithInterruptionConfig
 
@@ -229,7 +229,7 @@ func (a *Agent) WithAvatar(vendor vendors.Avatar) *Agent
 func (a *Agent) WithTurnDetection(td *TurnDetectionConfig) *Agent
 ```
 
-Sets cascading-flow turn detection configuration. Use `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection. Use interruption config for interruption behavior and MLLM vendor `TurnDetection` for MLLM turn detection.
+Sets cascading-flow turn detection configuration. Use `Language` for the Agora interaction language, `Config.StartOfSpeech` and `Config.EndOfSpeech` for SOS/EOS detection, interruption config for interruption behavior, and MLLM vendor `TurnDetection` for MLLM turn detection.
 
 Example with `pause_state_enabled`:
 

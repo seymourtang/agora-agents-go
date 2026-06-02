@@ -479,7 +479,6 @@ Panics if `APIKey` or `Language` is empty.
 |---|---|---|---|
 | `APIKey` | `string` | Yes | Speechmatics API key |
 | `Language` | `string` | Yes | Speechmatics language code |
-| `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `Model` | `string` | No | Model identifier |
 | `URI` | `string` | No | Speechmatics streaming WebSocket URL |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
@@ -500,7 +499,6 @@ Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed
 | `APIKey`           | `string`                 | BYOK only | Deepgram API key. Optional only for Agora-managed `nova-2` and `nova-3`. |
 | `Model`            | `string`                 | No       | Model (e.g., `"nova-2"`) |
 | `Language`         | `string`                 | No       | Language code            |
-| `InteractionLanguage` | `string`              | No       | Agora `asr.language` override |
 | `SmartFormat`      | `*bool`                  | No       | Enable smart formatting  |
 | `Punctuation`      | `*bool`                  | No       | Enable punctuation       |
 | `AdditionalParams` | `map[string]interface{}` | No       | Additional vendor params |
@@ -521,7 +519,6 @@ Panics if `Key`, `Region`, or `Language` is empty.
 | `Key`      | `string` | Yes      | Azure Speech Services key |
 | `Region`   | `string` | Yes      | Azure region              |
 | `Language` | `string` | Yes      | Language code             |
-| `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 
 ### NewOpenAISTT
 
@@ -541,7 +538,6 @@ Panics if `APIKey` is empty.
 | `Language` | `string` | No | OpenAI transcription language |
 | `Prompt` | `string` | No | Prompt for OpenAI transcription |
 | `InputAudioTranscription` | `map[string]interface{}` | No | OpenAI transcription settings |
-| `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ### NewGoogleSTT
@@ -561,7 +557,6 @@ Panics if `ProjectID`, `Location`, `ADCCredentialsString`, or `Language` is empt
 | `Location` | `string` | Yes | Google Cloud region |
 | `ADCCredentialsString` | `string` | Yes | Google service account credentials JSON string |
 | `Language` | `string` | Yes | Google recognition language |
-| `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `Model` | `string` | No | Model identifier |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
@@ -582,7 +577,6 @@ Panics if `AccessKey`, `SecretKey`, `Region`, or `Language` is empty.
 | `SecretKey` | `string` | Yes      | AWS secret key |
 | `Region`    | `string` | Yes      | AWS region     |
 | `Language`  | `string` | Yes      | Amazon `language_code` |
-| `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ### NewAssemblyAISTT
@@ -600,7 +594,6 @@ Panics if `APIKey` or `Language` is empty.
 |---|---|---|---|
 | `APIKey` | `string` | Yes | AssemblyAI API key |
 | `Language` | `string` | Yes | AssemblyAI language code |
-| `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `URI` | `string` | No | AssemblyAI streaming WebSocket URL |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
