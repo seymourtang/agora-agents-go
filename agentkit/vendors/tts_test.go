@@ -112,16 +112,18 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 		{
 			name: "openai byok",
 			params: NewOpenAITTS(OpenAITTSOptions{
-				APIKey:  "openai-key",
-				Voice:   "coral",
-				Model:   "gpt-4o-mini-tts",
-				BaseURL: "https://api.openai.com/v1",
+				APIKey:       "openai-key",
+				Voice:        "coral",
+				Model:        "gpt-4o-mini-tts",
+				BaseURL:      "https://api.openai.com/v1",
+				Instructions: "speak clearly",
 			}).ToConfig()["params"].(map[string]interface{}),
 			want: map[string]interface{}{
-				"voice":    "coral",
-				"api_key":  "openai-key",
-				"base_url": "https://api.openai.com/v1",
-				"model":    "gpt-4o-mini-tts",
+				"voice":        "coral",
+				"api_key":      "openai-key",
+				"base_url":     "https://api.openai.com/v1",
+				"model":        "gpt-4o-mini-tts",
+				"instructions": "speak clearly",
 			},
 		},
 		{

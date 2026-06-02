@@ -245,6 +245,7 @@ Panics if `Voice` is empty. `APIKey`, `Model`, and `BaseURL` are required togeth
 | `Voice`          | `string`   | Yes      | Voice name                         |
 | `Model`          | `string`   | BYOK only | Model identifier                   |
 | `BaseURL`        | `string`   | BYOK only | OpenAI TTS endpoint URL            |
+| `Instructions`   | `string`   | No       | Custom instructions for voice style, accent, pace, and tone |
 | `Speed`          | `*float64` | No       | Speech speed multiplier            |
 | `SkipPatterns`   | `[]int`    | No       | Patterns to skip                   |
 

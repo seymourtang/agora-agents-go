@@ -123,7 +123,7 @@ AgentKit alignment for Conversational AI v2.7.
 
 ### Added
 
-- **`OpenAITTS`** — New optional fields: `ResponseFormat` (string) and `Speed` (float64).
+- **`OpenAITTS`** — New optional fields: `Instructions` (string) and `Speed` (float64).
 - **`CartesiaTTS`** — `VoiceID` user-facing field is preserved; serialized to the required nested object format automatically.
 - **`RimeTTS`** — New optional fields: `Lang` (string), `SamplingRate` (int), `SpeedAlpha` (float64).
 - **`OpenAIRealtime`** — New optional fields: `PredefinedTools` ([]string), `FailureMessage` (string), `MaxHistory` (int).
