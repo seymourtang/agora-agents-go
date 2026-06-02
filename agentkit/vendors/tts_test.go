@@ -78,6 +78,71 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			want: map[string]interface{}{"api_key": "fish-key", "reference_id": "ref", "backend": "speech-1.5"},
 		},
 		{
+			name: "elevenlabs",
+			params: NewElevenLabsTTS(ElevenLabsTTSOptions{
+				Key:     "eleven-key",
+				ModelID: "eleven_flash_v2_5",
+				VoiceID: "voice",
+				BaseURL: "wss://api.elevenlabs.io/v1",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"key":      "eleven-key",
+				"base_url": "wss://api.elevenlabs.io/v1",
+				"model_id": "eleven_flash_v2_5",
+				"voice_id": "voice",
+			},
+		},
+		{
+			name: "openai byok",
+			params: NewOpenAITTS(OpenAITTSOptions{
+				APIKey:  "openai-key",
+				Voice:   "coral",
+				Model:   "gpt-4o-mini-tts",
+				BaseURL: "https://api.openai.com/v1",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"voice":    "coral",
+				"api_key":  "openai-key",
+				"base_url": "https://api.openai.com/v1",
+				"model":    "gpt-4o-mini-tts",
+			},
+		},
+		{
+			name:   "openai preset",
+			params: NewOpenAITTS(OpenAITTSOptions{Voice: "coral"}).ToConfig()["params"].(map[string]interface{}),
+			want:   map[string]interface{}{"voice": "coral"},
+		},
+		{
+			name: "humeai",
+			params: NewHumeAITTS(HumeAITTSOptions{
+				Key:      "hume-key",
+				VoiceID:  "voice",
+				Provider: "CUSTOM_VOICE",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"key":      "hume-key",
+				"voice_id": "voice",
+				"provider": "CUSTOM_VOICE",
+			},
+		},
+		{
+			name: "minimax byok",
+			params: NewMiniMaxTTS(MiniMaxTTSOptions{
+				Key:     "minimax-key",
+				GroupID: "group",
+				Model:   "speech-02-turbo",
+				VoiceID: "voice",
+				URL:     "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"key":           "minimax-key",
+				"group_id":      "group",
+				"model":         "speech-02-turbo",
+				"voice_setting": map[string]interface{}{"voice_id": "voice"},
+				"url":           "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+			},
+		},
+		{
 			name: "sarvam",
 			params: NewSarvamTTS(SarvamTTSOptions{
 				Key:                "sarvam-key",
@@ -95,11 +160,25 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 		{
 			name: "murf",
 			params: NewMurfTTS(MurfTTSOptions{
-				Key:     "murf-key",
-				VoiceID: "Ariana",
-				BaseURL: "wss://murf.example/ws",
+				Key:        "murf-key",
+				VoiceID:    "Ariana",
+				BaseURL:    "wss://murf.example/ws",
+				Locale:     "en-US",
+				Rate:       ptrFloat(0),
+				Pitch:      ptrFloat(0),
+				Model:      "FALCON",
+				SampleRate: ptrInt(24000),
 			}).ToConfig()["params"].(map[string]interface{}),
-			want: map[string]interface{}{"api_key": "murf-key", "base_url": "wss://murf.example/ws", "voiceId": "Ariana"},
+			want: map[string]interface{}{
+				"api_key":     "murf-key",
+				"base_url":    "wss://murf.example/ws",
+				"voiceId":     "Ariana",
+				"locale":      "en-US",
+				"rate":        float64(0),
+				"pitch":       float64(0),
+				"model":       "FALCON",
+				"sample_rate": 24000,
+			},
 		},
 		{
 			name: "murf minimal",
@@ -118,5 +197,9 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 }
 
 func ptrInt(v int) *int {
+	return &v
+}
+
+func ptrFloat(v float64) *float64 {
 	return &v
 }

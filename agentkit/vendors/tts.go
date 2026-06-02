@@ -30,6 +30,9 @@ func NewElevenLabsTTS(opts ElevenLabsTTSOptions) *ElevenLabsTTS {
 	if opts.VoiceID == "" {
 		panic("ElevenLabsTTS requires VoiceID")
 	}
+	if opts.BaseURL == "" {
+		panic("ElevenLabsTTS requires BaseURL")
+	}
 	return &ElevenLabsTTS{options: opts}
 }
 
@@ -40,11 +43,9 @@ func (e *ElevenLabsTTS) GetSampleRate() *SampleRate {
 func (e *ElevenLabsTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
 		"key":      e.options.Key,
+		"base_url": e.options.BaseURL,
 		"model_id": e.options.ModelID,
 		"voice_id": e.options.VoiceID,
-	}
-	if e.options.BaseURL != "" {
-		params["base_url"] = e.options.BaseURL
 	}
 	if e.options.SampleRate != nil {
 		params["sample_rate"] = int(*e.options.SampleRate)
@@ -156,6 +157,16 @@ func NewOpenAITTS(opts OpenAITTSOptions) *OpenAITTS {
 		if model != "" && model != "tts-1" {
 			panic("OpenAITTS requires APIKey unless using the Agora-managed tts-1 model")
 		}
+		if opts.BaseURL != "" {
+			panic("OpenAITTS BaseURL is only valid when APIKey is set")
+		}
+	} else {
+		if opts.BaseURL == "" {
+			panic("OpenAITTS requires BaseURL")
+		}
+		if opts.Model == "" {
+			panic("OpenAITTS requires Model")
+		}
 	}
 	return &OpenAITTS{options: opts}
 }
@@ -171,11 +182,9 @@ func (o *OpenAITTS) ToConfig() map[string]interface{} {
 	}
 	if o.options.APIKey != "" {
 		params["api_key"] = o.options.APIKey
-	}
-	if o.options.BaseURL != "" {
 		params["base_url"] = o.options.BaseURL
-	}
-	if o.options.Model != "" {
+		params["model"] = o.options.Model
+	} else if o.options.Model != "" {
 		params["model"] = o.options.Model
 	}
 	if o.options.ResponseFormat != "" {
@@ -431,6 +440,12 @@ func NewHumeAITTS(opts HumeAITTSOptions) *HumeAITTS {
 	if opts.Key == "" {
 		panic("HumeAITTS requires Key")
 	}
+	if opts.VoiceID == "" {
+		panic("HumeAITTS requires VoiceID")
+	}
+	if opts.Provider == "" {
+		panic("HumeAITTS requires Provider")
+	}
 	return &HumeAITTS{options: opts}
 }
 
@@ -440,19 +455,15 @@ func (h *HumeAITTS) GetSampleRate() *SampleRate {
 
 func (h *HumeAITTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"key": h.options.Key,
+		"key":      h.options.Key,
+		"voice_id": h.options.VoiceID,
+		"provider": h.options.Provider,
 	}
 	if h.options.ConfigID != "" {
 		params["config_id"] = h.options.ConfigID
 	}
-	if h.options.VoiceID != "" {
-		params["voice_id"] = h.options.VoiceID
-	}
 	if h.options.BaseURL != "" {
 		params["base_url"] = h.options.BaseURL
-	}
-	if h.options.Provider != "" {
-		params["provider"] = h.options.Provider
 	}
 	if h.options.Speed != nil {
 		params["speed"] = *h.options.Speed
@@ -593,6 +604,15 @@ func NewMiniMaxTTS(opts MiniMaxTTSOptions) *MiniMaxTTS {
 	}
 	if opts.Key != "" && opts.GroupID == "" {
 		panic("MiniMaxTTS requires GroupID")
+	}
+	if opts.Key != "" && opts.Model == "" {
+		panic("MiniMaxTTS requires Model")
+	}
+	if opts.Key != "" && opts.VoiceID == "" {
+		panic("MiniMaxTTS requires VoiceID")
+	}
+	if opts.Key != "" && opts.URL == "" {
+		panic("MiniMaxTTS requires URL")
 	}
 	return &MiniMaxTTS{options: opts}
 }

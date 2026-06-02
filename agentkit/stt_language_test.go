@@ -10,11 +10,12 @@ import (
 
 func baseAgentForSTTLanguage() *Agent {
 	return NewAgent().
-		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "llm-key", Model: "gpt-4o-mini"})).
+		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "llm-key", Model: "gpt-4o-mini", BaseURL: "https://api.openai.com/v1/chat/completions"})).
 		WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
 			Key:     "tts-key",
 			VoiceID: "voice",
 			ModelID: "eleven_flash_v2_5",
+			BaseURL: "wss://api.elevenlabs.io/v1",
 		}))
 }
 
