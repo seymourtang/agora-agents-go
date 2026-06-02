@@ -35,6 +35,15 @@ func WithName(name string) AgentOption
 
 Sets the agent name identifier.
 
+### WithPipelineID
+
+<!-- snippet: fragment -->
+```go
+func WithPipelineID(pipelineID string) AgentOption
+```
+
+Sets the published AI Studio pipeline ID to use as this agent's base configuration. Explicit Agent config such as `WithLlm`, `WithTts`, `WithStt`, advanced features, and other builder options may send fields in `properties` that override the saved pipeline settings. Session-level `CreateSessionOptions.PipelineID` overrides this value.
+
 ### WithInstructions
 
 <!-- snippet: fragment -->
@@ -182,6 +191,8 @@ Sets filler words configuration (played while waiting for LLM response).
 ## Agent Methods
 
 All vendor-chaining methods return a **new** `*Agent` (immutable clone). The original agent is not modified.
+
+Accessor methods include `Name()`, `PipelineID()`, vendor config getters, and getters for optional advanced configuration.
 
 ### WithLlm
 

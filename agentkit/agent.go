@@ -340,6 +340,7 @@ type FillerWordsContentSelectionRule = Agora.StartAgentsRequestPropertiesFillerW
 
 type Agent struct {
 	name                     string
+	pipelineID               string
 	instructions             string
 	greeting                 string
 	failureMessage           string
@@ -377,6 +378,16 @@ func NewAgent(opts ...AgentOption) *Agent {
 func WithName(name string) AgentOption {
 	return func(a *Agent) {
 		a.name = name
+	}
+}
+
+// WithPipelineID sets the published AI Studio pipeline ID to use as this agent's
+// base configuration. Explicit Agent config such as WithLlm, WithTts, WithStt,
+// advanced features, and other builder options may send fields in properties
+// that override the saved pipeline settings.
+func WithPipelineID(pipelineID string) AgentOption {
+	return func(a *Agent) {
+		a.pipelineID = pipelineID
 	}
 }
 
@@ -666,6 +677,7 @@ func (a *Agent) WithFillerWords(fw *FillerWordsConfig) *Agent {
 }
 
 func (a *Agent) Name() string                      { return a.name }
+func (a *Agent) PipelineID() string                { return a.pipelineID }
 func (a *Agent) Instructions() string              { return a.instructions }
 func (a *Agent) Greeting() string                  { return a.greeting }
 func (a *Agent) LlmConfig() map[string]interface{} { return a.llm }

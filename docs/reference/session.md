@@ -58,9 +58,11 @@ type AgentSessionOptions struct {
 | `ExpiresIn` | `int` | No | Auto-generated token lifetime in seconds |
 | `UseAppCredentialsForREST` | `bool` | No | Generate ConvoAI REST auth headers per request |
 | `Preset` | `[]string` | No | Advanced preset value for project-specific routing. Leave unset for normal builder usage. |
-| `PipelineID` | `string` | No | Published pipeline ID to send on session start |
+| `PipelineID` | `string` | No | Published AI Studio pipeline ID to send on session start. Overrides `agent.PipelineID()`. |
 | `Debug` | `bool` | No | Enable debug logging of the start request |
 | `Warn` | `func(string)` | No | Custom warning sink; defaults to logger |
+
+`PipelineID` is sent as the top-level `/join` field `pipeline_id`, not inside `properties`. If unset, `AgentSession.Start()` uses the agent-level value from `WithPipelineID`.
 
 ## SessionStatus
 

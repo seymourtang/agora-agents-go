@@ -150,6 +150,36 @@ func main() {
 
 `AgoraClient` generates the required ConvoAI REST auth and RTC join tokens automatically when you provide `AppID` and `AppCertificate`. For supported Agora-managed models, leave vendor API keys unset; provide keys when you want BYOK.
 
+## AI Studio pipeline IDs
+
+Use `WithPipelineID` when you want a published AI Studio pipeline to provide the base agent configuration:
+
+```go
+agent := agentkit.NewAgent(
+    agentkit.WithName("support"),
+    agentkit.WithPipelineID("studio-pipeline-id"),
+)
+
+session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    Channel:    "support-room",
+    AgentUID:   "1",
+    RemoteUIDs: []string{"100"},
+})
+```
+
+You can override it per session:
+
+```go
+session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    Channel:    "support-room",
+    AgentUID:   "1",
+    RemoteUIDs: []string{"100"},
+    PipelineID: "session-pipeline-id",
+})
+```
+
+AgentKit sends the resolved value as the top-level `/join` field `pipeline_id`, not inside `properties`. Explicit Agent config such as `WithLlm`, `WithTts`, `WithStt`, `WithMllm`, and advanced features may send `properties` fields that override the saved pipeline settings.
+
 ### BYOK version
 
 Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed models.
