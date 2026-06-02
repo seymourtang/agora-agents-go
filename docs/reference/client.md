@@ -38,6 +38,8 @@ c := agentkit.NewAgoraClient(agentkit.AgoraClientOptions{
 | `c.Telephony` | `*telephony.Client` | Telephony operations (call, hangup) |
 | `c.PhoneNumbers` | `*phonenumbers.Client` | Phone number management |
 
+
+
 All sub-client methods take `context.Context` as their first argument. See the [generated reference](https://github.com/AgoraIO/agora-agents-go/blob/HEAD/./reference.md) for full method signatures.
 
 ## Request Options

@@ -68,3 +68,9 @@ go run main.go
 In v2.0.0, the repository remains [AgoraIO/agora-agents-go](https://github.com/AgoraIO/agora-agents-go), and the Go module path is `github.com/AgoraIO/agora-agents-go/v2`. Replace `github.com/AgoraIO-Conversational-AI/agent-server-sdk-go` in `go.mod` and in all import paths, then run `go mod tidy`.
 
 For the full change list, see [changelog — v2.0.0](../../changelog.md#v200--2026-05-21).
+
+## Migrating from a previous module path
+
+In v2.0.0, the repository remains [AgoraIO/agora-agents-go](https://github.com/AgoraIO/agora-agents-go), and the Go module path is `github.com/AgoraIO/agora-agents-go/v2`. Replace `github.com/AgoraIO-Conversational-AI/agent-server-sdk-go` in `go.mod` and in all import paths, then run `go mod tidy`.
+
+For the full change list, see [changelog — v2.0.0](../../changelog.md#v200--2026-05-21).

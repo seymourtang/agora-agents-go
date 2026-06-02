@@ -19,6 +19,46 @@ Voice agents and video avatars both use ConvoAI-compatible Agora tokens. They mu
 
 Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you provide `AgoraToken`, the SDK uses it as-is and does not overwrite it.
 
+## Agent Token vs Avatar Token
+
+Voice agents and video avatars both use ConvoAI-compatible Agora tokens. They must be scoped to different UIDs:
+
+## Generic Avatar Example
+
+```go
+sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
+
+agent := agentkit.NewAgent(
+    agentkit.WithName("generic-avatar"),
+).WithLlm(
+    vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "<openai_key>"}),
+).WithTts(
+    vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
+        Key:        "<elevenlabs_key>",
+        ModelID:    "eleven_turbo_v2_5",
+        VoiceID:    "<voice_id>",
+        // Choose the sample rate required by your generic avatar provider.
+        SampleRate: &sampleRate,
+    }),
+).WithAvatar(
+    vendors.NewGenericAvatar(vendors.GenericAvatarOptions{
+        APIKey:     "<avatar_vendor_key>",
+        APIBaseURL: "https://avatar.example.com",
+        AvatarID:   "<avatar_id>",
+        AgoraUID:   "2001", // distinct from session AgentUID
+    }),
+)
+```
+
+For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar and HeyGen, AgentKit auto-generates only `agora_token` when `agora_uid` is set and `agora_token` is omitted.
+
+| Purpose | Field | UID | Default behavior |
+|---|---|---|---|
+| Voice agent | `properties.token` | `agent_rtc_uid` | Generated from session `AgentUID` when `Token` is omitted |
+| Avatar video stream | `avatar.params.agora_token` | `avatar.params.agora_uid` | Generated from avatar `AgoraUID` when `AgoraToken` is omitted |
+
+Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you provide `AgoraToken`, the SDK uses it as-is and does not overwrite it.
+
 ## Avatar Vendors
 
 | Vendor | Constructor | Required Sample Rate | Required Fields |

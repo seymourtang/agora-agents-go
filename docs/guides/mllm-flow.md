@@ -117,6 +117,7 @@ Use AgentKit for MLLM session starts. It keeps the app-credentials flow intact a
 
 ## Pointer Helper Functions
 
+
 MLLM configuration makes heavy use of pointer helpers for optional fields:
 
 | Helper | Type | Example |

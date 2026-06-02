@@ -95,6 +95,7 @@ Use the builder without vendor API keys when you are using supported Agora-manag
 
 Use BYOK when you need to:
 
+
 - supply your own vendor API keys
 - use models outside the Agora-managed catalog
 - point at custom vendor endpoints

@@ -327,6 +327,14 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		s.emit("error", err)
 		return "", err
 	}
+	resp, err := startAgentsWithMapBody(ctx, s.client, s.appID, s.name, resolvedPreset, s.pipelineID, resolvedProperties, reqOpts...)
+	if err != nil {
+		s.mu.Lock()
+		s.status = StatusError
+		s.mu.Unlock()
+		s.emit("error", err)
+		return "", err
+	}
 
 	s.mu.Lock()
 	if resp != nil && resp.AgentID != nil {
@@ -447,6 +455,10 @@ func (s *AgentSession) SayWithOptions(ctx context.Context, text string, opts *Sa
 		Appid:   s.appID,
 		AgentID: s.agentID,
 		Text:    text,
+	}
+	if opts != nil {
+		req.Priority = opts.Priority
+		req.Interruptable = opts.Interruptable
 	}
 	if opts != nil {
 		req.Priority = opts.Priority

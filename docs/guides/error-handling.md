@@ -65,6 +65,7 @@ if errors.As(err, &apiErr) {
         case "token_expired":
             // Regenerate the session or avatar token and retry.
         }
+
     }
 }
 ```

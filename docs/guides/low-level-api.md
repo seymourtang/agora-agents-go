@@ -26,6 +26,7 @@ Use these when you need REST API operations outside the AgentKit session lifecyc
 
 ## App-Credentials Client
 
+
 ```go
 package main
 

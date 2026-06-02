@@ -349,3 +349,41 @@ func omitEmptyProviderFields(props map[string]interface{}) {
 		}
 	}
 }
+
+func omitEmptyProviderFields(props map[string]interface{}) {
+	if props == nil {
+		return
+	}
+	if llm := asMap(props["llm"]); llm != nil {
+		for _, key := range []string{"api_key", "url"} {
+			if value, ok := llm[key].(string); ok && strings.TrimSpace(value) == "" {
+				delete(llm, key)
+			}
+		}
+		if params := asMap(llm["params"]); params != nil {
+			for _, key := range []string{"model"} {
+				if value, ok := params[key].(string); ok && strings.TrimSpace(value) == "" {
+					delete(params, key)
+				}
+			}
+		}
+	}
+	if asr := asMap(props["asr"]); asr != nil {
+		if params := asMap(asr["params"]); params != nil {
+			for _, key := range []string{"api_key", "model"} {
+				if value, ok := params[key].(string); ok && strings.TrimSpace(value) == "" {
+					delete(params, key)
+				}
+			}
+		}
+	}
+	if tts := asMap(props["tts"]); tts != nil {
+		if params := asMap(tts["params"]); params != nil {
+			for _, key := range []string{"api_key", "key", "group_id", "url", "model"} {
+				if value, ok := params[key].(string); ok && strings.TrimSpace(value) == "" {
+					delete(params, key)
+				}
+			}
+		}
+	}
+}

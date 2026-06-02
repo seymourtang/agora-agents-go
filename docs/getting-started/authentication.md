@@ -43,6 +43,8 @@ The generated REST client still contains legacy auth hooks for prebuilt REST tok
 
 ## Inspecting the resolved auth mode
 
+
+
 ```go
 import "fmt"
 
