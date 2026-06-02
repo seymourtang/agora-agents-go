@@ -163,6 +163,9 @@ func NewMicrosoftSTT(opts MicrosoftSTTOptions) *MicrosoftSTT {
 	if opts.Region == "" {
 		panic("MicrosoftSTT requires Region")
 	}
+	if opts.Language == "" {
+		panic("MicrosoftSTT requires Language")
+	}
 	return &MicrosoftSTT{options: opts}
 }
 
@@ -214,7 +217,7 @@ func (o *OpenAISTT) ToConfig() map[string]interface{} {
 		params[k] = v
 	}
 	params["api_key"] = o.options.APIKey
-	transcription := map[string]interface{}{}
+	transcription := map[string]interface{}{"model": "whisper-1"}
 	for k, v := range o.options.InputAudioTranscription {
 		transcription[k] = v
 	}
@@ -264,6 +267,9 @@ func NewGoogleSTT(opts GoogleSTTOptions) *GoogleSTT {
 	}
 	if opts.ADCCredentialsString == "" {
 		panic("GoogleSTT requires ADCCredentialsString")
+	}
+	if opts.Language == "" {
+		panic("GoogleSTT requires Language")
 	}
 	return &GoogleSTT{options: opts}
 }
@@ -316,6 +322,9 @@ func NewAmazonSTT(opts AmazonSTTOptions) *AmazonSTT {
 	if opts.Region == "" {
 		panic("AmazonSTT requires Region")
 	}
+	if opts.Language == "" {
+		panic("AmazonSTT requires Language")
+	}
 	return &AmazonSTT{options: opts}
 }
 
@@ -356,6 +365,9 @@ type AssemblyAISTT struct {
 func NewAssemblyAISTT(opts AssemblyAISTTOptions) *AssemblyAISTT {
 	if opts.APIKey == "" {
 		panic("AssemblyAISTT requires APIKey")
+	}
+	if opts.Language == "" {
+		panic("AssemblyAISTT requires Language")
 	}
 	return &AssemblyAISTT{options: opts}
 }

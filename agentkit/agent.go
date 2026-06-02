@@ -214,13 +214,13 @@ type Eagerness = Agora.StartAgentsRequestPropertiesTurnDetectionEagerness
 
 // LlmGreetingConfigs configures how greeting messages are broadcast when multiple
 // remote users are in the channel (llm.greeting_configs).
-type LlmGreetingConfigs = Agora.StartAgentsRequestPropertiesLlmGreetingConfigs
+type LlmGreetingConfigs = map[string]interface{}
 
 // LlmGreetingConfigsMode is the greeting broadcast mode: "single_every" | "single_first".
-type LlmGreetingConfigsMode = Agora.StartAgentsRequestPropertiesLlmGreetingConfigsMode
+type LlmGreetingConfigsMode = string
 
 // McpServersItem is a single MCP server config entry (llm.mcp_servers[]).
-type McpServersItem = Agora.StartAgentsRequestPropertiesLlmMcpServersItem
+type McpServersItem = map[string]interface{}
 
 // =============================================================================
 // Parameters (SessionParams) sub-type aliases
@@ -262,31 +262,31 @@ type GeofenceExcludeArea = Agora.StartAgentsRequestPropertiesGeofenceExcludeArea
 // =============================================================================
 
 // LlmConfig is the concrete LLM configuration payload (start_agents_request_properties.llm).
-type LlmConfig = Agora.StartAgentsRequestPropertiesLlm
+type LlmConfig = Agora.Llm
 
 // MllmConfig is the concrete MLLM configuration payload (start_agents_request_properties.mllm).
-type MllmConfig = Agora.StartAgentsRequestPropertiesMllm
+type MllmConfig = Agora.Mllm
 
 // MllmTurnDetectionConfig configures MLLM turn detection (`mllm.turn_detection`).
-type MllmTurnDetectionConfig = Agora.StartAgentsRequestPropertiesMllmTurnDetection
+type MllmTurnDetectionConfig = Agora.MllmTurnDetection
 
 // MllmTurnDetectionMode controls MLLM turn detection mode.
-type MllmTurnDetectionMode = Agora.StartAgentsRequestPropertiesMllmTurnDetectionMode
+type MllmTurnDetectionMode = Agora.MllmTurnDetectionMode
 
 // AsrConfig is the concrete ASR/STT configuration payload (start_agents_request_properties.asr).
-type AsrConfig = Agora.StartAgentsRequestPropertiesAsr
+type AsrConfig = Agora.Asr
 
 // SttConfig is an alias for AsrConfig (wire field remains `asr`).
 type SttConfig = AsrConfig
 
 // LlmStyle is the LLM request style (openai, gemini, anthropic, dify).
-type LlmStyle = Agora.StartAgentsRequestPropertiesLlmStyle
+type LlmStyle = Agora.LlmStyle
 
 // SttVendor is the ASR/STT vendor identifier.
-type SttVendor = Agora.StartAgentsRequestPropertiesAsrVendor
+type SttVendor = string
 
 // MllmVendor is the MLLM vendor identifier.
-type MllmVendor = Agora.StartAgentsRequestPropertiesMllmVendor
+type MllmVendor = Agora.MllmVendor
 
 // AvatarVendor is the avatar vendor identifier.
 type AvatarVendor = Agora.StartAgentsRequestPropertiesAvatarVendor

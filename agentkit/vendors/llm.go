@@ -563,18 +563,42 @@ func (v *VertexAILLM) ToConfig() map[string]interface{} {
 	return config
 }
 
-type AmazonBedrockOptions = AnthropicOptions
+type AmazonBedrockOptions struct {
+	AccessKey         string
+	SecretKey         string
+	Region            string
+	Model             string
+	MaxHistory        *int
+	MaxTokens         *int
+	Temperature       *float64
+	TopP              *float64
+	TopK              *int
+	SystemMessages    []map[string]interface{}
+	GreetingMessage   string
+	FailureMessage    string
+	InputModalities   []string
+	Params            map[string]interface{}
+	Headers           map[string]string
+	OutputModalities  []string
+	GreetingConfigs   map[string]interface{}
+	TemplateVariables map[string]string
+	Vendor            string
+	McpServers        []map[string]interface{}
+}
 
 type AmazonBedrock struct {
 	options AmazonBedrockOptions
 }
 
 func NewAmazonBedrock(opts AmazonBedrockOptions) *AmazonBedrock {
-	if opts.APIKey == "" {
-		panic("AmazonBedrock requires APIKey")
+	if opts.AccessKey == "" {
+		panic("AmazonBedrock requires AccessKey")
 	}
-	if opts.URL == "" {
-		panic("AmazonBedrock requires URL")
+	if opts.SecretKey == "" {
+		panic("AmazonBedrock requires SecretKey")
+	}
+	if opts.Region == "" {
+		panic("AmazonBedrock requires Region")
 	}
 	if opts.Model == "" {
 		panic("AmazonBedrock requires Model")
@@ -583,7 +607,66 @@ func NewAmazonBedrock(opts AmazonBedrockOptions) *AmazonBedrock {
 }
 
 func (a *AmazonBedrock) ToConfig() map[string]interface{} {
-	return (&Anthropic{options: a.options}).ToConfig()
+	params := map[string]interface{}{}
+	for k, v := range a.options.Params {
+		params[k] = v
+	}
+	if a.options.MaxTokens != nil {
+		params["max_tokens"] = *a.options.MaxTokens
+	}
+	if a.options.Temperature != nil {
+		params["temperature"] = *a.options.Temperature
+	}
+	if a.options.TopP != nil {
+		params["top_p"] = *a.options.TopP
+	}
+	if a.options.TopK != nil {
+		params["top_k"] = *a.options.TopK
+	}
+
+	config := map[string]interface{}{
+		"access_key":       a.options.AccessKey,
+		"secret_key":       a.options.SecretKey,
+		"region":           a.options.Region,
+		"model":            a.options.Model,
+		"params":           params,
+		"style":            "bedrock",
+		"input_modalities": []string{"text"},
+	}
+	if a.options.InputModalities != nil {
+		config["input_modalities"] = a.options.InputModalities
+	}
+	if a.options.OutputModalities != nil {
+		config["output_modalities"] = a.options.OutputModalities
+	}
+	if a.options.Headers != nil {
+		config["headers"] = a.options.Headers
+	}
+	if a.options.MaxHistory != nil {
+		config["max_history"] = *a.options.MaxHistory
+	}
+	if a.options.SystemMessages != nil {
+		config["system_messages"] = a.options.SystemMessages
+	}
+	if a.options.GreetingMessage != "" {
+		config["greeting_message"] = a.options.GreetingMessage
+	}
+	if a.options.FailureMessage != "" {
+		config["failure_message"] = a.options.FailureMessage
+	}
+	if a.options.GreetingConfigs != nil {
+		config["greeting_configs"] = a.options.GreetingConfigs
+	}
+	if a.options.TemplateVariables != nil {
+		config["template_variables"] = a.options.TemplateVariables
+	}
+	if a.options.Vendor != "" {
+		config["vendor"] = a.options.Vendor
+	}
+	if a.options.McpServers != nil {
+		config["mcp_servers"] = ensureMcpTransport(a.options.McpServers)
+	}
+	return config
 }
 
 type DifyOptions struct {

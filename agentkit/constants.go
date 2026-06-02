@@ -163,11 +163,11 @@ var (
 
 var (
 	// MllmTurnDetectionModeAgoraVad uses Agora-provided VAD for MLLM turn detection.
-	MllmTurnDetectionModeAgoraVad = Agora.StartAgentsRequestPropertiesMllmTurnDetectionModeAgoraVad
+	MllmTurnDetectionModeAgoraVad = Agora.MllmTurnDetectionModeAgoraVad
 
 	// MllmTurnDetectionModeServerVad delegates VAD to the MLLM vendor.
-	MllmTurnDetectionModeServerVad = Agora.StartAgentsRequestPropertiesMllmTurnDetectionModeServerVad
+	MllmTurnDetectionModeServerVad = Agora.MllmTurnDetectionModeServerVad
 
 	// MllmTurnDetectionModeSemanticVad uses semantic detection (OpenAI Realtime only).
-	MllmTurnDetectionModeSemanticVad = Agora.StartAgentsRequestPropertiesMllmTurnDetectionModeSemanticVad
+	MllmTurnDetectionModeSemanticVad = Agora.MllmTurnDetectionModeSemanticVad
 )

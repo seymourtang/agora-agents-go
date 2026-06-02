@@ -50,15 +50,19 @@ func TestVertexAILLMIncludesProjectRouting(t *testing.T) {
 	}
 }
 
-func TestAmazonBedrockSerializesAsAnthropicStyle(t *testing.T) {
+func TestAmazonBedrockSerializesAsBedrockStyle(t *testing.T) {
 	config := NewAmazonBedrock(AmazonBedrockOptions{
-		APIKey: "bedrock-key",
-		URL:    "https://bedrock.example.com/messages",
-		Model:  "anthropic.claude-3-5-sonnet-20241022-v2:0",
+		AccessKey: "aws-access",
+		SecretKey: "aws-secret",
+		Region:    "us-east-1",
+		Model:     "anthropic.claude-3-5-sonnet-20241022-v2:0",
 	}).ToConfig()
 
-	if config["style"] != "anthropic" {
+	if config["style"] != "bedrock" {
 		t.Fatalf("unexpected style: %v", config["style"])
+	}
+	if config["access_key"] != "aws-access" || config["secret_key"] != "aws-secret" || config["region"] != "us-east-1" {
+		t.Fatalf("unexpected config: %#v", config)
 	}
 }
 

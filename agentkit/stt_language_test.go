@@ -103,6 +103,15 @@ func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {
 	}).ToConfig()["params"])
 
 	assert.Equal(t, map[string]interface{}{
+		"api_key": "openai-key",
+		"input_audio_transcription": map[string]interface{}{
+			"model": "whisper-1",
+		},
+	}, vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
+		APIKey: "openai-key",
+	}).ToConfig()["params"])
+
+	assert.Equal(t, map[string]interface{}{
 		"project_id":             "project",
 		"location":               "global",
 		"adc_credentials_string": "{}",

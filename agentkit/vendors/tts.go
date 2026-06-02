@@ -80,6 +80,8 @@ type MicrosoftTTSOptions struct {
 	Region       string
 	VoiceName    string
 	SampleRate   *SampleRate
+	Speed        *float64
+	Volume       *float64
 	SkipPatterns []int
 }
 
@@ -113,6 +115,12 @@ func (m *MicrosoftTTS) ToConfig() map[string]interface{} {
 	if m.options.SampleRate != nil {
 		params["sample_rate"] = int(*m.options.SampleRate)
 	}
+	if m.options.Speed != nil {
+		params["speed"] = *m.options.Speed
+	}
+	if m.options.Volume != nil {
+		params["volume"] = *m.options.Volume
+	}
 
 	config := map[string]interface{}{
 		"vendor": "microsoft",
@@ -128,7 +136,9 @@ type OpenAITTSOptions struct {
 	APIKey         string
 	Voice          string
 	Model          string
+	BaseURL        string
 	ResponseFormat string
+	Instructions   string
 	Speed          *float64
 	SkipPatterns   []int
 }
@@ -162,11 +172,17 @@ func (o *OpenAITTS) ToConfig() map[string]interface{} {
 	if o.options.APIKey != "" {
 		params["api_key"] = o.options.APIKey
 	}
+	if o.options.BaseURL != "" {
+		params["base_url"] = o.options.BaseURL
+	}
 	if o.options.Model != "" {
 		params["model"] = o.options.Model
 	}
 	if o.options.ResponseFormat != "" {
 		params["response_format"] = o.options.ResponseFormat
+	}
+	if o.options.Instructions != "" {
+		params["instructions"] = o.options.Instructions
 	}
 	if o.options.Speed != nil {
 		params["speed"] = *o.options.Speed
@@ -186,6 +202,8 @@ type CartesiaTTSOptions struct {
 	APIKey       string
 	VoiceID      string
 	ModelID      string
+	BaseURL      string
+	Language     string
 	SampleRate   *SampleRate
 	SkipPatterns []int
 }
@@ -201,6 +219,9 @@ func NewCartesiaTTS(opts CartesiaTTSOptions) *CartesiaTTS {
 	if opts.VoiceID == "" {
 		panic("CartesiaTTS requires VoiceID")
 	}
+	if opts.ModelID == "" {
+		panic("CartesiaTTS requires ModelID")
+	}
 	return &CartesiaTTS{options: opts}
 }
 
@@ -210,14 +231,18 @@ func (c *CartesiaTTS) GetSampleRate() *SampleRate {
 
 func (c *CartesiaTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"api_key": c.options.APIKey,
-		"voice":   map[string]interface{}{"mode": "id", "id": c.options.VoiceID},
+		"api_key":  c.options.APIKey,
+		"model_id": c.options.ModelID,
+		"voice":    map[string]interface{}{"mode": "id", "id": c.options.VoiceID},
 	}
-	if c.options.ModelID != "" {
-		params["model_id"] = c.options.ModelID
+	if c.options.BaseURL != "" {
+		params["base_url"] = c.options.BaseURL
 	}
 	if c.options.SampleRate != nil {
-		params["sample_rate"] = int(*c.options.SampleRate)
+		params["output_format"] = map[string]interface{}{"container": "raw", "sample_rate": int(*c.options.SampleRate)}
+	}
+	if c.options.Language != "" {
+		params["language"] = c.options.Language
 	}
 
 	config := map[string]interface{}{
@@ -258,14 +283,14 @@ func (g *GoogleTTS) GetSampleRate() *SampleRate {
 
 func (g *GoogleTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"key":        g.options.Key,
-		"voice_name": g.options.VoiceName,
+		"credentials":          g.options.Key,
+		"VoiceSelectionParams": map[string]interface{}{"name": g.options.VoiceName},
 	}
 	if g.options.LanguageCode != "" {
-		params["language_code"] = g.options.LanguageCode
+		params["VoiceSelectionParams"].(map[string]interface{})["language_code"] = g.options.LanguageCode
 	}
 	if g.options.SampleRate != nil {
-		params["sample_rate_hertz"] = int(*g.options.SampleRate)
+		params["AudioConfig"] = map[string]interface{}{"sample_rate_hertz": int(*g.options.SampleRate)}
 	}
 
 	config := map[string]interface{}{
@@ -283,6 +308,7 @@ type AmazonTTSOptions struct {
 	SecretKey    string
 	Region       string
 	VoiceID      string
+	Engine       string
 	SkipPatterns []int
 }
 
@@ -312,10 +338,13 @@ func (a *AmazonTTS) GetSampleRate() *SampleRate {
 
 func (a *AmazonTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"access_key": a.options.AccessKey,
-		"secret_key": a.options.SecretKey,
-		"region":     a.options.Region,
-		"voice_id":   a.options.VoiceID,
+		"aws_access_key_id":     a.options.AccessKey,
+		"aws_secret_access_key": a.options.SecretKey,
+		"region_name":           a.options.Region,
+		"voice":                 a.options.VoiceID,
+	}
+	if a.options.Engine != "" {
+		params["engine"] = a.options.Engine
 	}
 
 	config := map[string]interface{}{
@@ -381,9 +410,14 @@ func (d *DeepgramTTS) ToConfig() map[string]interface{} {
 }
 
 type HumeAITTSOptions struct {
-	Key          string
-	ConfigID     string
-	SkipPatterns []int
+	Key             string
+	ConfigID        string
+	VoiceID         string
+	BaseURL         string
+	Provider        string
+	Speed           *float64
+	TrailingSilence *float64
+	SkipPatterns    []int
 }
 
 type HumeAITTS struct {
@@ -408,6 +442,21 @@ func (h *HumeAITTS) ToConfig() map[string]interface{} {
 	if h.options.ConfigID != "" {
 		params["config_id"] = h.options.ConfigID
 	}
+	if h.options.VoiceID != "" {
+		params["voice_id"] = h.options.VoiceID
+	}
+	if h.options.BaseURL != "" {
+		params["base_url"] = h.options.BaseURL
+	}
+	if h.options.Provider != "" {
+		params["provider"] = h.options.Provider
+	}
+	if h.options.Speed != nil {
+		params["speed"] = *h.options.Speed
+	}
+	if h.options.TrailingSilence != nil {
+		params["trailing_silence"] = *h.options.TrailingSilence
+	}
 
 	config := map[string]interface{}{
 		"vendor": "humeai",
@@ -423,9 +472,7 @@ type RimeTTSOptions struct {
 	Key          string
 	Speaker      string
 	ModelID      string
-	Lang         string
-	SamplingRate *int
-	SpeedAlpha   *float64
+	BaseURL      string
 	SkipPatterns []int
 }
 
@@ -449,20 +496,14 @@ func (r *RimeTTS) GetSampleRate() *SampleRate {
 
 func (r *RimeTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"key":     r.options.Key,
+		"api_key": r.options.Key,
 		"speaker": r.options.Speaker,
 	}
 	if r.options.ModelID != "" {
-		params["model_id"] = r.options.ModelID
+		params["modelId"] = r.options.ModelID
 	}
-	if r.options.Lang != "" {
-		params["lang"] = r.options.Lang
-	}
-	if r.options.SamplingRate != nil {
-		params["samplingRate"] = *r.options.SamplingRate
-	}
-	if r.options.SpeedAlpha != nil {
-		params["speedAlpha"] = *r.options.SpeedAlpha
+	if r.options.BaseURL != "" {
+		params["base_url"] = r.options.BaseURL
 	}
 
 	config := map[string]interface{}{
@@ -478,6 +519,7 @@ func (r *RimeTTS) ToConfig() map[string]interface{} {
 type FishAudioTTSOptions struct {
 	Key          string
 	ReferenceID  string
+	Backend      string
 	SkipPatterns []int
 }
 
@@ -501,8 +543,11 @@ func (f *FishAudioTTS) GetSampleRate() *SampleRate {
 
 func (f *FishAudioTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"key":          f.options.Key,
+		"api_key":      f.options.Key,
 		"reference_id": f.options.ReferenceID,
+	}
+	if f.options.Backend != "" {
+		params["backend"] = f.options.Backend
 	}
 
 	config := map[string]interface{}{
@@ -578,6 +623,10 @@ type SarvamTTSOptions struct {
 	Key                string
 	Speaker            string
 	TargetLanguageCode string
+	Pitch              *float64
+	Pace               *float64
+	Loudness           *float64
+	SampleRate         *int
 	SkipPatterns       []int
 }
 
@@ -604,9 +653,21 @@ func (s *SarvamTTS) GetSampleRate() *SampleRate {
 
 func (s *SarvamTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"key":                  s.options.Key,
+		"api_subscription_key": s.options.Key,
 		"speaker":              s.options.Speaker,
 		"target_language_code": s.options.TargetLanguageCode,
+	}
+	if s.options.Pitch != nil {
+		params["pitch"] = *s.options.Pitch
+	}
+	if s.options.Pace != nil {
+		params["pace"] = *s.options.Pace
+	}
+	if s.options.Loudness != nil {
+		params["loudness"] = *s.options.Loudness
+	}
+	if s.options.SampleRate != nil {
+		params["sample_rate"] = *s.options.SampleRate
 	}
 
 	config := map[string]interface{}{
@@ -622,7 +683,13 @@ func (s *SarvamTTS) ToConfig() map[string]interface{} {
 type MurfTTSOptions struct {
 	Key          string
 	VoiceID      string
+	BaseURL      string
 	Style        string
+	Locale       string
+	Rate         *float64
+	Pitch        *float64
+	Model        string
+	SampleRate   *int
 	SkipPatterns []int
 }
 
@@ -637,6 +704,9 @@ func NewMurfTTS(opts MurfTTSOptions) *MurfTTS {
 	if opts.VoiceID == "" {
 		panic("MurfTTS requires VoiceID")
 	}
+	if opts.BaseURL == "" {
+		panic("MurfTTS requires BaseURL")
+	}
 	return &MurfTTS{options: opts}
 }
 
@@ -646,11 +716,27 @@ func (m *MurfTTS) GetSampleRate() *SampleRate {
 
 func (m *MurfTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"key":      m.options.Key,
-		"voice_id": m.options.VoiceID,
+		"api_key":  m.options.Key,
+		"base_url": m.options.BaseURL,
+		"voiceId":  m.options.VoiceID,
 	}
 	if m.options.Style != "" {
 		params["style"] = m.options.Style
+	}
+	if m.options.Locale != "" {
+		params["locale"] = m.options.Locale
+	}
+	if m.options.Rate != nil {
+		params["rate"] = *m.options.Rate
+	}
+	if m.options.Pitch != nil {
+		params["pitch"] = *m.options.Pitch
+	}
+	if m.options.Model != "" {
+		params["model"] = m.options.Model
+	}
+	if m.options.SampleRate != nil {
+		params["sample_rate"] = *m.options.SampleRate
 	}
 
 	config := map[string]interface{}{

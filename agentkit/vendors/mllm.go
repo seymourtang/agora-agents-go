@@ -3,16 +3,19 @@ package vendors
 import Agora "github.com/AgoraIO/agora-agents-go/v2"
 
 type OpenAIRealtimeOptions struct {
-	APIKey           string
-	Model            string
-	URL              string
-	GreetingMessage  string
-	FailureMessage   string
-	InputModalities  []string
-	OutputModalities []string
-	Messages         []map[string]interface{}
-	Params           map[string]interface{}
-	TurnDetection    *Agora.StartAgentsRequestPropertiesMllmTurnDetection
+	APIKey                  string
+	Model                   string
+	Voice                   string
+	Instructions            string
+	InputAudioTranscription map[string]interface{}
+	URL                     string
+	GreetingMessage         string
+	FailureMessage          string
+	InputModalities         []string
+	OutputModalities        []string
+	Messages                []map[string]interface{}
+	Params                  map[string]interface{}
+	TurnDetection           *Agora.MllmTurnDetection
 }
 
 type OpenAIRealtime struct {
@@ -39,6 +42,15 @@ func (o *OpenAIRealtime) ToConfig() map[string]interface{} {
 		}
 		for k, v := range o.options.Params {
 			params[k] = v
+		}
+		if o.options.Voice != "" {
+			params["voice"] = o.options.Voice
+		}
+		if o.options.Instructions != "" {
+			params["instructions"] = o.options.Instructions
+		}
+		if o.options.InputAudioTranscription != nil {
+			params["input_audio_transcription"] = o.options.InputAudioTranscription
 		}
 	}
 
@@ -89,7 +101,7 @@ type XaiGrokOptions struct {
 	OutputModalities []string
 	Messages         []map[string]interface{}
 	Params           map[string]interface{}
-	TurnDetection    *Agora.StartAgentsRequestPropertiesMllmTurnDetection
+	TurnDetection    *Agora.MllmTurnDetection
 }
 
 // XaiGrok is the xAI Grok MLLM vendor (mllm.vendor "xai").
@@ -173,13 +185,18 @@ type GeminiLiveOptions struct {
 	URL              string
 	Instructions     string
 	Voice            string
+	AffectiveDialog  *bool
+	ProactiveAudio   *bool
+	TranscribeAgent  *bool
+	TranscribeUser   *bool
+	HttpOptions      map[string]interface{}
 	GreetingMessage  string
 	FailureMessage   string
 	InputModalities  []string
 	OutputModalities []string
 	Messages         []map[string]interface{}
 	AdditionalParams map[string]interface{}
-	TurnDetection    *Agora.StartAgentsRequestPropertiesMllmTurnDetection
+	TurnDetection    *Agora.MllmTurnDetection
 }
 
 type GeminiLive struct {
@@ -207,6 +224,21 @@ func (g *GeminiLive) ToConfig() map[string]interface{} {
 	}
 	if g.options.Voice != "" {
 		params["voice"] = g.options.Voice
+	}
+	if g.options.AffectiveDialog != nil {
+		params["affective_dialog"] = *g.options.AffectiveDialog
+	}
+	if g.options.ProactiveAudio != nil {
+		params["proactive_audio"] = *g.options.ProactiveAudio
+	}
+	if g.options.TranscribeAgent != nil {
+		params["transcribe_agent"] = *g.options.TranscribeAgent
+	}
+	if g.options.TranscribeUser != nil {
+		params["transcribe_user"] = *g.options.TranscribeUser
+	}
+	if g.options.HttpOptions != nil {
+		params["http_options"] = g.options.HttpOptions
 	}
 
 	config := map[string]interface{}{
@@ -244,6 +276,11 @@ type VertexAIOptions struct {
 	Model               string
 	URL                 string
 	Voice               string
+	AffectiveDialog     *bool
+	ProactiveAudio      *bool
+	TranscribeAgent     *bool
+	TranscribeUser      *bool
+	HttpOptions         map[string]interface{}
 	Instructions        string
 	Messages            []map[string]interface{}
 	ADCredentialsString string
@@ -252,7 +289,7 @@ type VertexAIOptions struct {
 	FailureMessage      string
 	InputModalities     []string
 	OutputModalities    []string
-	TurnDetection       *Agora.StartAgentsRequestPropertiesMllmTurnDetection
+	TurnDetection       *Agora.MllmTurnDetection
 }
 
 type VertexAI struct {
@@ -280,20 +317,35 @@ func (v *VertexAI) ToConfig() map[string]interface{} {
 	for k, val := range v.options.AdditionalParams {
 		params[k] = val
 	}
-	params["project_id"] = v.options.ProjectID
-	params["location"] = v.options.Location
 	params["model"] = v.options.Model
-	params["adc_credentials_string"] = v.options.ADCredentialsString
 	if v.options.Voice != "" {
 		params["voice"] = v.options.Voice
 	}
 	if v.options.Instructions != "" {
 		params["instructions"] = v.options.Instructions
 	}
+	if v.options.AffectiveDialog != nil {
+		params["affective_dialog"] = *v.options.AffectiveDialog
+	}
+	if v.options.ProactiveAudio != nil {
+		params["proactive_audio"] = *v.options.ProactiveAudio
+	}
+	if v.options.TranscribeAgent != nil {
+		params["transcribe_agent"] = *v.options.TranscribeAgent
+	}
+	if v.options.TranscribeUser != nil {
+		params["transcribe_user"] = *v.options.TranscribeUser
+	}
+	if v.options.HttpOptions != nil {
+		params["http_options"] = v.options.HttpOptions
+	}
 
 	config := map[string]interface{}{
-		"vendor": "vertexai",
-		"params": params,
+		"vendor":                 "vertexai",
+		"project_id":             v.options.ProjectID,
+		"location":               v.options.Location,
+		"adc_credentials_string": v.options.ADCredentialsString,
+		"params":                 params,
 	}
 
 	if v.options.URL != "" {
