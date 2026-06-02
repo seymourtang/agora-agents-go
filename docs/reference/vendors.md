@@ -122,7 +122,7 @@ Panics if `APIKey`, `Endpoint`, or `DeploymentName` is empty.
 func NewAnthropic(opts AnthropicOptions) *Anthropic
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey`, `URL`, `Headers`, or `MaxTokens` is empty.
 
 #### AnthropicOptions
 
@@ -130,7 +130,9 @@ Panics if `APIKey` is empty.
 | ----------------- | -------------------------- | -------- | ------------------------------ | -------------------- |
 | `APIKey`          | `string`                   | Yes      | —                              | Anthropic API key    |
 | `Model`           | `string`                   | No       | `"claude-3-5-sonnet-20241022"` | Model identifier     |
-| `MaxTokens`       | `*int`                     | No       | —                              | Max tokens           |
+| `URL`             | `string`                   | Yes      | —                              | Anthropic messages endpoint URL |
+| `Headers`         | `map[string]string`        | Yes      | —                              | Request headers, including Anthropic API version |
+| `MaxTokens`       | `*int`                     | Yes      | —                              | Max tokens           |
 | `Temperature`     | `*float64`                 | No       | —                              | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                              | Nucleus sampling     |
 | `SystemMessages`  | `[]map[string]interface{}` | No       | —                              | System messages      |
@@ -139,7 +141,6 @@ Panics if `APIKey` is empty.
 | `InputModalities` | `[]string`                 | No       | `["text"]`                     | Input modality types |
 | `OutputModalities` | `[]string`                | No       | —                              | Output modality types |
 | `Params`          | `map[string]interface{}`   | No       | —                              | Additional model params |
-| `Headers`         | `map[string]string`        | No       | —                              | Custom HTTP headers forwarded to the LLM provider |
 | `GreetingConfigs` | `map[string]interface{}`   | No       | —                              | Greeting playback configuration |
 | `TemplateVariables` | `map[string]string`      | No       | —                              | Template variables for messages |
 
@@ -495,7 +496,7 @@ Does not panic. `APIKey` is optional for Agora-managed Deepgram presets.
 func NewMicrosoftSTT(opts MicrosoftSTTOptions) *MicrosoftSTT
 ```
 
-Panics if `Key` or `Region` is empty.
+Panics if `Key`, `Region`, or `Language` is empty.
 
 #### MicrosoftSTTOptions
 
@@ -503,7 +504,7 @@ Panics if `Key` or `Region` is empty.
 | ---------- | -------- | -------- | ------------------------- |
 | `Key`      | `string` | Yes      | Azure Speech Services key |
 | `Region`   | `string` | Yes      | Azure region              |
-| `Language` | `string` | No       | Language code             |
+| `Language` | `string` | Yes      | Language code             |
 | `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 
 ### NewOpenAISTT
@@ -534,7 +535,7 @@ Panics if `APIKey` is empty.
 func NewGoogleSTT(opts GoogleSTTOptions) *GoogleSTT
 ```
 
-Panics if `ProjectID`, `Location`, or `ADCCredentialsString` is empty.
+Panics if `ProjectID`, `Location`, `ADCCredentialsString`, or `Language` is empty.
 
 #### GoogleSTTOptions
 
@@ -543,7 +544,7 @@ Panics if `ProjectID`, `Location`, or `ADCCredentialsString` is empty.
 | `ProjectID` | `string` | Yes | Google Cloud project ID |
 | `Location` | `string` | Yes | Google Cloud region |
 | `ADCCredentialsString` | `string` | Yes | Google service account credentials JSON string |
-| `Language` | `string` | No | Google recognition language |
+| `Language` | `string` | Yes | Google recognition language |
 | `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `Model` | `string` | No | Model identifier |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
@@ -555,7 +556,7 @@ Panics if `ProjectID`, `Location`, or `ADCCredentialsString` is empty.
 func NewAmazonSTT(opts AmazonSTTOptions) *AmazonSTT
 ```
 
-Panics if `AccessKey`, `SecretKey`, or `Region` is empty.
+Panics if `AccessKey`, `SecretKey`, `Region`, or `Language` is empty.
 
 #### AmazonSTTOptions
 
@@ -564,7 +565,7 @@ Panics if `AccessKey`, `SecretKey`, or `Region` is empty.
 | `AccessKey` | `string` | Yes      | AWS access key |
 | `SecretKey` | `string` | Yes      | AWS secret key |
 | `Region`    | `string` | Yes      | AWS region     |
-| `Language`  | `string` | No       | Amazon `language_code` |
+| `Language`  | `string` | Yes      | Amazon `language_code` |
 | `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
@@ -575,14 +576,14 @@ Panics if `AccessKey`, `SecretKey`, or `Region` is empty.
 func NewAssemblyAISTT(opts AssemblyAISTTOptions) *AssemblyAISTT
 ```
 
-Panics if `APIKey` is empty.
+Panics if `APIKey` or `Language` is empty.
 
 #### AssemblyAISTTOptions
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `APIKey` | `string` | Yes | AssemblyAI API key |
-| `Language` | `string` | No | AssemblyAI language code |
+| `Language` | `string` | Yes | AssemblyAI language code |
 | `InteractionLanguage` | `string` | No | Agora `asr.language` override |
 | `URI` | `string` | No | AssemblyAI streaming WebSocket URL |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |

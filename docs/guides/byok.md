@@ -50,8 +50,9 @@ func main() {
         Model:    "nova-3",
         Language: "en-US",
     })).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-        APIKey: os.Getenv("OPENAI_API_KEY"),
-        Model:  "gpt-4o-mini",
+        APIKey:  os.Getenv("OPENAI_API_KEY"),
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+        Model:   "gpt-4o-mini",
         SystemMessages: []map[string]interface{}{
             {"role": "system", "content": "You are a concise support voice assistant."},
         },

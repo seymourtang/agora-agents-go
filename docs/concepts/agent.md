@@ -17,8 +17,9 @@ The `agentkit.Agent` is the central configuration object. It defines what LLM, T
 agent := agentkit.NewAgent(
     agentkit.WithName("my-assistant"),
 ).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-    APIKey: "your-openai-key",
-    Model:  "gpt-4o-mini",
+    APIKey:  "your-openai-key",
+    BaseURL: "https://api.openai.com/v1/chat/completions",
+    Model:   "gpt-4o-mini",
     SystemMessages: []map[string]interface{}{
         {"role": "system", "content": "You are a helpful voice assistant."},
     },
@@ -64,8 +65,9 @@ agent := agentkit.NewAgent(
     agentkit.WithName("assistant"),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
-        APIKey: "<key>",
-        Model:  "gpt-4o-mini",
+        APIKey:  "<key>",
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+        Model:   "gpt-4o-mini",
         SystemMessages: []map[string]interface{}{
             {"role": "system", "content": "You are helpful."},
         },

@@ -35,8 +35,9 @@ func main() {
         agentkit.WithName("openai-assistant"),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
-            APIKey: "<openai_key>",
-            Model:  "gpt-4o-mini",
+            APIKey:  "<openai_key>",
+            BaseURL: "https://api.openai.com/v1/chat/completions",
+            Model:   "gpt-4o-mini",
             SystemMessages: []map[string]interface{}{
                 {"role": "system", "content": "You are a helpful voice assistant. Keep responses under 3 sentences."},
             },
@@ -108,8 +109,11 @@ func main() {
         agentkit.WithName("claude-assistant"),
     ).WithLlm(
         vendors.NewAnthropic(vendors.AnthropicOptions{
-            APIKey: "<anthropic_key>",
-            Model:  "claude-3-5-sonnet-20241022",
+            APIKey:    "<anthropic_key>",
+            URL:       "https://api.anthropic.com/v1/messages",
+            Headers:   map[string]string{"anthropic-version": "2023-06-01"},
+            Model:     "claude-3-5-sonnet-20241022",
+            MaxTokens: Agora.Int(1024),
             SystemMessages: []map[string]interface{}{
                 {"role": "system", "content": "You are a customer service agent for Acme Corp."},
             },

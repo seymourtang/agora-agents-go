@@ -37,7 +37,10 @@ sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 agent := agentkit.NewAgent(
     agentkit.WithName("generic-avatar"),
 ).WithLlm(
-    vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "<openai_key>"}),
+    vendors.NewOpenAI(vendors.OpenAIOptions{
+        APIKey:  "<openai_key>",
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+    }),
 ).WithTts(
     vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:        "<elevenlabs_key>",
@@ -87,8 +90,9 @@ func main() {
         agentkit.WithName("avatar-agent"),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
-            APIKey: "<openai_key>",
-            Model:  "gpt-4o-mini",
+            APIKey:  "<openai_key>",
+            BaseURL: "https://api.openai.com/v1/chat/completions",
+            Model:   "gpt-4o-mini",
             SystemMessages: []map[string]interface{}{
                 {"role": "system", "content": "You are a friendly virtual assistant with a visual avatar."},
             },
@@ -145,8 +149,9 @@ agent := agentkit.NewAgent(
     agentkit.WithName("akool-avatar"),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
-        APIKey: "<openai_key>",
-        Model:  "gpt-4o-mini",
+        APIKey:  "<openai_key>",
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+        Model:   "gpt-4o-mini",
         SystemMessages: []map[string]interface{}{
             {"role": "system", "content": "You are a virtual presenter."},
         },

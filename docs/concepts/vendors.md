@@ -41,7 +41,7 @@ type Avatar interface {
 |---|---|---|---|
 | `NewOpenAI` | `OpenAIOptions` | `APIKey` for BYOK; none for supported Agora-managed OpenAI models | `gpt-4o-mini` |
 | `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Endpoint`, `DeploymentName` | — |
-| `NewAnthropic` | `AnthropicOptions` | `APIKey` | `claude-3-5-sonnet-20241022` |
+| `NewAnthropic` | `AnthropicOptions` | `APIKey`, `URL`, `Headers`, `MaxTokens` | `claude-3-5-sonnet-20241022` |
 | `NewGemini` | `GeminiOptions` | `APIKey` | `gemini-2.0-flash-exp` |
 | `NewGroq` | `GroqOptions` | `APIKey` | `llama-3.3-70b-versatile` |
 | `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `ProjectID`, `Location` | `gemini-2.0-flash-exp` |
@@ -114,8 +114,8 @@ Use `Agent.WithInteractionLanguage()` for Agora `asr.language`; it defaults to `
 | `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region` |
 | `NewOpenAISTT` | `OpenAISTTOptions` | `APIKey` |
 | `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString` |
-| `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region` |
-| `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey` |
+| `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region`, `Language` |
+| `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey`, `Language` |
 | `NewAresSTT` | `AresSTTOptions` | None |
 | `NewSarvamSTT` | `SarvamSTTOptions` | `APIKey`, `Language` |
 

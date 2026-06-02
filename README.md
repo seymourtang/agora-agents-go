@@ -158,6 +158,7 @@ agent := agentkit.NewAgent().WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTO
     Language: "en",
 })).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
     APIKey:          os.Getenv("OPENAI_API_KEY"),
+    BaseURL:         "https://api.openai.com/v1/chat/completions",
     Model:           "gpt-4o-mini",
     SystemMessages:  []map[string]interface{}{{"role": "system", "content": agentPrompt}},
     GreetingMessage: greeting,

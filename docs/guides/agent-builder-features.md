@@ -50,8 +50,9 @@ agent := agentkit.NewAgent(
         },
     }),
 ).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-    APIKey: "<key>",
-    Model:  "gpt-4o-mini",
+    APIKey:  "<key>",
+    BaseURL: "https://api.openai.com/v1/chat/completions",
+    Model:   "gpt-4o-mini",
     SystemMessages: []map[string]interface{}{
         {"role": "system", "content": "You are a helpful assistant."},
     },
@@ -113,6 +114,7 @@ agent := agentkit.NewAgent(
 agent := agentkit.NewAgent().
     WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:         "<key>",
+        BaseURL:        "https://api.openai.com/v1/chat/completions",
         Model:          "gpt-4o-mini",
         FailureMessage: "Something went wrong.",
         MaxHistory:     Agora.Int(15),
@@ -280,8 +282,9 @@ func main() {
             },
         }),
     ).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
-        APIKey: "<openai_key>",
-        Model:  "gpt-4o-mini",
+        APIKey:  "<openai_key>",
+        BaseURL: "https://api.openai.com/v1/chat/completions",
+        Model:   "gpt-4o-mini",
         SystemMessages: []map[string]interface{}{
             {"role": "system", "content": "You are a helpful voice assistant."},
         },
