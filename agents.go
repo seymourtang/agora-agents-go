@@ -2547,8 +2547,7 @@ var (
 	deepgramTtsParamsFieldModel        = big.NewInt(1 << 1)
 	deepgramTtsParamsFieldBaseURL      = big.NewInt(1 << 2)
 	deepgramTtsParamsFieldSampleRate   = big.NewInt(1 << 3)
-	deepgramTtsParamsFieldParams       = big.NewInt(1 << 4)
-	deepgramTtsParamsFieldSkipPatterns = big.NewInt(1 << 5)
+	deepgramTtsParamsFieldSkipPatterns = big.NewInt(1 << 4)
 )
 
 type DeepgramTtsParams struct {
@@ -2560,8 +2559,6 @@ type DeepgramTtsParams struct {
 	BaseURL *string `json:"base_url,omitempty" url:"base_url,omitempty"`
 	// Audio sampling rate in Hz
 	SampleRate *int `json:"sample_rate,omitempty" url:"sample_rate,omitempty"`
-	// Additional Deepgram TTS parameters
-	Params map[string]interface{} `json:"params,omitempty" url:"params,omitempty"`
 	// Controls whether the TTS module skips bracketed content when reading LLM response text.
 	SkipPatterns []int `json:"skip_patterns,omitempty" url:"skip_patterns,omitempty"`
 
@@ -2599,13 +2596,6 @@ func (d *DeepgramTtsParams) GetSampleRate() *int {
 		return nil
 	}
 	return d.SampleRate
-}
-
-func (d *DeepgramTtsParams) GetParams() map[string]interface{} {
-	if d == nil {
-		return nil
-	}
-	return d.Params
 }
 
 func (d *DeepgramTtsParams) GetSkipPatterns() []int {
@@ -2652,13 +2642,6 @@ func (d *DeepgramTtsParams) SetBaseURL(baseURL *string) {
 func (d *DeepgramTtsParams) SetSampleRate(sampleRate *int) {
 	d.SampleRate = sampleRate
 	d.require(deepgramTtsParamsFieldSampleRate)
-}
-
-// SetParams sets the Params field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DeepgramTtsParams) SetParams(params map[string]interface{}) {
-	d.Params = params
-	d.require(deepgramTtsParamsFieldParams)
 }
 
 // SetSkipPatterns sets the SkipPatterns field and marks it as non-optional;
