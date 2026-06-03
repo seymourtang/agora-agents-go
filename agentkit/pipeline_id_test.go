@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
 	"github.com/AgoraIO/agora-agents-go/v2/client"
 	"github.com/AgoraIO/agora-agents-go/v2/option"
 	"github.com/stretchr/testify/assert"
@@ -70,6 +71,55 @@ func TestAgentPipelineIDSkipsMissingVendorValidation(t *testing.T) {
 	payload := startPipelineIDSession(t, NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")), basePipelineSessionOptions())
 
 	assert.Equal(t, "studio-pipeline-id", payload["pipeline_id"])
+	properties := payload["properties"].(map[string]interface{})
+	assert.NotContains(t, properties, "asr")
+	assert.NotContains(t, properties, "llm")
+	assert.NotContains(t, properties, "tts")
+}
+
+func TestPipelineIDAllowsSingleLLMOverrideWithoutTTSOrASR(t *testing.T) {
+	agent := NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")).WithLlm(
+		vendors.NewOpenAI(vendors.OpenAIOptions{
+			APIKey:  "openai-key",
+			BaseURL: "https://api.openai.com/v1/chat/completions",
+			Model:   "gpt-4o",
+		}),
+	)
+
+	payload := startPipelineIDSession(t, agent, basePipelineSessionOptions())
+
+	assert.Equal(t, "studio-pipeline-id", payload["pipeline_id"])
+	properties := payload["properties"].(map[string]interface{})
+	assert.NotContains(t, properties, "asr")
+	assert.NotContains(t, properties, "tts")
+	llm := properties["llm"].(map[string]interface{})
+	assert.Equal(t, "openai-key", llm["api_key"])
+	assert.Equal(t, "gpt-4o", llm["params"].(map[string]interface{})["model"])
+}
+
+func TestPipelineIDAllowsMultipleOverridesWithoutASR(t *testing.T) {
+	agent := NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")).
+		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
+			APIKey:  "openai-key",
+			BaseURL: "https://api.openai.com/v1/chat/completions",
+			Model:   "gpt-4o",
+		})).
+		WithTts(vendors.NewOpenAITTS(vendors.OpenAITTSOptions{
+			APIKey:  "tts-key",
+			BaseURL: "https://api.openai.com/v1/audio/speech",
+			Model:   "tts-1-hd",
+			Voice:   "alloy",
+		}))
+
+	payload := startPipelineIDSession(t, agent, basePipelineSessionOptions())
+
+	assert.Equal(t, "studio-pipeline-id", payload["pipeline_id"])
+	properties := payload["properties"].(map[string]interface{})
+	assert.NotContains(t, properties, "asr")
+	assert.Equal(t, "openai-key", properties["llm"].(map[string]interface{})["api_key"])
+	tts := properties["tts"].(map[string]interface{})
+	assert.Equal(t, "openai", tts["vendor"])
+	assert.Equal(t, "tts-key", tts["params"].(map[string]interface{})["api_key"])
 }
 
 func TestAgentPipelineIDSurvivesBuilderClone(t *testing.T) {
