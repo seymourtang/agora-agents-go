@@ -12,12 +12,9 @@ import (
 
 type turnDetectionLanguage string
 
-const defaultTurnDetectionLanguage turnDetectionLanguage = "en"
+const defaultTurnDetectionLanguage turnDetectionLanguage = "en-US"
 
 func isTurnDetectionLanguage(language string) bool {
-	if language == "en" {
-		return true
-	}
 	_, err := Agora.NewAsrLanguageFromString(language)
 	return err == nil
 }
@@ -909,12 +906,12 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 		}
 	}
 
-	if a.stt != nil || !allowMissingCategories["asr"] {
-		propsMap["asr"] = a.resolveAsrConfig()
-	}
 	turnDetection, err := a.resolveTurnDetectionConfig()
 	if err != nil {
 		return nil, err
+	}
+	if a.stt != nil || !allowMissingCategories["asr"] {
+		propsMap["asr"] = a.resolveAsrConfig(turnDetection)
 	}
 	propsMap["turn_detection"] = turnDetection
 
@@ -935,15 +932,15 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	return propsMap, nil
 }
 
-func (a *Agent) resolveAsrConfig() map[string]interface{} {
+func (a *Agent) resolveAsrConfig(turnDetection map[string]interface{}) map[string]interface{} {
 	asrConfig := cloneConfig(a.stt)
 	if asrConfig == nil {
 		asrConfig = map[string]interface{}{"vendor": "ares"}
 	}
-	delete(asrConfig, "language")
 	if len(asrConfig) == 0 {
 		asrConfig["vendor"] = "ares"
 	}
+	asrConfig["language"] = turnDetection["language"]
 	return asrConfig
 }
 

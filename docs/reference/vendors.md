@@ -610,7 +610,6 @@ Ares is an Agora built-in STT service — no external API key required.
 
 | Field              | Type                     | Required | Description              |
 | ------------------ | ------------------------ | -------- | ------------------------ |
-| `Language`         | `string`                 | No       | Language code            |
 | `AdditionalParams` | `map[string]interface{}` | No       | Additional vendor params |
 
 ### NewSarvamSTT

@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- **Turn detection language** — AgentKit now manages Agora interaction language through `TurnDetectionConfig.Language`, validates it against the supported BCP-47 language list, and sends the default `en` when no language is provided.
+- **Turn detection language** — AgentKit now manages Agora interaction language through `TurnDetectionConfig.Language`, validates it against the supported BCP-47 language list, and sends the default `en-US` when no language is provided.
 - **Provider parameter parity** — ASR, LLM, MLLM, TTS, and avatar wrappers expose typed provider parameters plus passthrough fields where the generated core supports additional properties.
 
 ### Changed
@@ -21,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 
 - **Managed-provider validation** — AgentKit validation now distinguishes preset-backed providers from BYOK providers so required provider fields are only required when credentials are caller-supplied.
-- **Language placement** — Provider-specific STT language values remain under `asr.params`, while Agora interaction language is emitted separately as `turn_detection.language`.
+- **Language placement** — Provider-specific STT language values remain under `asr.params`; the REST `asr.language` field is populated from `turn_detection.language`.
 - **Deepgram TTS explicit fields** — `AdditionalParams` can no longer override explicit `APIKey`, `Model`, `BaseURL`, or `SampleRate` values.
 
 ## [v2.0.0] — 2026-05-21
@@ -131,7 +131,7 @@ AgentKit alignment for Conversational AI v2.7.
 
 ### Fixed
 
-- **`AresSTT`** — Removed redundant `language` key from the `Params` map. Language is now emitted only at the top level.
+- **`AresSTT`** — Removed redundant `language` key from the `Params` map. Ares only selects the provider; AgentKit populates REST `asr.language` from `TurnDetectionConfig.Language`.
 - **`OpenAIRealtime` / `GeminiLive` (MLLM)** — Agent-level `greeting`, `FailureMessage`, and `MaxHistory` overrides are now correctly applied in MLLM mode.
 - **`GeminiLive` (MLLM)** — `messages` is now correctly placed inside `params` as required by the Gemini Live API.
 

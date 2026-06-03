@@ -50,12 +50,12 @@ func TestSTTLanguageSerializesBCP47ToProviderParams(t *testing.T) {
 
 	asr := asrFromProperties(t, props)
 	assert.Equal(t, "speechmatics", asr["vendor"])
-	assert.NotContains(t, asr, "language")
-	assert.Equal(t, "en", props["turn_detection"].(map[string]interface{})["language"])
+	assert.Equal(t, "en-US", asr["language"])
+	assert.Equal(t, "en-US", props["turn_detection"].(map[string]interface{})["language"])
 	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
 }
 
-func TestSTTProviderLanguageDefaultsTurnDetectionLanguageWhenUnsupportedByAres(t *testing.T) {
+func TestSTTProviderLanguageDoesNotSetTurnDetectionLanguage(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage().
 		WithStt(vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
 			APIKey:   "stt-key",
@@ -63,8 +63,8 @@ func TestSTTProviderLanguageDefaultsTurnDetectionLanguageWhenUnsupportedByAres(t
 		})))
 
 	asr := asrFromProperties(t, props)
-	assert.NotContains(t, asr, "language")
-	assert.Equal(t, "en", props["turn_detection"].(map[string]interface{})["language"])
+	assert.Equal(t, "en-US", asr["language"])
+	assert.Equal(t, "en-US", props["turn_detection"].(map[string]interface{})["language"])
 	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
 }
 
@@ -79,7 +79,7 @@ func TestTurnDetectionLanguageCanDifferFromProviderLanguage(t *testing.T) {
 		})))
 
 	asr := asrFromProperties(t, props)
-	assert.NotContains(t, asr, "language")
+	assert.Equal(t, "fr-FR", asr["language"])
 	assert.Equal(t, "fr-FR", props["turn_detection"].(map[string]interface{})["language"])
 	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
 }
@@ -100,15 +100,17 @@ func TestInvalidTurnDetectionLanguagePanics(t *testing.T) {
 func TestSTTDefaultTurnDetectionLanguageIsSentWithoutSTT(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage())
 
-	assert.Equal(t, map[string]interface{}{"vendor": "ares"}, props["asr"])
-	assert.Equal(t, map[string]interface{}{"language": "en"}, props["turn_detection"])
+	assert.Equal(t, map[string]interface{}{"vendor": "ares", "language": "en-US"}, props["asr"])
+	assert.Equal(t, map[string]interface{}{"language": "en-US"}, props["turn_detection"])
 }
 
 func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {
+	deepgramManaged := vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "nova-3", Language: "en-US"}).ToConfig()
+	assert.NotContains(t, deepgramManaged, "language")
 	assert.Equal(t, map[string]interface{}{
 		"model":    "nova-3",
 		"language": "en-US",
-	}, vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "nova-3", Language: "en-US"}).ToConfig()["params"])
+	}, deepgramManaged["params"])
 
 	assert.PanicsWithValue(t, "DeepgramSTT requires APIKey unless using a supported Agora-managed model", func() {
 		vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "enhanced"})
@@ -166,13 +168,38 @@ func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {
 		Language:  "en-US",
 	}).ToConfig()["params"])
 
+	assemblyAIConfig := vendors.NewAssemblyAISTT(vendors.AssemblyAISTTOptions{
+		APIKey:   "assembly-key",
+		Language: "en-US",
+		URI:      "wss://example.test/ws",
+	}).ToConfig()
+	assert.NotContains(t, assemblyAIConfig, "language")
 	assert.Equal(t, map[string]interface{}{
 		"api_key":  "assembly-key",
 		"language": "en-US",
 		"uri":      "wss://example.test/ws",
-	}, vendors.NewAssemblyAISTT(vendors.AssemblyAISTTOptions{
-		APIKey:   "assembly-key",
-		Language: "en-US",
-		URI:      "wss://example.test/ws",
-	}).ToConfig()["params"])
+	}, assemblyAIConfig["params"])
+}
+
+func TestAssemblyAIParamsStayNestedAndASRLanguageComesFromTurnDetection(t *testing.T) {
+	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage().
+		WithTurnDetection(&TurnDetectionConfig{
+			Language: Agora.AsrLanguageFrFr.Ptr(),
+		}).
+		WithStt(vendors.NewAssemblyAISTT(vendors.AssemblyAISTTOptions{
+			APIKey:   "assembly-key",
+			Language: "en-US",
+			URI:      "wss://example.test/ws",
+		})))
+
+	assert.Equal(t, map[string]interface{}{
+		"vendor":   "assemblyai",
+		"language": "fr-FR",
+		"params": map[string]interface{}{
+			"api_key":  "assembly-key",
+			"language": "en-US",
+			"uri":      "wss://example.test/ws",
+		},
+	}, props["asr"])
+	assert.Equal(t, map[string]interface{}{"language": "fr-FR"}, props["turn_detection"])
 }
