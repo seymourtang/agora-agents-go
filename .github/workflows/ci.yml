@@ -12,6 +12,9 @@ jobs:
       - name: Set up go
         uses: actions/setup-go@v4
 
+      - name: Release metadata check
+        run: bash scripts/check-release-workflow.sh
+
       - name: Compile
         run: go build ./...
   test:

@@ -891,20 +891,35 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 		return propsMap, nil
 	}
 
-	propsMap["asr"] = a.resolveAsrConfig()
+	skipCategories := map[string]bool{}
+	for _, category := range opts.SkipVendorValidationCategories {
+		skipCategories[category] = true
+	}
+	allowMissingCategories := map[string]bool{}
+	for _, category := range opts.AllowMissingVendorCategories {
+		allowMissingCategories[category] = true
+	}
+	if opts.SkipVendorValidation {
+		for _, category := range []string{"asr", "llm", "tts"} {
+			skipCategories[category] = true
+			allowMissingCategories[category] = true
+		}
+	}
+
+	if a.stt != nil || !allowMissingCategories["asr"] {
+		propsMap["asr"] = a.resolveAsrConfig()
+	}
 	turnDetection, err := a.resolveTurnDetectionConfig()
 	if err != nil {
 		return nil, err
 	}
 	propsMap["turn_detection"] = turnDetection
 
-	if !opts.SkipVendorValidation {
-		if a.tts == nil {
-			return nil, fmt.Errorf("TTS configuration is required; use WithTts() to set it")
-		}
-		if a.llm == nil {
-			return nil, fmt.Errorf("LLM configuration is required; use WithLlm() to set it")
-		}
+	if a.tts == nil && !skipCategories["tts"] && !allowMissingCategories["tts"] {
+		return nil, fmt.Errorf("TTS configuration is required; use WithTts() to set it")
+	}
+	if a.llm == nil && !skipCategories["llm"] && !allowMissingCategories["llm"] {
+		return nil, fmt.Errorf("LLM configuration is required; use WithLlm() to set it")
 	}
 
 	if a.llm != nil {
@@ -1127,11 +1142,14 @@ type ToPropertiesOptions struct {
 	AppCertificate string
 	// ExpiresIn is the token lifetime in seconds (default: 86400 = 24 hours, Agora maximum).
 	// Valid range: 1–86400. Use ExpiresInHours() / ExpiresInMinutes() for clarity.
-	ExpiresIn            int
-	IdleTimeout          *int
-	EnableStringUID      *bool
-	SkipVendorValidation bool
-	Warn                 func(string)
+	ExpiresIn       int
+	IdleTimeout     *int
+	EnableStringUID *bool
+	// Deprecated: use SkipVendorValidationCategories and AllowMissingVendorCategories instead.
+	SkipVendorValidation           bool
+	SkipVendorValidationCategories []string
+	AllowMissingVendorCategories   []string
+	Warn                           func(string)
 }
 
 func (a *Agent) clone() *Agent {

@@ -259,18 +259,20 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		pipelineID = s.agent.PipelineID()
 	}
 
+	skipCategories, allowMissingCategories := s.vendorValidationCategories(pipelineID)
 	propOpts := ToPropertiesOptions{
-		Channel:              s.channel,
-		AgentUID:             s.agentUID,
-		RemoteUIDs:           s.remoteUIDs,
-		Token:                s.token,
-		AppID:                s.appID,
-		AppCertificate:       s.appCertificate,
-		ExpiresIn:            s.expiresIn,
-		IdleTimeout:          s.idleTimeout,
-		EnableStringUID:      s.enableStringUID,
-		SkipVendorValidation: len(s.preset) > 0 || pipelineID != "",
-		Warn:                 s.warnf,
+		Channel:                        s.channel,
+		AgentUID:                       s.agentUID,
+		RemoteUIDs:                     s.remoteUIDs,
+		Token:                          s.token,
+		AppID:                          s.appID,
+		AppCertificate:                 s.appCertificate,
+		ExpiresIn:                      s.expiresIn,
+		IdleTimeout:                    s.idleTimeout,
+		EnableStringUID:                s.enableStringUID,
+		SkipVendorValidationCategories: skipCategories,
+		AllowMissingVendorCategories:   allowMissingCategories,
+		Warn:                           s.warnf,
 	}
 
 	properties, err := s.agent.ToPropertiesMap(propOpts)
@@ -373,6 +375,49 @@ func validateEnrichedAvatarConfig(properties map[string]interface{}) error {
 		return fmt.Errorf("%s avatar requires agora_token; pass AgoraToken on the avatar vendor or provide AppCertificate for automatic token generation", vendor)
 	}
 	return nil
+}
+
+func (s *AgentSession) vendorValidationCategories(pipelineID string) ([]string, []string) {
+	skip := map[string]bool{}
+	allowMissing := map[string]bool{}
+
+	if pipelineID != "" {
+		for _, category := range []string{"asr", "llm", "tts"} {
+			allowMissing[category] = true
+		}
+	}
+
+	for _, preset := range parsePresetInput(s.preset) {
+		if category := getPresetCategory(preset); category != "" {
+			skip[category] = true
+			allowMissing[category] = true
+		}
+	}
+
+	if preset, ok := inferASRPreset(s.agent.stt); ok && preset != "" {
+		skip["asr"] = true
+	}
+	if preset, ok := inferLLMPreset(s.agent.llm); ok && preset != "" {
+		skip["llm"] = true
+	}
+	if preset, ok := inferTTSPreset(s.agent.tts); ok && preset != "" {
+		skip["tts"] = true
+	}
+
+	return categorySetToSlice(skip), categorySetToSlice(allowMissing)
+}
+
+func categorySetToSlice(values map[string]bool) []string {
+	if len(values) == 0 {
+		return nil
+	}
+	result := make([]string, 0, len(values))
+	for _, category := range []string{"asr", "llm", "tts"} {
+		if values[category] {
+			result = append(result, category)
+		}
+	}
+	return result
 }
 
 func (s *AgentSession) Stop(ctx context.Context) error {
