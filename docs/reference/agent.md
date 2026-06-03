@@ -421,17 +421,19 @@ Returns an error if:
 <!-- snippet: fragment -->
 ```go
 type ToPropertiesOptions struct {
-    Channel         string
-    AgentUID        string
-    RemoteUIDs      []string
-    Token           string
-    AppID           string
-    AppCertificate  string
-    ExpiresIn       int
-    IdleTimeout     *int
-    EnableStringUID *bool
-    SkipVendorValidation bool
-    Warn            func(string)
+    Channel                      string
+    AgentUID                     string
+    RemoteUIDs                   []string
+    Token                        string
+    AppID                        string
+    AppCertificate               string
+    ExpiresIn                    int
+    IdleTimeout                  *int
+    EnableStringUID               *bool
+    SkipVendorValidation         bool
+    SkipVendorValidationCategories []string
+    AllowMissingVendorCategories []string
+    Warn                         func(string)
 }
 ```
 
@@ -446,7 +448,9 @@ type ToPropertiesOptions struct {
 | `ExpiresIn` | `int` | Token lifetime in seconds (default: `86400` = 24 h, Agora max). Use `ExpiresInHours()` / `ExpiresInMinutes()` for clarity. Valid range: 1–86400. |
 | `IdleTimeout` | `*int` | Session idle timeout |
 | `EnableStringUID` | `*bool` | Enable string UID mode |
-| `SkipVendorValidation` | `bool` | Advanced option for pipeline-backed starts without explicit LLM/TTS |
+| `SkipVendorValidation` | `bool` | **Deprecated.** Advanced escape hatch that disables all category validation. Use `SkipVendorValidationCategories` instead. |
+| `SkipVendorValidationCategories` | `[]string` | Skip validation only for listed categories (`"asr"`, `"llm"`, `"tts"`). |
+| `AllowMissingVendorCategories` | `[]string` | Allow missing config in listed categories (`"asr"`, `"llm"`, `"tts"`). |
 | `Warn` | `func(string)` | Warning sink for recoverable config issues |
 
 ## Type Aliases
