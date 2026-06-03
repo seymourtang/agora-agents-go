@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- **Turn detection language** — AgentKit now manages Agora interaction language through `TurnDetectionConfig.Language`, validates it against the supported BCP-47 language list, and sends the default `en-US` when no language is provided.
+- **Turn detection language** — AgentKit now manages Agora interaction language through `TurnDetectionConfig.Language`, validates it against the supported BCP-47 language list, and sends the default `en` when no language is provided.
 - **Provider parameter parity** — ASR, LLM, MLLM, TTS, and avatar wrappers expose typed provider parameters plus passthrough fields where the generated core supports additional properties.
 
 ### Changed

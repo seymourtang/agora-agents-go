@@ -41,18 +41,18 @@ func asrFromProperties(t *testing.T, props map[string]interface{}) map[string]in
 	return asr
 }
 
-func TestSTTLanguageSerializesBCP47ToTurnDetectionAndProviderParams(t *testing.T) {
+func TestSTTLanguageSerializesBCP47ToProviderParams(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage().
 		WithStt(vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
 			APIKey:   "stt-key",
-			Language: "en-US",
+			Language: "en",
 		})))
 
 	asr := asrFromProperties(t, props)
 	assert.Equal(t, "speechmatics", asr["vendor"])
 	assert.NotContains(t, asr, "language")
-	assert.Equal(t, "en-US", props["turn_detection"].(map[string]interface{})["language"])
-	assert.Equal(t, "en-US", asr["params"].(map[string]interface{})["language"])
+	assert.Equal(t, "en", props["turn_detection"].(map[string]interface{})["language"])
+	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
 }
 
 func TestSTTProviderLanguageDefaultsTurnDetectionLanguageWhenUnsupportedByAres(t *testing.T) {
@@ -64,7 +64,7 @@ func TestSTTProviderLanguageDefaultsTurnDetectionLanguageWhenUnsupportedByAres(t
 
 	asr := asrFromProperties(t, props)
 	assert.NotContains(t, asr, "language")
-	assert.Equal(t, "en-US", props["turn_detection"].(map[string]interface{})["language"])
+	assert.Equal(t, "en", props["turn_detection"].(map[string]interface{})["language"])
 	assert.Equal(t, "en", asr["params"].(map[string]interface{})["language"])
 }
 
@@ -85,9 +85,9 @@ func TestTurnDetectionLanguageCanDifferFromProviderLanguage(t *testing.T) {
 }
 
 func TestInvalidTurnDetectionLanguagePanics(t *testing.T) {
-	assert.PanicsWithValue(t, "invalid interaction language: en", func() {
+	assert.PanicsWithValue(t, "invalid interaction language: xx", func() {
 		baseAgentForSTTLanguage().WithTurnDetection(&TurnDetectionConfig{
-			Language: Agora.AsrLanguage("en").Ptr(),
+			Language: Agora.AsrLanguage("xx").Ptr(),
 		}).ToPropertiesMap(ToPropertiesOptions{
 			Channel:    "channel",
 			Token:      "token",
@@ -101,7 +101,7 @@ func TestSTTDefaultTurnDetectionLanguageIsSentWithoutSTT(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage())
 
 	assert.Equal(t, map[string]interface{}{"vendor": "ares"}, props["asr"])
-	assert.Equal(t, map[string]interface{}{"language": "en-US"}, props["turn_detection"])
+	assert.Equal(t, map[string]interface{}{"language": "en"}, props["turn_detection"])
 }
 
 func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {

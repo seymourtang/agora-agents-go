@@ -12,9 +12,12 @@ import (
 
 type turnDetectionLanguage string
 
-const defaultTurnDetectionLanguage turnDetectionLanguage = turnDetectionLanguage(Agora.AsrLanguageEnUs)
+const defaultTurnDetectionLanguage turnDetectionLanguage = "en"
 
 func isTurnDetectionLanguage(language string) bool {
+	if language == "en" {
+		return true
+	}
 	_, err := Agora.NewAsrLanguageFromString(language)
 	return err == nil
 }
@@ -959,11 +962,7 @@ func (a *Agent) resolveTurnDetectionConfig() (map[string]interface{}, error) {
 		language = existing
 	}
 	if language == "" {
-		if existing, ok := a.stt["language"].(string); ok && isTurnDetectionLanguage(existing) {
-			language = existing
-		} else {
-			language = string(defaultTurnDetectionLanguage)
-		}
+		language = string(defaultTurnDetectionLanguage)
 	}
 	validateTurnDetectionLanguage(language)
 	turnDetection["language"] = language
