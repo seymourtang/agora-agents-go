@@ -564,7 +564,14 @@ func (v *VertexAILLM) ToConfig() map[string]interface{} {
 	opts := v.options.GeminiOptions
 	opts.APIKey = v.options.APIKey
 	opts.Model = v.options.Model
-	opts.URL = v.options.URL
+	if v.options.URL != "" {
+		opts.URL = v.options.URL
+	} else {
+		opts.URL = fmt.Sprintf(
+			"https://%s-aiplatform.googleapis.com/v1/projects/%s/locations/%s/publishers/google/models/%s:streamGenerateContent?alt=sse",
+			v.options.Location, v.options.ProjectID, v.options.Location, v.options.Model,
+		)
+	}
 	config := (&Gemini{options: opts}).ToConfig()
 	params, _ := config["params"].(map[string]interface{})
 	if params == nil {

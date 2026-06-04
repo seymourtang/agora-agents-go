@@ -126,21 +126,28 @@ func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {
 		"input_audio_transcription": map[string]interface{}{
 			"model":    "gpt-4o-mini-transcribe",
 			"language": "en",
+			"prompt":   "Transcribe English speech",
 		},
 	}, vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
 		APIKey:   "openai-key",
 		Model:    "gpt-4o-mini-transcribe",
 		Language: "en",
+		Prompt:   "Transcribe English speech",
 	}).ToConfig()["params"])
 
-	assert.Equal(t, map[string]interface{}{
-		"api_key": "openai-key",
-		"input_audio_transcription": map[string]interface{}{
-			"model": "whisper-1",
-		},
-	}, vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
-		APIKey: "openai-key",
-	}).ToConfig()["params"])
+	assert.PanicsWithValue(t, "OpenAISTT: input_audio_transcription.prompt is required", func() {
+		vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
+			APIKey:   "openai-key",
+			Language: "en",
+		}).ToConfig()
+	})
+
+	assert.PanicsWithValue(t, "OpenAISTT: input_audio_transcription.language is required", func() {
+		vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
+			APIKey:  "openai-key",
+			Prompt:  "Transcribe speech",
+		}).ToConfig()
+	})
 
 	assert.Equal(t, map[string]interface{}{
 		"project_id":             "project",

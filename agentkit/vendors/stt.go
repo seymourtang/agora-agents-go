@@ -52,6 +52,7 @@ type DeepgramSTTOptions struct {
 	APIKey           string
 	Model            string
 	Language         string
+	Keyterm          string
 	SmartFormat      *bool
 	Punctuation      *bool
 	AdditionalParams map[string]interface{}
@@ -91,6 +92,9 @@ func (d *DeepgramSTT) ToConfig() map[string]interface{} {
 	}
 	if d.options.Punctuation != nil {
 		params["punctuation"] = *d.options.Punctuation
+	}
+	if d.options.Keyterm != "" {
+		params["keyterm"] = d.options.Keyterm
 	}
 
 	config := map[string]interface{}{
@@ -168,7 +172,7 @@ func (o *OpenAISTT) ToConfig() map[string]interface{} {
 		params[k] = v
 	}
 	params["api_key"] = o.options.APIKey
-	transcription := map[string]interface{}{"model": "whisper-1"}
+	transcription := map[string]interface{}{"model": "gpt-4o-mini-transcribe"}
 	for k, v := range o.options.InputAudioTranscription {
 		transcription[k] = v
 	}
@@ -181,9 +185,16 @@ func (o *OpenAISTT) ToConfig() map[string]interface{} {
 	if o.options.Language != "" {
 		transcription["language"] = o.options.Language
 	}
-	if len(transcription) > 0 {
-		params["input_audio_transcription"] = transcription
+	if v, _ := transcription["model"].(string); v == "" {
+		panic("OpenAISTT: input_audio_transcription.model is required")
 	}
+	if v, _ := transcription["prompt"].(string); v == "" {
+		panic("OpenAISTT: input_audio_transcription.prompt is required")
+	}
+	if v, _ := transcription["language"].(string); v == "" {
+		panic("OpenAISTT: input_audio_transcription.language is required")
+	}
+	params["input_audio_transcription"] = transcription
 
 	config := map[string]interface{}{
 		"vendor": "openai",
