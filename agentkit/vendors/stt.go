@@ -63,12 +63,13 @@ func (s *SpeechmaticsSTT) ToConfig() map[string]interface{} {
 }
 
 type DeepgramSTTOptions struct {
-	APIKey           string
-	Model            string
-	Language         string
-	SmartFormat      *bool
-	Punctuation      *bool
-	AdditionalParams map[string]interface{}
+	APIKey              string
+	Model               string
+	Language            string
+	InteractionLanguage string
+	SmartFormat         *bool
+	Punctuation         *bool
+	AdditionalParams    map[string]interface{}
 }
 
 type DeepgramSTT struct {
@@ -118,10 +119,11 @@ func (d *DeepgramSTT) ToConfig() map[string]interface{} {
 }
 
 type MicrosoftSTTOptions struct {
-	Key              string
-	Region           string
-	Language         string
-	AdditionalParams map[string]interface{}
+	Key                 string
+	Region              string
+	Language            string
+	InteractionLanguage string
+	AdditionalParams    map[string]interface{}
 }
 
 type MicrosoftSTT struct {
@@ -270,11 +272,12 @@ func (g *GoogleSTT) ToConfig() map[string]interface{} {
 }
 
 type AmazonSTTOptions struct {
-	AccessKey        string
-	SecretKey        string
-	Region           string
-	Language         string
-	AdditionalParams map[string]interface{}
+	AccessKey           string
+	SecretKey           string
+	Region              string
+	Language            string
+	InteractionLanguage string
+	AdditionalParams    map[string]interface{}
 }
 
 type AmazonSTT struct {
@@ -394,10 +397,11 @@ func (a *AresSTT) ToConfig() map[string]interface{} {
 }
 
 type SarvamSTTOptions struct {
-	APIKey           string
-	Language         string
-	Model            string
-	AdditionalParams map[string]interface{}
+	APIKey              string
+	Language            string
+	InteractionLanguage string
+	Model               string
+	AdditionalParams    map[string]interface{}
 }
 
 type SarvamSTT struct {

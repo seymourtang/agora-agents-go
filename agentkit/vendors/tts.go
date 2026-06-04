@@ -189,6 +189,9 @@ func (o *OpenAITTS) ToConfig() map[string]interface{} {
 	if o.options.Instructions != "" {
 		params["instructions"] = o.options.Instructions
 	}
+	if o.options.Instructions != "" {
+		params["instructions"] = o.options.Instructions
+	}
 	if o.options.Speed != nil {
 		params["speed"] = *o.options.Speed
 	}

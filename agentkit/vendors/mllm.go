@@ -37,9 +37,6 @@ func (o *OpenAIRealtime) ToConfig() map[string]interface{} {
 	var params map[string]interface{}
 	if o.options.Model != "" || o.options.Params != nil {
 		params = map[string]interface{}{}
-		if o.options.Model != "" {
-			params["model"] = o.options.Model
-		}
 		for k, v := range o.options.Params {
 			params[k] = v
 		}
