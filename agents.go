@@ -2179,14 +2179,11 @@ func (c *CartesiaTtsVoice) String() string {
 var (
 	deepgramAsrFieldLanguage = big.NewInt(1 << 0)
 	deepgramAsrFieldParams   = big.NewInt(1 << 1)
-	deepgramAsrFieldKeyterm  = big.NewInt(1 << 2)
 )
 
 type DeepgramAsr struct {
 	Language *AsrLanguage       `json:"language,omitempty" url:"language,omitempty"`
 	Params   *DeepgramAsrParams `json:"params" url:"params"`
-	// Boost specialized terms and brands for preset-backed Deepgram usage.
-	Keyterm *string `json:"keyterm,omitempty" url:"keyterm,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
 	explicitFields *big.Int `json:"-" url:"-"`
@@ -2208,13 +2205,6 @@ func (d *DeepgramAsr) GetParams() *DeepgramAsrParams {
 		return nil
 	}
 	return d.Params
-}
-
-func (d *DeepgramAsr) GetKeyterm() *string {
-	if d == nil {
-		return nil
-	}
-	return d.Keyterm
 }
 
 func (d *DeepgramAsr) GetExtraProperties() map[string]interface{} {
@@ -2240,13 +2230,6 @@ func (d *DeepgramAsr) SetLanguage(language *AsrLanguage) {
 func (d *DeepgramAsr) SetParams(params *DeepgramAsrParams) {
 	d.Params = params
 	d.require(deepgramAsrFieldParams)
-}
-
-// SetKeyterm sets the Keyterm field and marks it as non-optional;
-// this prevents an empty or null value for this field from being omitted during serialization.
-func (d *DeepgramAsr) SetKeyterm(keyterm *string) {
-	d.Keyterm = keyterm
-	d.require(deepgramAsrFieldKeyterm)
 }
 
 func (d *DeepgramAsr) UnmarshalJSON(data []byte) error {
@@ -2310,7 +2293,7 @@ type DeepgramAsrParams struct {
 	Model *string `json:"model,omitempty" url:"model,omitempty"`
 	// Language code for speech recognition
 	Language *string `json:"language,omitempty" url:"language,omitempty"`
-	// Boost specialized terms and brands
+	// Boost specialized terms and brands for Deepgram.
 	Keyterm *string `json:"keyterm,omitempty" url:"keyterm,omitempty"`
 
 	// Private bitmask of fields set to an explicit value and therefore not to be omitted
