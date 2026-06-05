@@ -210,8 +210,8 @@ func TestRequestBodyScenario4VertexAIURLConstruction(t *testing.T) {
 
 	params := llm["params"].(map[string]interface{})
 	assert.Equal(t, "gemini-2.0-flash", params["model"])
-	assert.Equal(t, "my-project", params["project_id"])
-	assert.Equal(t, "us-central1", params["location"])
+	assert.NotContains(t, params, "project_id")
+	assert.NotContains(t, params, "location")
 }
 
 func TestRequestBodyScenario4VertexAIExplicitURLOverride(t *testing.T) {
@@ -547,6 +547,21 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 		assert.Equal(t, "en", p["language"])
 	})
 
+	t.Run("Deepgram/keyterm", func(t *testing.T) {
+		// APIKey → wire key "key"; keyterm passes through unchanged
+		config := vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
+			APIKey:   "dg-key",
+			Model:    "nova-3",
+			Language: "en",
+			Keyterm:  "term",
+		}).ToConfig()
+		p := config["params"].(map[string]interface{})
+		assert.Equal(t, "dg-key", p["key"])
+		assert.Equal(t, "nova-3", p["model"])
+		assert.Equal(t, "en", p["language"])
+		assert.Equal(t, "term", p["keyterm"])
+	})
+
 	t.Run("Microsoft", func(t *testing.T) {
 		agent := NewAgent(WithName("a")).
 			WithStt(vendors.NewMicrosoftSTT(vendors.MicrosoftSTTOptions{
@@ -811,8 +826,10 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 		llm := props["llm"].(map[string]interface{})
 		assert.Equal(t, "gemini", llm["style"])
 		params := llm["params"].(map[string]interface{})
-		assert.Equal(t, "my-project", params["project_id"])
-		assert.Equal(t, "us-central1", params["location"])
+		assert.NotContains(t, params, "project_id")
+		assert.NotContains(t, params, "location")
+		assert.Contains(t, llm["url"].(string), "my-project")
+		assert.Contains(t, llm["url"].(string), "us-central1")
 	})
 
 	t.Run("AmazonBedrock", func(t *testing.T) {

@@ -572,15 +572,7 @@ func (v *VertexAILLM) ToConfig() map[string]interface{} {
 			v.options.Location, v.options.ProjectID, v.options.Location, v.options.Model,
 		)
 	}
-	config := (&Gemini{options: opts}).ToConfig()
-	params, _ := config["params"].(map[string]interface{})
-	if params == nil {
-		params = map[string]interface{}{}
-	}
-	params["project_id"] = v.options.ProjectID
-	params["location"] = v.options.Location
-	config["params"] = params
-	return config
+	return (&Gemini{options: opts}).ToConfig()
 }
 
 type AmazonBedrockOptions struct {
