@@ -85,7 +85,7 @@ func TestTurnDetectionLanguageCanDifferFromProviderLanguage(t *testing.T) {
 }
 
 func TestInvalidTurnDetectionLanguagePanics(t *testing.T) {
-	assert.PanicsWithValue(t, "invalid interaction language: xx", func() {
+	assert.PanicsWithValue(t, "invalid turn_detection.language: xx", func() {
 		baseAgentForSTTLanguage().WithTurnDetection(&TurnDetectionConfig{
 			Language: Agora.AsrLanguage("xx").Ptr(),
 		}).ToPropertiesMap(ToPropertiesOptions{

@@ -21,7 +21,7 @@ func isTurnDetectionLanguage(language string) bool {
 
 func validateTurnDetectionLanguage(language string) {
 	if !isTurnDetectionLanguage(string(language)) {
-		panic(fmt.Sprintf("invalid interaction language: %s", language))
+		panic(fmt.Sprintf("invalid turn_detection.language: %s", language))
 	}
 }
 
