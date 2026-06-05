@@ -499,7 +499,7 @@ Panics if `APIKey` is empty unless `Model` is one of the supported Agora-managed
 | `APIKey`           | `string`                 | BYOK only | Deepgram API key. Optional only for Agora-managed `nova-2` and `nova-3`. |
 | `Model`            | `string`                 | No       | Model (e.g., `"nova-2"`) |
 | `Language`         | `string`                 | No       | Language code            |
-| `InteractionLanguage` | `string`              | No       | Agora `asr.language` override |
+| `Keyterm`          | `string`                 | No       | Boost specialized terms and brands; serialized as `asr.params.keyterm` |
 | `SmartFormat`      | `*bool`                  | No       | Enable smart formatting  |
 | `Punctuation`      | `*bool`                  | No       | Enable punctuation       |
 | `AdditionalParams` | `map[string]interface{}` | No       | Additional vendor params |
