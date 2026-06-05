@@ -1304,3 +1304,27 @@ func TestPresetCoverageMatrix(t *testing.T) {
 		assert.Equal(t, "alloy", ttsParams["voice"])
 	})
 }
+
+func TestExplicitMiniMaxPresetStripsInternalHint(t *testing.T) {
+	// When the caller supplies the MiniMax TTS preset explicitly (not inferred),
+	// the internal _minimax_preset_model hint set by MiniMaxTTS must still be removed.
+	opts := basePipelineSessionOptions()
+	opts.Preset = []string{AgentPresets.Tts.MiniMaxSpeech28Turbo}
+
+	agent := NewAgent(WithName("a")).
+		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
+		WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
+			Model:   "speech-2.8-turbo",
+			VoiceID: "English_captivating_female1",
+		}))
+
+	payload, err := startPresetValidationSession(t, agent, opts)
+	require.NoError(t, err)
+
+	preset := payload["preset"].(string)
+	assert.Contains(t, preset, AgentPresets.Tts.MiniMaxSpeech28Turbo)
+
+	props := payload["properties"].(map[string]interface{})
+	tts := props["tts"].(map[string]interface{})
+	assert.NotContains(t, tts, "_minimax_preset_model")
+}

@@ -130,6 +130,9 @@ func ResolveSessionPresetsMap(presets []string, properties map[string]interface{
 			stripInferredTTSFields(props["tts"], preset)
 		}
 	}
+	if tts := asMap(props["tts"]); tts != nil {
+		delete(tts, "_minimax_preset_model")
+	}
 	omitEmptyProviderFields(props)
 
 	combined := append(append([]string{}, explicit...), inferred...)
