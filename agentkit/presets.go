@@ -181,7 +181,7 @@ func inferASRPreset(value interface{}) (string, bool) {
 		return "", false
 	}
 	params := asMap(asr["params"])
-	if hasNonEmptyString(params, "api_key") {
+	if hasNonEmptyString(params, "key") {
 		return "", false
 	}
 	switch normalizeModelName(params["model"]) {
