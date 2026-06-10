@@ -30,7 +30,11 @@ const (
 )
 
 const GlobalDomainPrefix = "api"
-const ConvoAIAPIPathSuffix = "/api/conversational-ai-agent"
+
+const (
+	GlobalConvoAIAPIPathSuffix = "/api/conversational-ai-agent"
+	CNConvoAICNAPIPathSuffix   = "/cn/api/conversational-ai-agent"
+)
 
 const (
 	USWestRegionDomainPrefix = "api-us-west-1"
@@ -246,8 +250,11 @@ func (p *Pool) GetCurrentURL() string {
 
 	currentRegion := p.currentRegionPrefixes[0]
 	currentDomain := p.currentDomain
-
-	return fmt.Sprintf("https://%s.%s%s", currentRegion, currentDomain, ConvoAIAPIPathSuffix)
+	apiPathSuffix := GlobalConvoAIAPIPathSuffix
+	if p.domainArea == AreaCN {
+		apiPathSuffix = CNConvoAICNAPIPathSuffix
+	}
+	return fmt.Sprintf("https://%s.%s%s", currentRegion, currentDomain, apiPathSuffix)
 }
 
 // AreaRequestOption implements the RequestOption interface for area-based URL selection
