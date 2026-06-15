@@ -77,7 +77,7 @@ func startConversation(ctx context.Context) (string, error) {
         AppCertificate: appCertificate,
     })
 
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName(fmt.Sprintf("conversation-%d", time.Now().UnixMilli())),
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
             Language: Agora.AsrLanguageEnUs.Ptr(),
@@ -91,7 +91,7 @@ func startConversation(ctx context.Context) (string, error) {
                     },
                 },
                 EndOfSpeech: &agentkit.EndOfSpeechConfig{
-                    Mode: agentkit.EndOfSpeechMode("vad"),
+                    Mode: agentkit.EndOfSpeechMode("vad").Ptr(),
                     VadConfig: &agentkit.EndOfSpeechVadConfig{
                         SilenceDurationMs: intPtr(480),
                     },
@@ -103,7 +103,7 @@ func startConversation(ctx context.Context) (string, error) {
             EnableTools: boolPtr(true),
         }),
         agentkit.WithParameters(&agentkit.SessionParams{
-            DataChannel:        &agentkit.DataChannelRtm,
+            DataChannel:        agentkit.DataChannelRtm.Ptr(),
             EnableErrorMessage: boolPtr(true),
         }),
     ).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
@@ -125,7 +125,7 @@ func startConversation(ctx context.Context) (string, error) {
         VoiceID: "English_captivating_female1",
     }))
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:    "123456",
         RemoteUIDs:  []string{"*"},
@@ -150,17 +150,103 @@ func main() {
 
 `AgoraClient` generates the required ConvoAI REST auth and RTC join tokens automatically when you provide `AppID` and `AppCertificate`. For supported Agora-managed models, leave vendor API keys unset; provide keys when you want BYOK.
 
+### CN facade example
+
+Use the CN facade when your integration should default to Chinese mainland routing and use CN-specific vendors:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+
+    Agora "github.com/AgoraIO/agora-agents-go/v2"
+    agentkit "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn"
+    vendors "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors"
+)
+
+func intPtr(v int) *int { return &v }
+func boolPtr(v bool) *bool { return &v }
+
+func mustEnv(key string) string {
+    value := os.Getenv(key)
+    if value == "" {
+        panic("missing env: " + key)
+    }
+    return value
+}
+
+func main() {
+    client := agentkit.NewAgoraClient(agentkit.ClientOptions{
+        AppID:          mustEnv("AGORA_APP_ID"),
+        AppCertificate: mustEnv("AGORA_APP_CERTIFICATE"),
+    })
+
+    agent := agentkit.NewAgent(client,
+        agentkit.WithName("cn-support"),
+        agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+            Language: Agora.AsrLanguageZhCn.Ptr(),
+        }),
+        agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
+            EnableRtm: boolPtr(true),
+        }),
+        agentkit.WithParameters(&agentkit.SessionParams{
+            DataChannel: &agentkit.DataChannelRtm,
+        }),
+    ).WithStt(
+        vendors.NewTencentSTT(vendors.TencentSTTOptions{
+            Key:    mustEnv("TENCENT_ASR_KEY"),
+            AppID:  mustEnv("TENCENT_ASR_APP_ID"),
+            Secret: mustEnv("TENCENT_ASR_SECRET"),
+        }),
+    ).WithLlm(
+        vendors.NewTencentLLM(vendors.TencentLLMOptions{
+            APIKey:  mustEnv("TENCENT_LLM_KEY"),
+            Model:   "hunyuan-turbos-latest",
+            BaseURL: "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
+        }),
+    ).WithTts(
+        vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
+            Key:   mustEnv("MINIMAX_TTS_KEY"),
+            Model: "speech-01-turbo",
+            VoiceSetting: &vendors.MiniMaxVoiceSetting{
+                VoiceID: "female-shaonv",
+            },
+            AudioSetting: &vendors.MiniMaxAudioSetting{
+                SampleRate: 16000,
+            },
+            LanguageBoost: "auto",
+        }),
+    )
+
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Channel:    "cn-room",
+        AgentUID:   "1001",
+        RemoteUIDs: []string{"1002"},
+        IdleTimeout: intPtr(30),
+    })
+
+    agentID, err := session.Start(context.Background())
+    if err != nil {
+        panic(err)
+    }
+    fmt.Println(agentID)
+}
+```
+
 ## AI Studio pipeline IDs
 
 Use `WithPipelineID` when you want a published AI Studio pipeline to provide the base agent configuration:
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("support"),
     agentkit.WithPipelineID("studio-pipeline-id"),
 )
 
-session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+session := agent.CreateSession(agentkit.CreateSessionOptions{
     Channel:    "support-room",
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
@@ -170,7 +256,7 @@ session := agent.CreateSession(client, agentkit.CreateSessionOptions{
 You can override it per session:
 
 ```go
-session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+session := agent.CreateSession(agentkit.CreateSessionOptions{
     Channel:    "support-room",
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
@@ -185,7 +271,7 @@ AgentKit sends the resolved value as the top-level `/join` field `pipeline_id`, 
 Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed models.
 
 ```go
-agent := agentkit.NewAgent(agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+agent := agentkit.NewAgent(client, agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
     Language: Agora.AsrLanguageEnUs.Ptr(),
 })).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
     APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
@@ -222,7 +308,7 @@ If you want to bring your own vendor credentials instead of using Agora-managed 
 Use `WithMllm()` for OpenAI Realtime, Gemini Live, Vertex AI, or xAI Grok. No STT, LLM, or TTS vendor is needed when MLLM mode is enabled.
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("realtime-assistant"),
 ).WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
     APIKey:          os.Getenv("OPENAI_API_KEY"),

@@ -57,9 +57,29 @@ type AgoraClient struct {
 	AgentManagement *agentmanagement.Client
 	Telephony       *telephony.Client
 	PhoneNumbers    *phonenumbers.Client
-	AppID           string
-	AppCertificate  string
+	appID           string
+	appCertificate  string
 	AuthMode        AuthMode
+}
+
+func (c *AgoraClient) AgentsClient() *agents.Client {
+	return c.Agents
+}
+
+func (c *AgoraClient) AgentManagementClient() *agentmanagement.Client {
+	return c.AgentManagement
+}
+
+func (c *AgoraClient) AppID() string {
+	return c.appID
+}
+
+func (c *AgoraClient) AppCertificate() string {
+	return c.appCertificate
+}
+
+func (c *AgoraClient) IsAppCredentialsMode() bool {
+	return c.AuthMode == AuthModeAppCredentials
 }
 
 // NewAgoraClient creates a new AgoraClient with the given options.
@@ -108,8 +128,8 @@ func NewAgoraClient(opts AgoraClientOptions) *AgoraClient {
 		AgentManagement: c.AgentManagement,
 		Telephony:       c.Telephony,
 		PhoneNumbers:    c.PhoneNumbers,
-		AppID:           opts.AppID,
-		AppCertificate:  opts.AppCertificate,
+		appID:           opts.AppID,
+		appCertificate:  opts.AppCertificate,
 		AuthMode:        authMode,
 	}
 }
@@ -133,10 +153,10 @@ func NewAgoraClient(opts AgoraClientOptions) *AgoraClient {
 //	}
 func (c *AgoraClient) StopAgent(ctx context.Context, agentID string) error {
 	var reqOpts []option.RequestOption
-	if c.AuthMode == AuthModeAppCredentials && c.AppCertificate != "" {
+	if c.AuthMode == AuthModeAppCredentials && c.appCertificate != "" {
 		token, err := GenerateConvoAIToken(GenerateConvoAITokenOptions{
-			AppID:          c.AppID,
-			AppCertificate: c.AppCertificate,
+			AppID:          c.appID,
+			AppCertificate: c.appCertificate,
 			ChannelName:    "stop",
 			UID:            0,
 		})
@@ -147,7 +167,7 @@ func (c *AgoraClient) StopAgent(ctx context.Context, agentID string) error {
 	}
 
 	err := c.Agents.Stop(ctx, &Agora.StopAgentsRequest{
-		Appid:   c.AppID,
+		Appid:   c.appID,
 		AgentID: agentID,
 	}, reqOpts...)
 	if err != nil {

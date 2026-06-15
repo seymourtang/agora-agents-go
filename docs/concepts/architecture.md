@@ -16,7 +16,7 @@ The SDK is organized into two layers with distinct responsibilities.
 ├─────────────────────────────────────────────────────┤
 │  agentkit/         │  agentkit/vendors/              │
 │  ─────────         │  ────────────────               │
-│  NewAgent()        │  NewOpenAI()                    │
+│  NewAgent(client)  │  NewOpenAI()                    │
 │  CreateSession()   │  NewElevenLabsTTS()             │
 │  AgentOption funcs │  NewDeepgramSTT()               │
 │  Session lifecycle │  NewOpenAIRealtime()            │

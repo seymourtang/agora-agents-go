@@ -1,6 +1,10 @@
 package agentkit
 
-import "fmt"
+import (
+	"fmt"
+
+	agentcore "github.com/AgoraIO/agora-agents-go/v2/agentkit/core"
+)
 
 // IsHeyGenAvatar reports whether vendor is the legacy HeyGen wire value ("heygen").
 //
@@ -21,6 +25,10 @@ func IsAnamAvatar(vendor string) bool {
 	return vendor == "anam"
 }
 
+func IsSensetimeAvatar(vendor string) bool {
+	return vendor == "sensetime"
+}
+
 func IsGenericAvatar(vendor string) bool {
 	return vendor == "generic"
 }
@@ -34,10 +42,10 @@ func ValidateAvatarConfig(vendor string, params map[string]interface{}) error {
 		if params == nil {
 			return fmt.Errorf("%s avatar requires params", label)
 		}
-		if !hasNonEmptyString(params, "api_key") {
+		if !agentcore.HasNonEmptyString(params, "api_key") {
 			return fmt.Errorf("%s avatar requires api_key", label)
 		}
-		if q, ok := params["quality"]; !ok || !hasNonEmptyString(params, "quality") {
+		if q, ok := params["quality"]; !ok || !agentcore.HasNonEmptyString(params, "quality") {
 			return fmt.Errorf("%s avatar requires quality (low, medium, or high)", label)
 		} else {
 			qs, _ := q.(string)
@@ -45,37 +53,56 @@ func ValidateAvatarConfig(vendor string, params map[string]interface{}) error {
 				return fmt.Errorf("invalid quality for %s: %v. Must be one of: low, medium, high", label, q)
 			}
 		}
-		if avatarUIDString(params["agora_uid"]) == "" {
+		if agentcore.ParseUIDString(params["agora_uid"]) == "" {
 			return fmt.Errorf("%s avatar requires agora_uid", label)
 		}
 	} else if IsAkoolAvatar(vendor) {
 		if params == nil {
 			return fmt.Errorf("Akool avatar requires params")
 		}
-		if !hasNonEmptyString(params, "api_key") {
+		if !agentcore.HasNonEmptyString(params, "api_key") {
 			return fmt.Errorf("Akool avatar requires api_key")
 		}
 	} else if IsAnamAvatar(vendor) {
 		if params == nil {
 			return fmt.Errorf("Anam avatar requires params")
 		}
-		if !hasNonEmptyString(params, "api_key") {
+		if !agentcore.HasNonEmptyString(params, "api_key") {
 			return fmt.Errorf("Anam avatar requires api_key")
+		}
+	} else if IsSensetimeAvatar(vendor) {
+		if params == nil {
+			return fmt.Errorf("Sensetime avatar requires params")
+		}
+		if agentcore.ParseUIDString(params["agora_uid"]) == "" {
+			return fmt.Errorf("Sensetime avatar requires agora_uid")
+		}
+		if !agentcore.HasNonEmptyString(params, "appId") {
+			return fmt.Errorf("Sensetime avatar requires appId")
+		}
+		if !agentcore.HasNonEmptyString(params, "app_key") {
+			return fmt.Errorf("Sensetime avatar requires app_key")
+		}
+		sceneList, ok := params["sceneList"].([]interface{})
+		if !ok || len(sceneList) == 0 {
+			if typed, ok := params["sceneList"].([]map[string]interface{}); !ok || len(typed) == 0 {
+				return fmt.Errorf("Sensetime avatar requires sceneList")
+			}
 		}
 	} else if IsGenericAvatar(vendor) {
 		if params == nil {
 			return fmt.Errorf("Generic avatar requires params")
 		}
-		if !hasNonEmptyString(params, "api_key") {
+		if !agentcore.HasNonEmptyString(params, "api_key") {
 			return fmt.Errorf("Generic avatar requires api_key")
 		}
-		if !hasNonEmptyString(params, "api_base_url") {
+		if !agentcore.HasNonEmptyString(params, "api_base_url") {
 			return fmt.Errorf("Generic avatar requires api_base_url")
 		}
-		if !hasNonEmptyString(params, "avatar_id") {
+		if !agentcore.HasNonEmptyString(params, "avatar_id") {
 			return fmt.Errorf("Generic avatar requires avatar_id")
 		}
-		if avatarUIDString(params["agora_uid"]) == "" {
+		if agentcore.ParseUIDString(params["agora_uid"]) == "" {
 			return fmt.Errorf("Generic avatar requires agora_uid")
 		}
 	}

@@ -38,7 +38,7 @@ func main() {
         AppCertificate: "your-app-certificate",
     })
 
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName("support-assistant"),
     ).WithStt(
         vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
@@ -61,7 +61,7 @@ func main() {
         }),
     )
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:     "support-room-123",
         AgentUID:    "1",
         RemoteUIDs:  []string{"100"},

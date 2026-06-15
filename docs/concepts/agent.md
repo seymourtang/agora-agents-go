@@ -14,7 +14,7 @@ The `agentkit.Agent` is the central configuration object. It defines what LLM, T
 
 <!-- snippet: fragment -->
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("my-assistant"),
 ).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
     APIKey:  "your-openai-key",
@@ -29,7 +29,7 @@ agent := agentkit.NewAgent(
 }))
 ```
 
-Each `With*` function has the signature `func(...) AgentOption`, where `AgentOption` is `func(*Agent)`. This pattern lets you:
+Each `With*` function has the signature `func(...) AgentOption`, where the option is applied while constructing a client-bound `Agent`. This pattern lets you:
 
 - Omit any option you don't need (sensible defaults)
 - Add new options without breaking existing code
@@ -37,7 +37,7 @@ Each `With*` function has the signature `func(...) AgentOption`, where `AgentOpt
 
 ## AgentOption Functions
 
-These are passed to `agentkit.NewAgent(opts ...AgentOption)`:
+These are passed to `agentkit.NewAgent(client, opts ...AgentOption)`:
 
 | Function | Parameter | Description |
 |---|---|---|
@@ -61,7 +61,7 @@ After creating an agent with `NewAgent`, attach vendors using method chaining. E
 
 <!-- snippet: fragment -->
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("assistant"),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{

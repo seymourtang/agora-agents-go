@@ -23,7 +23,7 @@ Creates a new session. If `Name` is empty, defaults to `agent-<unix_timestamp>`.
 ```go
 type AgentSessionOptions struct {
     Client          *agents.Client
-    Agent           *Agent
+    Agent           AgentRuntime
     AppID           string
     AppCertificate  string
     Name            string
@@ -45,7 +45,7 @@ type AgentSessionOptions struct {
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `Client` | `*agents.Client` | Yes | Fern-generated agents sub-client (from `c.Agents`) |
-| `Agent` | `*Agent` | Yes | Agent configuration |
+| `Agent` | `AgentRuntime` | Yes | Agent runtime configuration supplied by the global or CN facade |
 | `AppID` | `string` | Yes | Agora App ID |
 | `AppCertificate` | `string` | Conditional | Required if `Token` is not set |
 | `Name` | `string` | No | Session name (default: `agent-<unix_timestamp>`) |
@@ -239,9 +239,9 @@ Returns the current session state.
 
 <!-- snippet: fragment -->
 ```go
-func (s *AgentSession) Agent() *Agent
+func (s *AgentSession) Agent() AgentRuntime
 ```
-Returns the agent configuration.
+Returns the bound agent runtime abstraction.
 
 <!-- snippet: fragment -->
 ```go

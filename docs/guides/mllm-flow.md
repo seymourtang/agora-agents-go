@@ -13,7 +13,7 @@ The MLLM flow uses a single multimodal model to process audio input and generate
 Call `WithMllm(vendor)` to enable MLLM mode. The builder sets `mllm.enable = true` automatically.
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("realtime-agent"),
 ).WithMllm(vendor)
 ```
@@ -41,7 +41,7 @@ func main() {
         AppCertificate: "<app_cert>",
     })
 
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName("openai-realtime"),
     ).WithMllm(
         vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
@@ -53,7 +53,7 @@ func main() {
         }),
     )
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:    "realtime-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -77,7 +77,7 @@ func main() {
 ## Gemini Live Example
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("gemini-live"),
 ).WithMllm(
     vendors.NewGeminiLive(vendors.GeminiLiveOptions{
@@ -96,7 +96,7 @@ Configure MLLM turn detection on the MLLM vendor with `TurnDetection`. When set,
 Example:
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("realtime-vad"),
 ).WithMllm(
     vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{

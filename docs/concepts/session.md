@@ -12,7 +12,7 @@ description: AgentSession lifecycle — state machine, methods, and event handli
 
 <!-- snippet: fragment -->
 ```go
-session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+session := agent.CreateSession(agentkit.CreateSessionOptions{
     Channel:    "my-channel",
     AgentUID:   "1001",
     RemoteUIDs: []string{"1002"},
@@ -180,7 +180,7 @@ These do not make API calls:
 ```go
 session.ID() string              // Agent ID (set after Start)
 session.Status() SessionStatus   // Current state
-session.Agent() *Agent           // Agent configuration
+session.Agent() AgentRuntime     // Agent runtime configuration abstraction
 session.AppID() string           // App ID
 session.Raw() *agents.Client     // Underlying Fern-generated client
 ```

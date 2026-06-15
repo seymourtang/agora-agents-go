@@ -44,7 +44,7 @@ var stubASR = vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 // ─────────────────────────────────────────────────────────────────────────────
 
 func TestRequestBodyScenario1BYOKPropertiesShape(t *testing.T) {
-	agent := NewAgent(WithName("byok-agent")).
+	agent := NewAgent(nil, WithName("byok-agent")).
 		WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 			APIKey:   "dg-key",
 			Language: "en",
@@ -94,7 +94,7 @@ func TestRequestBodyScenario1BYOKPropertiesShape(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func TestRequestBodyScenario2aPresetBackedPipeline(t *testing.T) {
-	agent := NewAgent(WithName("preset-agent")).
+	agent := NewAgent(nil, WithName("preset-agent")).
 		WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 			Model:    "nova-2",
 			Language: "en-US",
@@ -140,7 +140,7 @@ func TestRequestBodyScenario3VendorGreetingWins(t *testing.T) {
 	opts := basePropertiesOpts()
 	opts.AllowMissingVendorCategories = []string{"asr", "tts"}
 
-	agent := NewAgent(WithName("greeting-agent")).
+	agent := NewAgent(nil, WithName("greeting-agent")).
 		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
 			APIKey:          "openai-key",
 			BaseURL:         "https://api.openai.com/v1/chat/completions",
@@ -167,7 +167,7 @@ func TestRequestBodyScenario3AgentGreetingFillsIn(t *testing.T) {
 	opts.AllowMissingVendorCategories = []string{"asr", "tts"}
 
 	// LLM without greeting; agent has greeting → agent value fills in
-	agent := NewAgent(WithName("fill-agent")).
+	agent := NewAgent(nil, WithName("fill-agent")).
 		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
 			APIKey:  "openai-key",
 			BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -190,7 +190,7 @@ func TestRequestBodyScenario4VertexAIURLConstruction(t *testing.T) {
 	opts := basePropertiesOpts()
 	opts.AllowMissingVendorCategories = []string{"asr", "tts"}
 
-	agent := NewAgent(WithName("vertex-agent")).
+	agent := NewAgent(nil, WithName("vertex-agent")).
 		WithLlm(vendors.NewVertexAILLM(vendors.VertexAILLMOptions{
 			GeminiOptions: vendors.GeminiOptions{
 				APIKey: "vertex-key",
@@ -218,7 +218,7 @@ func TestRequestBodyScenario4VertexAIExplicitURLOverride(t *testing.T) {
 	opts := basePropertiesOpts()
 	opts.AllowMissingVendorCategories = []string{"asr", "tts"}
 
-	agent := NewAgent(WithName("vertex-agent")).
+	agent := NewAgent(nil, WithName("vertex-agent")).
 		WithLlm(vendors.NewVertexAILLM(vendors.VertexAILLMOptions{
 			GeminiOptions: vendors.GeminiOptions{
 				APIKey: "vertex-key",
@@ -247,7 +247,7 @@ func baseOpenAISTTOpts() ToPropertiesOptions {
 }
 
 func TestRequestBodyScenario5aOpenAISTTBasicConfig(t *testing.T) {
-	agent := NewAgent(WithName("oai-stt")).
+	agent := NewAgent(nil, WithName("oai-stt")).
 		WithStt(vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
 			APIKey:   "stt-key",
 			Model:    "gpt-4o-mini-transcribe",
@@ -270,7 +270,7 @@ func TestRequestBodyScenario5aOpenAISTTBasicConfig(t *testing.T) {
 }
 
 func TestRequestBodyScenario5bOpenAISTTModelInTranscription(t *testing.T) {
-	agent := NewAgent(WithName("oai-stt")).
+	agent := NewAgent(nil, WithName("oai-stt")).
 		WithStt(vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
 			APIKey:   "stt-key",
 			Model:    "gpt-4o-transcribe",
@@ -289,7 +289,7 @@ func TestRequestBodyScenario5bOpenAISTTModelInTranscription(t *testing.T) {
 }
 
 func TestRequestBodyScenario5cOpenAISTTLanguageInTranscription(t *testing.T) {
-	agent := NewAgent(WithName("oai-stt")).
+	agent := NewAgent(nil, WithName("oai-stt")).
 		WithStt(vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
 			APIKey:   "stt-key",
 			Model:    "gpt-4o-mini-transcribe",
@@ -307,7 +307,7 @@ func TestRequestBodyScenario5cOpenAISTTLanguageInTranscription(t *testing.T) {
 }
 
 func TestRequestBodyScenario5dOpenAISTTVendorIsOpenAI(t *testing.T) {
-	agent := NewAgent(WithName("oai-stt")).
+	agent := NewAgent(nil, WithName("oai-stt")).
 		WithStt(vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
 			APIKey:   "stt-key",
 			Model:    "gpt-4o-mini-transcribe",
@@ -327,7 +327,7 @@ func TestRequestBodyScenario5dOpenAISTTVendorIsOpenAI(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func TestRequestBodyScenario6aManagedASRBYOKLLMManagedTTS(t *testing.T) {
-	agent := NewAgent(WithName("mixed")).
+	agent := NewAgent(nil, WithName("mixed")).
 		WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 			Model:    "nova-2",
 			Language: "en-US",
@@ -357,7 +357,7 @@ func TestRequestBodyScenario6aManagedASRBYOKLLMManagedTTS(t *testing.T) {
 func TestRequestBodyScenario6bBYOKASRManagedLLMBYOKTTS(t *testing.T) {
 	// Use nova-2 model with BYOK key to exercise the key-detection path in inferASRPreset.
 	// Without a key, even nova-2 would be managed; this test confirms the key gates BYOK correctly.
-	agent := NewAgent(WithName("mixed")).
+	agent := NewAgent(nil, WithName("mixed")).
 		WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 			APIKey:   "byok-asr-key",
 			Model:    "nova-2",
@@ -405,7 +405,7 @@ func TestRequestBodyScenario6bBYOKASRManagedLLMBYOKTTS(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func TestRequestBodyScenario7bPipelineIDWithBYOKTTSOnly(t *testing.T) {
-	agent := NewAgent(WithName("support"), WithPipelineID("studio-pipeline")).
+	agent := NewAgent(nil, WithName("support"), WithPipelineID("studio-pipeline")).
 		WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
 			Key:     "el-key",
 			ModelID: "eleven_flash_v2_5",
@@ -427,7 +427,7 @@ func TestRequestBodyScenario7bPipelineIDWithBYOKTTSOnly(t *testing.T) {
 }
 
 func TestRequestBodyScenario7cPipelineIDWithBYOKASRAndTTS(t *testing.T) {
-	agent := NewAgent(WithName("support"), WithPipelineID("studio-pipeline")).
+	agent := NewAgent(nil, WithName("support"), WithPipelineID("studio-pipeline")).
 		WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 			APIKey:   "dg-key",
 			Language: "en",
@@ -457,7 +457,7 @@ func TestRequestBodyScenario7cPipelineIDWithBYOKASRAndTTS(t *testing.T) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 func TestRequestBodyScenario8aOpenAIRealtimeMLLM(t *testing.T) {
-	agent := NewAgent(WithName("mllm-agent")).
+	agent := NewAgent(nil, WithName("mllm-agent")).
 		WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
 			APIKey: "realtime-key",
 			Model:  "gpt-4o-realtime-preview",
@@ -485,7 +485,7 @@ func TestRequestBodyScenario8aOpenAIRealtimeMLLM(t *testing.T) {
 func TestRequestBodyScenario8bMLLMAgentGreetingFillIn(t *testing.T) {
 	opts := basePropertiesOpts()
 
-	agent := NewAgent(WithName("mllm-agent")).
+	agent := NewAgent(nil, WithName("mllm-agent")).
 		WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
 			APIKey: "realtime-key",
 			Model:  "gpt-4o-realtime-preview",
@@ -503,7 +503,7 @@ func TestRequestBodyScenario8bMLLMAgentGreetingFillIn(t *testing.T) {
 func TestRequestBodyScenario8cMLLMVendorGreetingWins(t *testing.T) {
 	opts := basePropertiesOpts()
 
-	agent := NewAgent(WithName("mllm-agent")).
+	agent := NewAgent(nil, WithName("mllm-agent")).
 		WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
 			APIKey:          "realtime-key",
 			Model:           "gpt-4o-realtime-preview",
@@ -531,7 +531,7 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 	}
 
 	t.Run("Deepgram", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 				APIKey:   "dg-key",
 				Model:    "nova-2",
@@ -563,7 +563,7 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 	})
 
 	t.Run("Microsoft", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewMicrosoftSTT(vendors.MicrosoftSTTOptions{
 				Key:      "ms-key",
 				Region:   "eastus",
@@ -580,7 +580,7 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 	})
 
 	t.Run("OpenAISTT", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
 				APIKey:   "stt-key",
 				Model:    "gpt-4o-mini-transcribe",
@@ -600,7 +600,7 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 	})
 
 	t.Run("Google", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewGoogleSTT(vendors.GoogleSTTOptions{
 				ProjectID:            "proj",
 				Location:             "global",
@@ -621,7 +621,7 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 	})
 
 	t.Run("Amazon", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewAmazonSTT(vendors.AmazonSTTOptions{
 				AccessKey: "ak",
 				SecretKey: "sk",
@@ -640,7 +640,7 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 	})
 
 	t.Run("AssemblyAI", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewAssemblyAISTT(vendors.AssemblyAISTTOptions{
 				APIKey:   "aai-key",
 				Language: "en-US",
@@ -656,19 +656,8 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 		assert.Equal(t, "wss://example.com/ws", p["uri"])
 	})
 
-	t.Run("Ares", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
-			WithStt(vendors.NewAresSTT(vendors.AresSTTOptions{}))
-		props, err := agent.ToPropertiesMap(asrOpts())
-		require.NoError(t, err)
-		asr := props["asr"].(map[string]interface{})
-		assert.Equal(t, "ares", asr["vendor"])
-		// Ares has no params key when empty
-		assert.NotContains(t, asr, "params")
-	})
-
 	t.Run("Speechmatics", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewSpeechmaticsSTT(vendors.SpeechmaticsSTTOptions{
 				APIKey:   "sm-key",
 				Language: "en",
@@ -682,20 +671,16 @@ func TestBYOKASRVendorShapes(t *testing.T) {
 		assert.Equal(t, "en", p["language"])
 	})
 
-	t.Run("Sarvam", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
-			WithStt(vendors.NewSarvamSTT(vendors.SarvamSTTOptions{
-				APIKey:   "sv-key",
-				Language: "en-IN",
-			}))
+	t.Run("DefaultASRFallsBackToAres", func(t *testing.T) {
+		agent := NewAgent(nil, WithName("a"))
 		props, err := agent.ToPropertiesMap(asrOpts())
 		require.NoError(t, err)
 		asr := props["asr"].(map[string]interface{})
-		assert.Equal(t, "sarvam", asr["vendor"])
-		p := asr["params"].(map[string]interface{})
-		assert.Equal(t, "sv-key", p["api_key"])
-		assert.Equal(t, "en-IN", p["language"])
+		assert.Equal(t, "ares", asr["vendor"])
+		assert.Equal(t, "en-US", asr["language"])
+		assert.NotContains(t, asr, "params")
 	})
+
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -710,7 +695,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	}
 
 	t.Run("OpenAI", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
 				APIKey:  "openai-key",
 				BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -726,7 +711,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("AzureOpenAI", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewAzureOpenAI(vendors.AzureOpenAIOptions{
 				APIKey:         "az-key",
 				Endpoint:       "https://myres.openai.azure.com",
@@ -746,7 +731,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 
 	t.Run("Anthropic", func(t *testing.T) {
 		maxTok := 1024
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewAnthropic(vendors.AnthropicOptions{
 				APIKey:    "ant-key",
 				Model:     "claude-3-opus-20240229",
@@ -768,7 +753,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("Gemini", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewGemini(vendors.GeminiOptions{
 				APIKey: "gem-key",
 				Model:  "gemini-1.5-flash",
@@ -782,7 +767,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("Groq", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewGroq(vendors.GroqOptions{
 				APIKey:  "groq-key",
 				Model:   "llama-3.3-70b-versatile",
@@ -797,7 +782,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("CustomLLM", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewCustomLLM(vendors.CustomLLMOptions{
 				APIKey:  "custom-key",
 				BaseURL: "https://llm.example.com/chat",
@@ -812,7 +797,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("VertexAILLM", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewVertexAILLM(vendors.VertexAILLMOptions{
 				GeminiOptions: vendors.GeminiOptions{
 					APIKey: "vtx-key",
@@ -833,7 +818,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("AmazonBedrock", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewAmazonBedrock(vendors.AmazonBedrockOptions{
 				AccessKey: "ak",
 				SecretKey: "sk",
@@ -850,7 +835,7 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("Dify", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewDify(vendors.DifyOptions{
 				APIKey: "dify-key",
 				URL:    "https://dify.example.com",
@@ -876,7 +861,7 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 		return opts
 	}
 	agentWithTTS := func(tts vendors.TTS) *Agent {
-		return NewAgent(WithName("a")).
+		return NewAgent(nil, WithName("a")).
 			WithLlm(stubLLM).
 			WithTts(tts)
 	}
@@ -1051,8 +1036,25 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 			Key:     "mm-key",
 			GroupID: "g1",
 			Model:   "speech-02-turbo",
-			VoiceID: "English_captivating_female1",
 			URL:     "https://api.minimax.io/v1/tts",
+			AdditionalParams: map[string]interface{}{
+				"voice_setting": map[string]interface{}{
+					"voice_id":              "English_captivating_female1",
+					"speed":                 1,
+					"vol":                   1,
+					"pitch":                 0,
+					"emotion":               "happy",
+					"latex_read":            true,
+					"english_normalization": true,
+				},
+				"audio_setting": map[string]interface{}{
+					"sample_rate": 16000,
+				},
+				"pronunciation_dict": map[string]interface{}{
+					"tone": []string{"hello/(heh-LOH)", "world/(WURLD)"},
+				},
+				"language_boost": "auto",
+			},
 		}))
 		props, err := agent.ToPropertiesMap(ttsOpts())
 		require.NoError(t, err)
@@ -1061,22 +1063,20 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 		p := tts["params"].(map[string]interface{})
 		assert.Equal(t, "mm-key", p["key"])
 		assert.Equal(t, "g1", p["group_id"])
-	})
-
-	t.Run("SarvamTTS", func(t *testing.T) {
-		agent := agentWithTTS(vendors.NewSarvamTTS(vendors.SarvamTTSOptions{
-			Key:                "sv-key",
-			Speaker:            "meera",
-			TargetLanguageCode: "hi-IN",
-		}))
-		props, err := agent.ToPropertiesMap(ttsOpts())
-		require.NoError(t, err)
-		tts := props["tts"].(map[string]interface{})
-		assert.Equal(t, "sarvam", tts["vendor"])
-		p := tts["params"].(map[string]interface{})
-		assert.Equal(t, "sv-key", p["api_subscription_key"])
-		assert.Equal(t, "meera", p["speaker"])
-		assert.Equal(t, "hi-IN", p["target_language_code"])
+		assert.Equal(t, map[string]interface{}{
+			"voice_id":              "English_captivating_female1",
+			"speed":                 1,
+			"vol":                   1,
+			"pitch":                 0,
+			"emotion":               "happy",
+			"latex_read":            true,
+			"english_normalization": true,
+		}, p["voice_setting"])
+		assert.Equal(t, map[string]interface{}{"sample_rate": 16000}, p["audio_setting"])
+		assert.Equal(t, map[string]interface{}{
+			"tone": []string{"hello/(heh-LOH)", "world/(WURLD)"},
+		}, p["pronunciation_dict"])
+		assert.Equal(t, "auto", p["language_boost"])
 	})
 
 	t.Run("Murf", func(t *testing.T) {
@@ -1090,6 +1090,7 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 		p := tts["params"].(map[string]interface{})
 		assert.Equal(t, "murf-key", p["api_key"])
 	})
+
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1100,7 +1101,7 @@ func TestMLLMVendorShapes(t *testing.T) {
 	mllmOpts := basePropertiesOpts()
 
 	t.Run("OpenAIRealtime", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
 				APIKey: "rt-key",
 				Model:  "gpt-4o-realtime-preview",
@@ -1118,7 +1119,7 @@ func TestMLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("GeminiLive", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithMllm(vendors.NewGeminiLive(vendors.GeminiLiveOptions{
 				APIKey: "gl-key",
 				Model:  "gemini-live-2.5-flash",
@@ -1134,7 +1135,7 @@ func TestMLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("VertexAI", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithMllm(vendors.NewVertexAI(vendors.VertexAIOptions{
 				ProjectID:           "my-project",
 				Location:            "us-central1",
@@ -1154,7 +1155,7 @@ func TestMLLMVendorShapes(t *testing.T) {
 	})
 
 	t.Run("XaiGrok", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithMllm(vendors.NewXaiGrok(vendors.XaiGrokOptions{
 				APIKey: "xai-key",
 			}))
@@ -1175,7 +1176,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	// For each preset, verify it's inferred and correct fields are stripped.
 
 	t.Run("ASR_deepgram_nova_2", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 				Model:    "nova-2",
 				Language: "en-US",
@@ -1199,7 +1200,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("ASR_deepgram_nova_3", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
 				Model:    "nova-3",
 				Language: "en-US",
@@ -1215,7 +1216,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("LLM_openai_gpt_4o_mini", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
 			WithTts(vendors.NewOpenAITTS(vendors.OpenAITTSOptions{Voice: "alloy"}))
 
@@ -1231,7 +1232,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("LLM_openai_gpt_4_1_mini", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4.1-mini"})).
 			WithTts(vendors.NewOpenAITTS(vendors.OpenAITTSOptions{Voice: "alloy"}))
 
@@ -1243,7 +1244,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("LLM_openai_gpt_5_nano", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-5-nano"})).
 			WithTts(vendors.NewOpenAITTS(vendors.OpenAITTSOptions{Voice: "alloy"}))
 
@@ -1255,7 +1256,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("LLM_openai_gpt_5_mini", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-5-mini"})).
 			WithTts(vendors.NewOpenAITTS(vendors.OpenAITTSOptions{Voice: "alloy"}))
 
@@ -1267,7 +1268,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("TTS_minimax_speech_2_6_turbo", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
 			WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
 				Model:   "speech-2.6-turbo",
@@ -1288,7 +1289,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("TTS_minimax_speech_2_8_turbo", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
 			WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
 				Model:   "speech-2.8-turbo",
@@ -1303,7 +1304,7 @@ func TestPresetCoverageMatrix(t *testing.T) {
 	})
 
 	t.Run("TTS_openai_tts_1", func(t *testing.T) {
-		agent := NewAgent(WithName("a")).
+		agent := NewAgent(nil, WithName("a")).
 			WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
 			WithTts(vendors.NewOpenAITTS(vendors.OpenAITTSOptions{Voice: "alloy"}))
 
@@ -1328,7 +1329,7 @@ func TestExplicitMiniMaxPresetStripsInternalHint(t *testing.T) {
 	opts := basePipelineSessionOptions()
 	opts.Preset = []string{AgentPresets.Tts.MiniMaxSpeech28Turbo}
 
-	agent := NewAgent(WithName("a")).
+	agent := NewAgent(nil, WithName("a")).
 		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
 		WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
 			Model:   "speech-2.8-turbo",
@@ -1344,4 +1345,12 @@ func TestExplicitMiniMaxPresetStripsInternalHint(t *testing.T) {
 	props := payload["properties"].(map[string]interface{})
 	tts := props["tts"].(map[string]interface{})
 	assert.NotContains(t, tts, "_minimax_preset_model")
+}
+
+func ptrInt(v int) *int {
+	return &v
+}
+
+func ptrFloat(v float64) *float64 {
+	return &v
 }

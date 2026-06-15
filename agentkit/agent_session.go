@@ -12,6 +12,7 @@ import (
 	"time"
 
 	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	agentcore "github.com/AgoraIO/agora-agents-go/v2/agentkit/core"
 	"github.com/AgoraIO/agora-agents-go/v2/agentmanagement"
 	"github.com/AgoraIO/agora-agents-go/v2/agents"
 	"github.com/AgoraIO/agora-agents-go/v2/core"
@@ -50,7 +51,7 @@ type EventHandler func(data interface{})
 type AgentSession struct {
 	client          *agents.Client
 	agentManagement *agentmanagement.Client
-	agent           *Agent
+	agent           agentcore.AgentRuntime
 	appID           string
 	appCertificate  string
 	name            string
@@ -76,7 +77,7 @@ type AgentSession struct {
 type AgentSessionOptions struct {
 	Client                *agents.Client
 	AgentManagementClient *agentmanagement.Client
-	Agent                 *Agent
+	Agent                 agentcore.AgentRuntime
 	AppID                 string
 	AppCertificate        string
 	Name                  string
@@ -137,7 +138,7 @@ func (s *AgentSession) convoAIRequestOpts(ctx context.Context) ([]option.Request
 	if s.appCertificate == "" {
 		return nil, fmt.Errorf("appCertificate is required for app-credentials auth mode; pass AppCertificate when creating AgoraClient")
 	}
-	uid, err := parseNumericUID(s.agentUID, "agent UID")
+	uid, err := agentcore.ParseNumericUID(s.agentUID, "agent UID")
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +166,7 @@ func (s *AgentSession) Status() AgentSessionLifecycle {
 	return s.status
 }
 
-func (s *AgentSession) Agent() *Agent {
+func (s *AgentSession) Agent() agentcore.AgentRuntime {
 	return s.agent
 }
 
@@ -190,24 +191,25 @@ func (s *AgentSession) warnf(message string) {
 }
 
 func (s *AgentSession) validateAvatarConfig() error {
-	if s.agent == nil || s.agent.avatar == nil {
+	baseAgent := s.agent.BaseAgent()
+	if s.agent == nil || baseAgent.Avatar == nil {
 		return nil
 	}
-	if !avatarConfigEnabled(s.agent.avatar) {
+	if !agentcore.AvatarConfigEnabled(baseAgent.Avatar) {
 		return nil
 	}
 
-	vendor, _ := s.agent.avatar["vendor"].(string)
+	vendor, _ := baseAgent.Avatar["vendor"].(string)
 	if vendor == "" {
 		return nil
 	}
-	params, _ := s.agent.avatar["params"].(map[string]interface{})
-	if err := ValidateAvatarConfig(vendor, params); err != nil {
+	params, _ := baseAgent.Avatar["params"].(map[string]interface{})
+	if err := agentcore.ValidateAvatarConfig(vendor, params); err != nil {
 		return err
 	}
 
-	if s.agent.ttsSampleRate != nil {
-		if err := ValidateTtsSampleRate(vendor, int(*s.agent.ttsSampleRate)); err != nil {
+	if baseAgent.TTSSampleRate != nil {
+		if err := agentcore.ValidateTtsSampleRate(vendor, int(*baseAgent.TTSSampleRate)); err != nil {
 			return err
 		}
 		return nil
@@ -230,17 +232,18 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		s.mu.Unlock()
 		return "", fmt.Errorf("cannot start session in %s state", s.status)
 	}
-	if s.agent != nil && s.agent.mllm != nil && s.agent.hasEnabledAvatar() {
+	baseAgent := s.agent.BaseAgent()
+	if s.agent != nil && baseAgent.MLLM != nil && baseAgent.Avatar != nil && agentcore.AvatarConfigEnabled(baseAgent.Avatar) {
 		s.mu.Unlock()
 		return "", fmt.Errorf("avatar is only supported with cascading ASR/LLM/TTS sessions; remove the avatar configuration when using MLLM")
 	}
 
-	if s.agent.avatar != nil && avatarConfigEnabled(s.agent.avatar) && s.agent.avatarRequiredSampleRate != nil && *s.agent.avatarRequiredSampleRate != 0 && s.agent.ttsSampleRate != nil {
-		if *s.agent.ttsSampleRate != *s.agent.avatarRequiredSampleRate {
+	if baseAgent.Avatar != nil && agentcore.AvatarConfigEnabled(baseAgent.Avatar) && baseAgent.AvatarRequiredSampleRate != nil && *baseAgent.AvatarRequiredSampleRate != 0 && baseAgent.TTSSampleRate != nil {
+		if *baseAgent.TTSSampleRate != *baseAgent.AvatarRequiredSampleRate {
 			s.mu.Unlock()
 			return "", fmt.Errorf(
 				"avatar requires TTS sample rate of %d Hz, but TTS is configured with %d Hz",
-				int(*s.agent.avatarRequiredSampleRate), int(*s.agent.ttsSampleRate),
+				int(*baseAgent.AvatarRequiredSampleRate), int(*baseAgent.TTSSampleRate),
 			)
 		}
 	}
@@ -254,7 +257,7 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 
 	pipelineID := s.pipelineID
 	if pipelineID == "" {
-		pipelineID = s.agent.PipelineID()
+		pipelineID = baseAgent.PipelineID
 	}
 
 	skipCategories, allowMissingCategories := s.vendorValidationCategories(pipelineID)
@@ -273,7 +276,9 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		Warn:                           s.warnf,
 	}
 
-	properties, err := s.agent.ToPropertiesMap(propOpts)
+	properties, err := agentcore.BuildPropertiesMap(baseAgent, propOpts, func(opts agentcore.GenerateConvoAITokenOptions) (string, error) {
+		return GenerateConvoAIToken(GenerateConvoAITokenOptions(opts))
+	})
 	if err != nil {
 		s.mu.Lock()
 		s.status = StatusError
@@ -291,6 +296,13 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		return "", err
 	}
 	if err := validateEnrichedAvatarConfig(resolvedProperties); err != nil {
+		s.mu.Lock()
+		s.status = StatusError
+		s.mu.Unlock()
+		s.emit("error", err)
+		return "", err
+	}
+	if err := agentcore.ValidateProfileProviders(s.agent.Profile(), resolvedProperties, resolvedPreset); err != nil {
 		s.mu.Lock()
 		s.status = StatusError
 		s.mu.Unlock()
@@ -349,27 +361,27 @@ func validateEnrichedAvatarConfig(properties map[string]interface{}) error {
 		return nil
 	}
 	avatar := asMap(properties["avatar"])
-	if len(avatar) == 0 || !avatarConfigEnabled(avatar) {
+	if len(avatar) == 0 || !agentcore.AvatarConfigEnabled(avatar) {
 		return nil
 	}
 	vendor, _ := avatar["vendor"].(string)
-	params := asMap(avatar["params"])
-	if err := ValidateAvatarConfig(vendor, params); err != nil {
+	params := agentcore.AsMap(avatar["params"])
+	if err := agentcore.ValidateAvatarConfig(vendor, params); err != nil {
 		return err
 	}
-	if IsGenericAvatar(vendor) {
-		if !hasNonEmptyString(params, "agora_appid") {
+	if agentcore.IsGenericAvatar(vendor) {
+		if !agentcore.HasNonEmptyString(params, "agora_appid") {
 			return fmt.Errorf("Generic avatar requires agora_appid")
 		}
-		if !hasNonEmptyString(params, "agora_channel") {
+		if !agentcore.HasNonEmptyString(params, "agora_channel") {
 			return fmt.Errorf("Generic avatar requires agora_channel")
 		}
-		if !hasNonEmptyString(params, "agora_token") {
+		if !agentcore.HasNonEmptyString(params, "agora_token") {
 			return fmt.Errorf("Generic avatar requires agora_token")
 		}
 		return nil
 	}
-	if IsAvatarTokenManaged(vendor) && avatarUIDString(params["agora_uid"]) != "" && !hasNonEmptyString(params, "agora_token") {
+	if agentcore.IsAvatarTokenManaged(vendor) && agentcore.ParseUIDString(params["agora_uid"]) != "" && !agentcore.HasNonEmptyString(params, "agora_token") {
 		return fmt.Errorf("%s avatar requires agora_token; pass AgoraToken on the avatar vendor or provide AppCertificate for automatic token generation", vendor)
 	}
 	return nil
@@ -392,13 +404,14 @@ func (s *AgentSession) vendorValidationCategories(pipelineID string) ([]string, 
 		}
 	}
 
-	if preset, ok := inferASRPreset(s.agent.stt); ok && preset != "" {
+	baseAgent := s.agent.BaseAgent()
+	if preset, ok := inferASRPreset(baseAgent.STT); ok && preset != "" {
 		skip["asr"] = true
 	}
-	if preset, ok := inferLLMPreset(s.agent.llm); ok && preset != "" {
+	if preset, ok := inferLLMPreset(baseAgent.LLM); ok && preset != "" {
 		skip["llm"] = true
 	}
-	if preset, ok := inferTTSPreset(s.agent.tts); ok && preset != "" {
+	if preset, ok := inferTTSPreset(baseAgent.TTS); ok && preset != "" {
 		skip["tts"] = true
 	}
 

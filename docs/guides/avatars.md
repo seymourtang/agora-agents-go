@@ -34,7 +34,7 @@ Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you prov
 ```go
 sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("generic-avatar"),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "<openai_key>"}),
@@ -63,7 +63,7 @@ For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are fille
 ```go
 sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("generic-avatar"),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
@@ -115,7 +115,7 @@ func main() {
 
     sr := vendors.SampleRate24kHz
 
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName("avatar-agent"),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
@@ -148,7 +148,7 @@ func main() {
         }),
     )
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:    "avatar-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -174,7 +174,7 @@ func main() {
 ```go
 sr := vendors.SampleRate16kHz
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("akool-avatar"),
 ).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
@@ -228,7 +228,7 @@ Always configure TTS with the correct sample rate **before** calling `WithAvatar
 ```go
 // Correct: TTS sample rate matches avatar requirement
 sr := vendors.SampleRate24kHz
-agent := agentkit.NewAgent(...).
+agent := agentkit.NewAgent(client).
     WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:        "<key>",
         ModelID:    "<model>",
@@ -246,7 +246,7 @@ agent := agentkit.NewAgent(...).
 ```go
 // Wrong: This panics because TTS is 16kHz but LiveAvatar requires 24kHz.
 sr := vendors.SampleRate16kHz
-agent := agentkit.NewAgent(...).
+agent := agentkit.NewAgent(client).
     WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:        "<key>",
         ModelID:    "<model>",

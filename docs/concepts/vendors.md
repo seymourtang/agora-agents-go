@@ -6,7 +6,7 @@ description: Vendor catalog — LLM, TTS, STT, MLLM, and Avatar constructors wit
 
 # Vendors
 
-The `agentkit/vendors` package provides constructor functions for all supported third-party vendors. Each vendor implements one of five interfaces: `LLM`, `TTS`, `STT`, `MLLM`, or `Avatar`.
+The default `agentkit/vendors` package provides constructor functions for the global/default vendor surface. For mainland China integrations, use `agentkit/cn` with `agentkit/cn/vendors`.
 
 ## Vendor Interfaces
 
@@ -55,7 +55,7 @@ llm := vendors.NewOpenAI(vendors.OpenAIOptions{
     Model: "gpt-5-mini",
 })
 
-agent := agentkit.NewAgent(...).WithLlm(llm)
+agent := agentkit.NewAgent(client).WithLlm(llm)
 ```
 
 ## TTS Vendors
@@ -116,7 +116,6 @@ Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults t
 | `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString`, `Language` |
 | `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region`, `Language` |
 | `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey`, `Language` |
-| `NewAresSTT` | `AresSTTOptions` | None |
 | `NewSarvamSTT` | `SarvamSTTOptions` | `APIKey`, `Language` |
 
 <!-- snippet: fragment -->

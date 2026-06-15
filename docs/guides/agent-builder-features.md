@@ -25,7 +25,7 @@ For string values with a finite set of options (e.g. `data_channel`, `sal_mode`,
 | `rtc` | `WithRtc` | RTC media encryption |
 | `fillerWords` | `WithFillerWords` | Filler words while waiting for LLM |
 
-Use `NewAgent(opts...)` for constructor options, or chain methods on an existing agent. All methods return a **new** `*Agent` (immutable).
+Use `NewAgent(client, opts...)` for constructor options, or chain methods on an existing agent. All methods return a **new** `*Agent` (immutable).
 
 ## SAL (Selective Attention Locking)
 
@@ -38,7 +38,7 @@ import (
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
 )
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("sal-assistant"),
     agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
         EnableSal: Agora.Bool(true),
@@ -69,17 +69,17 @@ Enable MLLM, RTM, SAL, or tools:
 
 ```go
 // MLLM mode (see mllm-flow guide)
-agent := agentkit.NewAgent().WithMllm(/* ... */)
+agent := agentkit.NewAgent(client).WithMllm(/* ... */)
 
 // RTM signaling for custom data delivery
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
         EnableRtm: Agora.Bool(true),
     }),
 )
 
 // Enable tool invocation via MCP
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithTools(true),
 )
 ```
@@ -91,7 +91,7 @@ Note: Use `Agora.Bool(true)` for optional boolean fields — the API expects `*b
 Configure silence handling, farewell behavior, and data channel:
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("params-agent"),
     agentkit.WithParameters(&agentkit.SessionParams{
         SilenceConfig: &agentkit.SilenceConfig{
@@ -111,7 +111,7 @@ agent := agentkit.NewAgent(
 ## Failure Message and Max History
 
 ```go
-agent := agentkit.NewAgent().
+agent := agentkit.NewAgent(client).
     WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:         "<key>",
         BaseURL:        "https://api.openai.com/v1/chat/completions",
@@ -128,14 +128,14 @@ Restrict which geographic regions the backend can use:
 ```go
 import Agora "github.com/AgoraIO/agora-agents-go/v2"
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithGeofence(&agentkit.GeofenceConfig{
         Area: agentkit.GeofenceAreaNorthAmerica,
     }),
 ).WithLlm(/* ... */).WithTts(/* ... */).WithStt(/* ... */)
 
 // Global with exclusion
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithGeofence(&agentkit.GeofenceConfig{
         Area:        agentkit.GeofenceAreaGlobal,
         ExcludeArea: agentkit.GeofenceExcludeAreaEurope.Ptr(),
@@ -150,7 +150,7 @@ Available `GeofenceArea` constants: `agentkit.GeofenceAreaGlobal`, `GeofenceArea
 Attach custom labels returned in notification callbacks:
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithLabels(map[string]string{
         "environment": "production",
         "team":        "support",
@@ -164,7 +164,7 @@ agent := agentkit.NewAgent(
 Configure RTC media encryption:
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithRtc(&agentkit.RtcConfig{
         EncryptionKey:  Agora.String("your-32-byte-key"),
         EncryptionMode: Agora.Int(5), // AES_128_GCM
@@ -177,7 +177,7 @@ agent := agentkit.NewAgent(
 Play filler words while waiting for the LLM response:
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithFillerWords(&agentkit.FillerWordsConfig{
         Enable: Agora.Bool(true),
         Trigger: &agentkit.FillerWordsTrigger{
@@ -202,7 +202,7 @@ agent := agentkit.NewAgent(
 Read back configuration via getter methods:
 
 ```go
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithGeofence(&agentkit.GeofenceConfig{
         Area: agentkit.GeofenceAreaEurope,
     }),
@@ -242,7 +242,7 @@ func main() {
         AppCertificate: "<app_cert>",
     })
 
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName("full-featured-assistant"),
         agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
             EnableRtm: Agora.Bool(true),
@@ -302,7 +302,7 @@ func main() {
         Language: "en-US",
     }))
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:    "demo-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},

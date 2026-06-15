@@ -43,7 +43,7 @@ func main() {
 
     // In BYOK mode, each vendor carries its own credentials.
     sampleRate := vendors.SampleRate24kHz
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName("support-assistant"),
     ).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
         APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
@@ -66,7 +66,7 @@ func main() {
         SampleRate: &sampleRate,
     }))
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:     "support-room-123",
         AgentUID:    "1",
         RemoteUIDs:  []string{"100"},

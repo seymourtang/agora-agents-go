@@ -12,16 +12,16 @@ Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit`
 
 <!-- snippet: fragment -->
 ```go
-func NewAgent(opts ...AgentOption) *Agent
+func NewAgent(client *AgoraClient, opts ...AgentOption) *Agent
 ```
 
-Creates a new `Agent` with the given functional options.
+Creates a new `Agent` bound to the provided `AgoraClient` and configured with the given functional options.
 
 ## AgentOption Type
 
 <!-- snippet: fragment -->
 ```go
-type AgentOption func(*Agent)
+type AgentOption func(*BaseAgent)
 ```
 
 ## AgentOption Functions
@@ -249,7 +249,7 @@ enabled := true
 mode := "default"
 eosMode := Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechModeSemantic
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
         Mode: &mode,
         Config: &agentkit.TurnDetectionNestedConfig{

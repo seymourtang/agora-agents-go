@@ -31,7 +31,7 @@ func main() {
         AppCertificate: "<app_cert>",
     })
 
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName("openai-assistant"),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
@@ -59,7 +59,7 @@ func main() {
         }),
     )
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:    "demo-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -105,7 +105,7 @@ func main() {
         AppCertificate: "<app_cert>",
     })
 
-    agent := agentkit.NewAgent(
+    agent := agentkit.NewAgent(client,
         agentkit.WithName("claude-assistant"),
     ).WithLlm(
         vendors.NewAnthropic(vendors.AnthropicOptions{
@@ -133,7 +133,7 @@ func main() {
         }),
     )
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
         Channel:    "support-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -159,7 +159,7 @@ func main() {
 In cascading mode, **LLM and TTS are required**. STT is optional — if omitted, the platform uses a default ASR provider. `ToProperties` returns an error if LLM or TTS is missing:
 
 ```go
-agent := agentkit.NewAgent(agentkit.WithName("no-tts"))
+agent := agentkit.NewAgent(client, agentkit.WithName("no-tts"))
 // No TTS or LLM configured
 
 _, err := agent.ToProperties(agentkit.ToPropertiesOptions{...})
@@ -173,7 +173,7 @@ Add server-side voice activity detection to control when the agent starts proces
 ```go
 import Agora "github.com/AgoraIO/agora-agents-go/v2"
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithName("vad-agent"),
     agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
         Type:              agentkit.TurnDetectionTypeServerVad.Ptr(), // deprecated; use Config.EndOfSpeech instead

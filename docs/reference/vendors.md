@@ -8,6 +8,8 @@ description: Complete API reference for all vendor constructors and configuratio
 
 Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`
 
+This reference describes the default/global vendor package. CN-specific vendors live under `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`.
+
 ## SampleRate
 
 <!-- snippet: fragment -->
@@ -597,21 +599,6 @@ Panics if `APIKey` or `Language` is empty.
 | `Language` | `string` | Yes | AssemblyAI language code |
 | `URI` | `string` | No | AssemblyAI streaming WebSocket URL |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
-
-### NewAresSTT
-
-<!-- snippet: fragment -->
-```go
-func NewAresSTT(opts AresSTTOptions) *AresSTT
-```
-
-Ares is an Agora built-in STT service — no external API key required.
-
-#### AresSTTOptions
-
-| Field              | Type                     | Required | Description              |
-| ------------------ | ------------------------ | -------- | ------------------------ |
-| `AdditionalParams` | `map[string]interface{}` | No       | Additional vendor params |
 
 ### NewSarvamSTT
 
