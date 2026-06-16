@@ -8,6 +8,15 @@ description: Vendor catalog — LLM, TTS, STT, MLLM, and Avatar constructors wit
 
 The default `agentkit/vendors` package provides constructor functions for the global/default vendor surface. For mainland China integrations, use `agentkit/cn` with `agentkit/cn/vendors`.
 
+## Package layout
+
+- Global/default package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`
+- CN package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`
+
+Use the global/default package for `option.AreaUS`, `option.AreaEU`, and `option.AreaAP`.
+
+Use the CN package for `option.AreaCN`.
+
 ## Vendor Interfaces
 
 <!-- snippet: fragment -->
@@ -39,7 +48,7 @@ type Avatar interface {
 
 | Constructor | Options Struct | Required Fields | Default Model |
 |---|---|---|---|
-| `NewOpenAI` | `OpenAIOptions` | `Model` for Agora-managed models; `APIKey`, `BaseURL`, `Model` for BYOK | — |
+| `NewOpenAI` | `OpenAIOptions` | `Model` for Agora-managed global/default models; `APIKey`, `BaseURL`, `Model` for BYOK | — |
 | `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Model`, `Endpoint`, `DeploymentName` | — |
 | `NewAnthropic` | `AnthropicOptions` | `APIKey`, `Model`, `URL`, `Headers`, `MaxTokens` | — |
 | `NewGemini` | `GeminiOptions` | `APIKey`, `Model` | — |
@@ -72,7 +81,7 @@ agent := agentkit.NewAgent(client).WithLlm(llm)
 | `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker`, `ModelID` |
 | `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID`, `Backend` |
 | `NewGroqTTS` | `GroqTTSOptions` | `Key` |
-| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed MiniMax models; `Key`, `GroupID`, `Model`, `VoiceID`, `URL` for BYOK |
+| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed global/default MiniMax models; `Key`, `GroupID`, `Model`, `VoiceID`, `URL` for BYOK |
 | `NewDeepgramTTS` | `DeepgramTTSOptions` | `APIKey`, `Model` |
 | `NewSarvamTTS` | `SarvamTTSOptions` | `APIKey` |
 
@@ -110,7 +119,7 @@ Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults t
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
 | `NewSpeechmaticsSTT` | `SpeechmaticsSTTOptions` | `APIKey`, `Language` |
-| `NewDeepgramSTT` | `DeepgramSTTOptions` | `APIKey` for BYOK; none for supported Agora-managed Deepgram models; `Keyterm?` |
+| `NewDeepgramSTT` | `DeepgramSTTOptions` | `APIKey` for BYOK; none for supported Agora-managed global/default Deepgram models; `Keyterm?` |
 | `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region`, `Language` |
 | `NewOpenAISTT` | `OpenAISTTOptions` | `APIKey` |
 | `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString`, `Language` |

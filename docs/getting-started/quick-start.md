@@ -11,7 +11,7 @@ This guide starts with the standard AgentKit path:
 - `AppID`, `AppCertificate`, and `Area` on `AgoraClient`
 - the `Agent` builder with `WithStt()`, `WithLlm()`, and `WithTts()`
 - automatic ConvoAI REST auth and RTC join token generation
-- no vendor API keys when using supported Agora-managed models
+- no vendor API keys when using supported Agora-managed global models
 
 ## Full example
 
@@ -87,13 +87,13 @@ func main() {
 
 1. `AgoraClient` runs in app-credentials mode when you pass `AppID` and `AppCertificate` only.
 2. `Agent` holds reusable behavior such as instructions, greeting, and history settings.
-3. Vendor constructors on the builder select the ASR, LLM, and TTS stack. AgentKit uses Agora-managed configuration when credentials are omitted for supported models.
+3. Vendor constructors on the builder select the ASR, LLM, and TTS stack. Leave vendor credentials unset for supported Agora-managed global models, or provide keys when you want BYOK. CN MiniMax TTS always requires `Key`.
 4. `session.Start(...)` lets the SDK generate the required auth tokens automatically.
 5. `session.Start(...)` returns the unique agent session ID.
 
 ## When to use BYOK instead
 
-Use the builder without vendor API keys when you are using supported Agora-managed models.
+Use the builder without vendor API keys when you are using supported Agora-managed global models.
 
 Use BYOK when you need to:
 

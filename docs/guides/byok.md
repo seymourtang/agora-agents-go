@@ -6,7 +6,7 @@ description: Bring your own vendor credentials and use custom vendor configurati
 
 # BYOK
 
-Use BYOK when you want to provide vendor credentials yourself instead of using Agora-managed models.
+Use BYOK when you want to provide vendor credentials yourself instead of using Agora-managed global models.
 
 Typical reasons:
 
@@ -87,5 +87,5 @@ func main() {
 
 ## Agora-managed models vs BYOK
 
-- Agora-managed models: supported models without vendor keys in app code
+- Agora-managed global models: supported global/default models without vendor keys in app code
 - BYOK: most control, your keys and your vendor configuration

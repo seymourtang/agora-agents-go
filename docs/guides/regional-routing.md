@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Regional Routing
-description: Configure regional routing for app-credentials AgentKit clients.
+description: Configure the Go SDK to route requests to the nearest Agora region.
 ---
 
 # Regional Routing
@@ -27,17 +27,113 @@ func main() {
 }
 ```
 
-## Available Areas
+## Area enum
 
-| Constant | Region | Domain Prefixes |
-|---|---|---|
-| `option.AreaUS` | United States | `api-us-west-1`, `api-us-east-1` |
-| `option.AreaEU` | Europe | `api-eu-west-1`, `api-eu-central-1` |
-| `option.AreaAP` | Asia-Pacific | `api-ap-southeast-1`, `api-ap-northeast-1` |
-| `option.AreaCN` | Chinese Mainland | `api-cn-east-1`, `api-cn-north-1` |
+| Constant | Region |
+|---|---|
+| `option.AreaUS` | United States (west + east) |
+| `option.AreaEU` | Europe (west + central) |
+| `option.AreaAP` | Asia-Pacific (southeast + northeast) |
+| `option.AreaCN` | Chinese mainland (east + north) |
 
-Each area has two regional prefixes for failover. The SDK uses the selected area when constructing the Conversational AI API base URL.
+## Area-aware package hints
 
-## When To Override Lower-Level Routing
+Use the default/global surface with `agentkit` and `agentkit/vendors` when you want `option.AreaUS`, `option.AreaEU`, or `option.AreaAP`.
+
+Use `agentkit/cn` and `agentkit/cn/vendors` when you want the Chinese mainland defaults from `option.AreaCN`.
+
+| Area | Agent package | Vendor package | Notes |
+|---|---|---|---|
+| `option.AreaUS`, `option.AreaEU`, `option.AreaAP` | `agentkit` | `agentkit/vendors` | Supports cascading, MLLM, and the default/global vendor catalog |
+| `option.AreaCN` | `agentkit/cn` | `agentkit/cn/vendors` | Supports cascading and CN-specific vendors; MLLM helpers are not exposed |
+
+Global/default example:
+
+```go
+package main
+
+import (
+    "github.com/AgoraIO/agora-agents-go/v2/agentkit"
+    "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
+    "github.com/AgoraIO/agora-agents-go/v2/option"
+)
+
+func main() {
+    client := agentkit.NewAgoraClient(agentkit.AgoraClientOptions{
+        Area:           option.AreaUS,
+        AppID:          "your-app-id",
+        AppCertificate: "your-app-certificate",
+    })
+
+    _ = agentkit.NewAgent(client,
+        agentkit.WithName("global-agent"),
+    ).WithStt(
+        vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "nova-3", Language: "en-US"}),
+    ).WithLlm(
+        vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"}),
+    ).WithTts(
+        vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{Model: "speech_2_6_turbo", VoiceID: "English_captivating_female1"}),
+    )
+}
+```
+
+CN example:
+
+```go
+package main
+
+import (
+    agentkit "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn"
+    vendors "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors"
+)
+
+func main() {
+    client := agentkit.NewAgoraClient(agentkit.ClientOptions{
+        AppID:          "your-app-id",
+        AppCertificate: "your-app-certificate",
+    })
+
+    _ = agentkit.NewAgent(client,
+        agentkit.WithName("cn-agent"),
+    ).WithStt(
+        vendors.NewFengmingSTT(),
+    ).WithLlm(
+        vendors.NewAliyun(vendors.AliyunOptions{
+            APIKey:  "api-key",
+            BaseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+            Model:   "qwen-plus",
+        }),
+    ).WithTts(
+        vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
+            Key:   "minimax-key",
+            Model: "speech-01-turbo",
+            VoiceSetting: &vendors.MiniMaxVoiceSetting{
+                VoiceID: "female-shaonv",
+            },
+        }),
+    )
+}
+```
+
+## How the domain pool works
+
+Each area has two regional domain prefixes and two domain suffixes. The pool:
+
+1. Starts with the first regional prefix and the first domain suffix.
+2. Resolves the best domain suffix via DNS every 30 seconds.
+3. Constructs the full URL as `https://{prefix}.{suffix}{path}`.
+
+## Region-to-domain mapping
+
+| Area | Primary prefix | Fallback prefix | Primary suffix | Fallback suffix | Path |
+|---|---|---|---|---|---|
+| `option.AreaUS` | `api-us-west-1` | `api-us-east-1` | `agora.io` | `sd-rtn.com` | `/api/conversational-ai-agent` |
+| `option.AreaEU` | `api-eu-west-1` | `api-eu-central-1` | `agora.io` | `sd-rtn.com` | `/api/conversational-ai-agent` |
+| `option.AreaAP` | `api-ap-southeast-1` | `api-ap-northeast-1` | `agora.io` | `sd-rtn.com` | `/api/conversational-ai-agent` |
+| `option.AreaCN` | `api-cn-east-1` | `api-cn-north-1` | `sd-rtn.com` | `agora.io` | `/cn/api/conversational-ai-agent` |
+
+Note: `option.AreaCN` uses `sd-rtn.com` as the primary suffix and the `/cn/api/conversational-ai-agent` path by default.
+
+## When to override lower-level routing
 
 The generated `client` and `option` packages also expose lower-level routing primitives such as `option.WithBaseURL`, `option.WithPool`, and `core.NewPool`. Use those only when you are building direct generated-client integrations. For realtime agent sessions, prefer `AgoraClientOptions.Area` so auth, token generation, and regional routing stay together in AgentKit.

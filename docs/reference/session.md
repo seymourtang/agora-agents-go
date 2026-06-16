@@ -117,6 +117,8 @@ Starts the agent session. Returns the agent ID assigned by the API.
 - **Transitions to:** `starting` -> `running` (success) or `error` (failure)
 - **Emits:** `"started"` on success, `"error"` on failure
 - **Validates:** Avatar config and avatar/TTS sample rate match before making the API call
+- **Applies:** Explicit `Preset` values when provided and Agora-managed configuration when supported vendor credentials are omitted
+- **Resolves:** `PipelineID` as session-level value first, then agent-level value; sends the resolved value as top-level `/join.pipeline_id`
 
 ### Stop
 
@@ -254,6 +256,16 @@ Returns the App ID.
 func (s *AgentSession) Raw() *agents.Client
 ```
 Returns the generated agents client for direct API access.
+
+## Presets and BYOK
+
+Prefer configuring vendors on the `Agent` builder. When you omit credentials for supported Agora-managed global models, AgentKit sends the matching Agora-managed configuration at session start. CN MiniMax TTS is not Agora-managed and always requires `Key`.
+
+`Preset` is an advanced session option for project-specific settings, not for selecting Agora-managed models. Most applications should use the builder instead.
+
+- Omit vendor credentials on the builder for supported Agora-managed global models.
+- Provide vendor API keys when you want BYOK.
+- Pass `Preset` on `agent.CreateSession(...)` only when you need project-specific settings.
 
 ## Event System
 

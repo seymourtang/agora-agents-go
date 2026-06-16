@@ -79,6 +79,10 @@ session := agent.CreateSession(agentkit.CreateSessionOptions{
 
 All methods that make API calls take `context.Context` as the first argument and return an `error`.
 
+## Agora-managed models and BYOK
+
+When you omit credentials for supported Agora-managed global models on the builder, AgentKit sends the matching Agora-managed configuration at session start. Pass your own vendor API keys when you need BYOK. CN MiniMax TTS is not Agora-managed and always requires `Key`.
+
 ### Start
 
 <!-- snippet: fragment -->

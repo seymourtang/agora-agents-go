@@ -69,7 +69,7 @@ c := client.NewClient(
 func WithArea(area core.Area) *core.AreaRequestOption
 ```
 
-Enables regional routing with automatic DNS-based domain selection. See [Regional Routing](../guides/regional-routing.md).
+Enables regional routing with automatic DNS-based domain selection. Use this for the global/default and CN area enum flow described in [Regional Routing](../guides/regional-routing.md).
 
 <!-- snippet: fragment -->
 ```go
