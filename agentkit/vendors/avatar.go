@@ -46,9 +46,6 @@ func (l *LiveAvatarAvatar) ToConfig() map[string]interface{} {
 	for k, v := range l.options.AdditionalParams {
 		params[k] = v
 	}
-	params["api_key"] = h.options.APIKey
-	params["quality"] = h.options.Quality
-	params["agora_uid"] = h.options.AgoraUID
 	params["api_key"] = l.options.APIKey
 	params["quality"] = l.options.Quality
 	params["agora_uid"] = l.options.AgoraUID
@@ -145,9 +142,6 @@ func (a *AnamAvatar) ToConfig() map[string]interface{} {
 	for k, v := range a.options.AdditionalParams {
 		params[k] = v
 	}
-	params["api_key"] = l.options.APIKey
-	params["quality"] = l.options.Quality
-	params["agora_uid"] = l.options.AgoraUID
 	params["api_key"] = a.options.APIKey
 	if a.options.PersonaID != "" {
 		params["persona_id"] = a.options.PersonaID
@@ -268,7 +262,6 @@ func (h *HeyGenAvatar) ToConfig() map[string]interface{} {
 	for k, v := range h.options.AdditionalParams {
 		params[k] = v
 	}
-	params["api_key"] = a.options.APIKey
 	params["api_key"] = h.options.APIKey
 	params["quality"] = h.options.Quality
 	params["agora_uid"] = h.options.AgoraUID
@@ -292,71 +285,6 @@ func (h *HeyGenAvatar) ToConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"enable": enable,
 		"vendor": "heygen",
-		"params": params,
-	}
-}
-
-type GenericAvatarOptions struct {
-	APIKey           string
-	APIBaseURL       string
-	AvatarID         string
-	AgoraUID         string
-	AgoraToken       string
-	AgoraAppID       string
-	AgoraChannel     string
-	Enable           *bool
-	AdditionalParams map[string]interface{}
-}
-
-type GenericAvatar struct {
-	options GenericAvatarOptions
-}
-
-func NewGenericAvatar(opts GenericAvatarOptions) *GenericAvatar {
-	if opts.APIKey == "" {
-		panic("GenericAvatar requires APIKey")
-	}
-	if opts.APIBaseURL == "" {
-		panic("GenericAvatar requires APIBaseURL")
-	}
-	if opts.AvatarID == "" {
-		panic("GenericAvatar requires AvatarID")
-	}
-	if opts.AgoraUID == "" {
-		panic("GenericAvatar requires AgoraUID")
-	}
-	return &GenericAvatar{options: opts}
-}
-
-func (g *GenericAvatar) RequiredSampleRate() SampleRate {
-	return 0
-}
-
-func (g *GenericAvatar) ToConfig() map[string]interface{} {
-	params := map[string]interface{}{}
-	for k, v := range g.options.AdditionalParams {
-		params[k] = v
-	}
-	params["api_key"] = g.options.APIKey
-	params["api_base_url"] = g.options.APIBaseURL
-	params["avatar_id"] = g.options.AvatarID
-	params["agora_uid"] = g.options.AgoraUID
-	if g.options.AgoraToken != "" {
-		params["agora_token"] = g.options.AgoraToken
-	}
-	if g.options.AgoraAppID != "" {
-		params["agora_appid"] = g.options.AgoraAppID
-	}
-	if g.options.AgoraChannel != "" {
-		params["agora_channel"] = g.options.AgoraChannel
-	}
-	enable := true
-	if g.options.Enable != nil {
-		enable = *g.options.Enable
-	}
-	return map[string]interface{}{
-		"enable": enable,
-		"vendor": "generic",
 		"params": params,
 	}
 }
