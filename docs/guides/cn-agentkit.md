@@ -24,9 +24,7 @@ func main() {
         AppCertificate: "your-app-certificate",
     })
 
-    agent := agentkit.NewAgent(client,
-        agentkit.WithName("cn-support"),
-    ).WithStt(
+    agent := agentkit.NewAgent(client).WithStt(
         vendors.NewTencentSTT(vendors.TencentSTTOptions{
             Key:    "secret-key",
             AppID:  "app-id",
@@ -47,6 +45,7 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:       "cn-support",
         Channel:    "cn-room",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},

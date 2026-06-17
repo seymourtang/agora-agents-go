@@ -39,7 +39,6 @@ import (
 )
 
 agent := agentkit.NewAgent(client,
-    agentkit.WithName("sal-assistant"),
     agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
         EnableSal: Agora.Bool(true),
     }),
@@ -92,7 +91,6 @@ Configure silence handling, farewell behavior, and data channel:
 
 ```go
 agent := agentkit.NewAgent(client,
-    agentkit.WithName("params-agent"),
     agentkit.WithParameters(&agentkit.SessionParams{
         SilenceConfig: &agentkit.SilenceConfig{
             TimeoutMs: Agora.Int(10000),
@@ -209,7 +207,6 @@ agent := agentkit.NewAgent(client,
     agentkit.WithLabels(map[string]string{"env": "staging"}),
 )
 
-agent.Name()           // string
 agent.Geofence()       // *GeofenceConfig
 agent.Labels()         // map[string]string
 agent.Sal()            // *SalConfig
@@ -243,7 +240,6 @@ func main() {
     })
 
     agent := agentkit.NewAgent(client,
-        agentkit.WithName("full-featured-assistant"),
         agentkit.WithAdvancedFeatures(&agentkit.AdvancedFeatures{
             EnableRtm: Agora.Bool(true),
         }),
@@ -303,6 +299,7 @@ func main() {
     }))
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:       "full-featured-assistant",
         Channel:    "demo-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},

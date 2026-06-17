@@ -78,7 +78,6 @@ func startConversation(ctx context.Context) (string, error) {
     })
 
     agent := agentkit.NewAgent(client,
-        agentkit.WithName(fmt.Sprintf("conversation-%d", time.Now().UnixMilli())),
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
             Language: Agora.AsrLanguageEnUs.Ptr(),
             Config: &agentkit.TurnDetectionNestedConfig{
@@ -126,6 +125,7 @@ func startConversation(ctx context.Context) (string, error) {
     }))
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
         Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:    "123456",
         RemoteUIDs:  []string{"*"},
@@ -160,11 +160,11 @@ Use `WithPipelineID` when you want a published AI Studio pipeline to provide the
 
 ```go
 agent := agentkit.NewAgent(client,
-    agentkit.WithName("support"),
     agentkit.WithPipelineID("studio-pipeline-id"),
 )
 
 session := agent.CreateSession(agentkit.CreateSessionOptions{
+    Name:       "support",
     Channel:    "support-room",
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
@@ -175,6 +175,7 @@ You can override it per session:
 
 ```go
 session := agent.CreateSession(agentkit.CreateSessionOptions{
+    Name:       "support",
     Channel:    "support-room",
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
@@ -226,9 +227,7 @@ If you want to bring your own vendor credentials instead of using Agora-managed 
 Use `WithMllm()` for OpenAI Realtime, Gemini Live, Vertex AI, or xAI Grok. No STT, LLM, or TTS vendor is needed when MLLM mode is enabled.
 
 ```go
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("realtime-assistant"),
-).WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
+agent := agentkit.NewAgent(client).WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
     APIKey:          os.Getenv("OPENAI_API_KEY"),
     Model:           "gpt-4o-realtime-preview",
     GreetingMessage: "Hello! Ready to chat.",

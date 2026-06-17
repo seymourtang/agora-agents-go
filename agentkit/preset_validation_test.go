@@ -41,7 +41,7 @@ func TestExplicitASRPresetStillRequiresTTSAndLLM(t *testing.T) {
 	opts := basePipelineSessionOptions()
 	opts.Preset = []string{AgentPresets.Asr.DeepgramNova3}
 
-	_, err := startPresetValidationSession(t, NewAgent(nil, WithName("support")), opts)
+	_, err := startPresetValidationSession(t, NewAgent(nil), opts)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "TTS configuration is required")
@@ -51,7 +51,7 @@ func TestExplicitLLMPresetStillRequiresTTS(t *testing.T) {
 	opts := basePipelineSessionOptions()
 	opts.Preset = []string{AgentPresets.Llm.OpenAIGpt4oMini}
 
-	_, err := startPresetValidationSession(t, NewAgent(nil, WithName("support")), opts)
+	_, err := startPresetValidationSession(t, NewAgent(nil), opts)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "TTS configuration is required")
@@ -61,14 +61,14 @@ func TestExplicitTTSPresetStillRequiresLLM(t *testing.T) {
 	opts := basePipelineSessionOptions()
 	opts.Preset = []string{AgentPresets.Tts.OpenAITts1}
 
-	_, err := startPresetValidationSession(t, NewAgent(nil, WithName("support")), opts)
+	_, err := startPresetValidationSession(t, NewAgent(nil), opts)
 
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "LLM configuration is required")
 }
 
 func TestSessionStartInfersASRLLMAndTTSPresets(t *testing.T) {
-	agent := NewAgent(nil, WithName("support")).
+	agent := NewAgent(nil).
 		WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "nova-3", Language: "en-US"})).
 		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
 		WithTts(vendors.NewOpenAITTS(vendors.OpenAITTSOptions{Voice: "alloy"}))
@@ -83,7 +83,7 @@ func TestSessionStartInfersASRLLMAndTTSPresets(t *testing.T) {
 }
 
 func TestSessionStartInfersHyphenatedMiniMaxManagedPresetModel(t *testing.T) {
-	agent := NewAgent(nil, WithName("support")).
+	agent := NewAgent(nil).
 		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"})).
 		WithTts(vendors.NewMiniMaxTTS(vendors.MiniMaxTTSOptions{
 			Model:   "speech-2.6-turbo",

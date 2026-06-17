@@ -31,9 +31,7 @@ func main() {
         AppCertificate: "<app_cert>",
     })
 
-    agent := agentkit.NewAgent(client,
-        agentkit.WithName("openai-assistant"),
-    ).WithLlm(
+    agent := agentkit.NewAgent(client).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
             APIKey:  "<openai_key>",
             BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -60,6 +58,7 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:       "openai-assistant",
         Channel:    "demo-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -105,9 +104,7 @@ func main() {
         AppCertificate: "<app_cert>",
     })
 
-    agent := agentkit.NewAgent(client,
-        agentkit.WithName("claude-assistant"),
-    ).WithLlm(
+    agent := agentkit.NewAgent(client).WithLlm(
         vendors.NewAnthropic(vendors.AnthropicOptions{
             APIKey:    "<anthropic_key>",
             URL:       "https://api.anthropic.com/v1/messages",
@@ -134,6 +131,7 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:       "claude-assistant",
         Channel:    "support-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -159,7 +157,7 @@ func main() {
 In cascading mode, **LLM and TTS are required**. STT is optional — if omitted, the platform uses a default ASR provider. `ToProperties` returns an error if LLM or TTS is missing:
 
 ```go
-agent := agentkit.NewAgent(client, agentkit.WithName("no-tts"))
+agent := agentkit.NewAgent(client)
 // No TTS or LLM configured
 
 _, err := agent.ToProperties(agentkit.ToPropertiesOptions{...})
@@ -174,7 +172,6 @@ Add server-side voice activity detection to control when the agent starts proces
 import Agora "github.com/AgoraIO/agora-agents-go/v2"
 
 agent := agentkit.NewAgent(client,
-    agentkit.WithName("vad-agent"),
     agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
         Type:              agentkit.TurnDetectionTypeServerVad.Ptr(), // deprecated; use Config.EndOfSpeech instead
         Threshold:         Agora.Float64(0.5),

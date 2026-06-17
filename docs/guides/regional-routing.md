@@ -65,9 +65,7 @@ func main() {
         AppCertificate: "your-app-certificate",
     })
 
-    _ = agentkit.NewAgent(client,
-        agentkit.WithName("global-agent"),
-    ).WithStt(
+    _ = agentkit.NewAgent(client).WithStt(
         vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{Model: "nova-3", Language: "en-US"}),
     ).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{Model: "gpt-4o-mini"}),
@@ -93,9 +91,7 @@ func main() {
         AppCertificate: "your-app-certificate",
     })
 
-    _ = agentkit.NewAgent(client,
-        agentkit.WithName("cn-agent"),
-    ).WithStt(
+    _ = agentkit.NewAgent(client).WithStt(
         vendors.NewFengmingSTT(),
     ).WithLlm(
         vendors.NewAliyun(vendors.AliyunOptions{

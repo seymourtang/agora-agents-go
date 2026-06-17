@@ -34,9 +34,7 @@ Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you prov
 ```go
 sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("generic-avatar"),
-).WithLlm(
+agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "<openai_key>"}),
 ).WithTts(
     vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
@@ -63,9 +61,7 @@ For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are fille
 ```go
 sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("generic-avatar"),
-).WithLlm(
+agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:  "<openai_key>",
         BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -115,9 +111,7 @@ func main() {
 
     sr := vendors.SampleRate24kHz
 
-    agent := agentkit.NewAgent(client,
-        agentkit.WithName("avatar-agent"),
-    ).WithLlm(
+    agent := agentkit.NewAgent(client).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
             APIKey:  "<openai_key>",
             BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -149,6 +143,7 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:       "avatar-agent",
         Channel:    "avatar-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -174,9 +169,7 @@ func main() {
 ```go
 sr := vendors.SampleRate16kHz
 
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("akool-avatar"),
-).WithLlm(
+agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:  "<openai_key>",
         BaseURL: "https://api.openai.com/v1/chat/completions",

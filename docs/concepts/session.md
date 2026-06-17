@@ -10,16 +10,38 @@ description: AgentSession lifecycle — state machine, methods, and event handli
 
 ## Creating a Session
 
+Pass the agent instance name in `CreateSessionOptions.Name`. This value is sent as the top-level `name` field on `/join`. If omitted, AgentKit generates `agent-<unix_timestamp>`.
+
 <!-- snippet: fragment -->
 ```go
 session := agent.CreateSession(agentkit.CreateSessionOptions{
+    Name:       "my-agent",
     Channel:    "my-channel",
     AgentUID:   "1001",
     RemoteUIDs: []string{"1002"},
 })
 ```
 
+### CreateSessionOptions Fields
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `Name` | `string` | No | Agent instance name for `/join` (default: `agent-<unix_timestamp>`) |
+| `Channel` | `string` | Yes | Agora channel name |
+| `Token` | `string` | Conditional | Pre-generated RTC token (skips auto-generation) |
+| `AgentUID` | `string` | Yes | Agent's UID in the channel |
+| `RemoteUIDs` | `[]string` | Yes | Remote participant UIDs |
+| `IdleTimeout` | `*int` | No | Idle timeout in seconds |
+| `EnableStringUID` | `*bool` | No | Enable string UIDs |
+| `ExpiresIn` | `int` | No | Auto-generated token lifetime in seconds |
+| `Preset` | `[]string` | No | Advanced preset value for project-specific routing |
+| `PipelineID` | `string` | No | Published AI Studio pipeline ID; overrides `agent.PipelineID()` |
+| `Debug` | `bool` | No | Log the start request payload |
+| `Warn` | `func(string)` | No | Custom warning sink |
+
 ### AgentSessionOptions Fields
+
+Low-level `NewAgentSession` accepts the same session fields via `AgentSessionOptions`:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -95,7 +117,7 @@ fmt.Println("Agent ID:", agentID)
 ```
 
 Transitions: `idle`/`stopped`/`error` -> `starting` -> `running` (or `error`).
-Returns the agent ID string assigned by the API.
+Returns the agent ID string assigned by the API. The `/join` `name` field comes from `CreateSessionOptions.Name`, or `agent-<unix_timestamp>` when that field is empty.
 
 ### Stop
 

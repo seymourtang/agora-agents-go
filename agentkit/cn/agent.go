@@ -97,7 +97,6 @@ func NewAgent(client *AgoraClient, opts ...AgentOption) *Agent {
 	return &Agent{base: baseAgent}
 }
 
-func WithName(name string) AgentOption     { return agentcore.WithName(name) }
 func WithPipelineID(id string) AgentOption { return agentcore.WithPipelineID(id) }
 func WithInstructions(instructions string) AgentOption {
 	return agentcore.WithInstructions(instructions)
@@ -152,6 +151,8 @@ func (a *Agent) WithAvatar(vendor cnvendors.Avatar) *Agent {
 	return &Agent{base: a.base.ApplyAvatarConfig(avatarConfig, &requiredSR)}
 }
 
+// CreateSession builds a session from the CN agent builder.
+// Pass CreateSessionOptions.Name to set the /join agent instance identifier.
 func (a *Agent) CreateSession(opts CreateSessionOptions) *AgentSession {
 	return base.NewSession(a, opts)
 }
@@ -160,7 +161,6 @@ func NewSession(agent *Agent, opts CreateSessionOptions) *AgentSession {
 	return base.NewSession(agent, opts)
 }
 
-func (a *Agent) Name() string                      { return a.base.Name }
 func (a *Agent) PipelineID() string                { return a.base.PipelineID }
 func (a *Agent) Instructions() string              { return a.base.Instructions }
 func (a *Agent) Greeting() string                  { return a.base.Greeting }

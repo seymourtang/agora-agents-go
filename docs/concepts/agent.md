@@ -14,9 +14,7 @@ The `agentkit.Agent` is the central configuration object. It defines what LLM, T
 
 <!-- snippet: fragment -->
 ```go
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("my-assistant"),
-).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
+agent := agentkit.NewAgent(client).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
     APIKey:  "your-openai-key",
     BaseURL: "https://api.openai.com/v1/chat/completions",
     Model:   "gpt-4o-mini",
@@ -41,7 +39,7 @@ These are passed to `agentkit.NewAgent(client, opts ...AgentOption)`:
 
 | Function | Parameter | Description |
 |---|---|---|
-| `WithName(name string)` | Agent name | Identifier for the agent |
+| `WithPipelineID(pipelineID string)` | AI Studio pipeline ID | Default pipeline for sessions created from this agent |
 | `WithInstructions(instructions string)` | System prompt | Deprecated. Use LLM vendor `SystemMessages` instead. |
 | `WithGreeting(greeting string)` | Greeting text | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
 | `WithFailureMessage(msg string)` | Fallback message | Deprecated. Use LLM/MLLM vendor `FailureMessage` instead. |
@@ -61,9 +59,7 @@ After creating an agent with `NewAgent`, attach vendors using method chaining. E
 
 <!-- snippet: fragment -->
 ```go
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("assistant"),
-).WithLlm(
+agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:  "<key>",
         BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -96,7 +92,6 @@ agent := agentkit.NewAgent(client,
 | `WithTurnDetection(td *TurnDetectionConfig)` | Pointer to config | Configure `turn_detection.language` and cascading-flow SOS/EOS detection; use interruption config for interruption behavior |
 | `WithInstructions(instructions string)` | String | Deprecated. Use LLM vendor `SystemMessages` instead. |
 | `WithGreeting(greeting string)` | String | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
-| `WithName(name string)` | String | Override name on a cloned agent |
 | `WithSal(sal *SalConfig)` | Pointer to config | Set SAL configuration |
 | `WithAdvancedFeatures(af *AdvancedFeatures)` | Pointer to config | Set advanced features |
 | `WithParameters(params *SessionParams)` | Pointer to config | Set session parameters |
@@ -109,11 +104,14 @@ agent := agentkit.NewAgent(client,
 
 Note: `WithInstructions`, `WithGreeting`, `WithFailureMessage`, and `WithMaxHistory` are compatibility shims. New code should configure those values on the LLM or MLLM vendor because that matches the core request schema.
 
+## Session name
+
+The agent instance `name` sent on `/join` is set on `CreateSession`, not on the `Agent` builder. Pass `CreateSessionOptions.Name` when creating a session; if omitted, AgentKit generates `agent-<unix_timestamp>`. See [Session](./session.md).
+
 ## Agent Getters
 
 <!-- snippet: fragment -->
 ```go
-agent.Name() string
 agent.Instructions() string
 agent.Greeting() string
 agent.FailureMessage() string

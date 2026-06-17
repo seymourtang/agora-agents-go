@@ -80,6 +80,8 @@ type AgentSessionOptions struct {
 	Agent                 agentcore.AgentRuntime
 	AppID                 string
 	AppCertificate        string
+	// Name is the agent instance identifier sent as the top-level /join "name" field.
+	// When empty, NewAgentSession generates agent-<unix_timestamp>.
 	Name                  string
 	Channel               string
 	Token                 string
@@ -100,6 +102,8 @@ type AgentSessionOptions struct {
 	Warn                     func(string)
 }
 
+// NewAgentSession creates a session in StatusIdle.
+// Prefer Agent.CreateSession for the public AgentKit flow; this constructor is for advanced wiring.
 func NewAgentSession(opts AgentSessionOptions) *AgentSession {
 	name := opts.Name
 	if name == "" {

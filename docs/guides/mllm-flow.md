@@ -13,9 +13,7 @@ The MLLM flow uses a single multimodal model to process audio input and generate
 Call `WithMllm(vendor)` to enable MLLM mode. The builder sets `mllm.enable = true` automatically.
 
 ```go
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("realtime-agent"),
-).WithMllm(vendor)
+agent := agentkit.NewAgent(client).WithMllm(vendor)
 ```
 
 ## OpenAI Realtime Example
@@ -41,9 +39,7 @@ func main() {
         AppCertificate: "<app_cert>",
     })
 
-    agent := agentkit.NewAgent(client,
-        agentkit.WithName("openai-realtime"),
-    ).WithMllm(
+    agent := agentkit.NewAgent(client).WithMllm(
         vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
             APIKey: "<openai_key>",
             Model:  "gpt-4o-realtime-preview",
@@ -54,6 +50,7 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:       "openai-realtime",
         Channel:    "realtime-channel",
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
@@ -77,9 +74,7 @@ func main() {
 ## Gemini Live Example
 
 ```go
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("gemini-live"),
-).WithMllm(
+agent := agentkit.NewAgent(client).WithMllm(
     vendors.NewGeminiLive(vendors.GeminiLiveOptions{
         APIKey:       "<google_ai_api_key>",
         Model:        "gemini-live-2.5-flash",
@@ -96,9 +91,7 @@ Configure MLLM turn detection on the MLLM vendor with `TurnDetection`. When set,
 Example:
 
 ```go
-agent := agentkit.NewAgent(client,
-    agentkit.WithName("realtime-vad"),
-).WithMllm(
+agent := agentkit.NewAgent(client).WithMllm(
     vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
         APIKey: "<openai_key>",
         TurnDetection: &Agora.MllmTurnDetection{

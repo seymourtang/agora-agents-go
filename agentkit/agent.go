@@ -99,7 +99,6 @@ func NewAgent(client *AgoraClient, opts ...AgentOption) *Agent {
 	return &Agent{base: baseAgent}
 }
 
-func WithName(name string) AgentOption             { return agentcore.WithName(name) }
 func WithPipelineID(pipelineID string) AgentOption { return agentcore.WithPipelineID(pipelineID) }
 func WithInstructions(instructions string) AgentOption {
 	return agentcore.WithInstructions(instructions)
@@ -210,12 +209,6 @@ func (a *Agent) WithGreeting(greeting string) *Agent {
 	return &Agent{base: clone}
 }
 
-func (a *Agent) WithName(name string) *Agent {
-	clone := a.base.Clone()
-	clone.Name = name
-	return &Agent{base: clone}
-}
-
 func (a *Agent) WithSal(sal *SalConfig) *Agent {
 	clone := a.base.Clone()
 	clone.Sal = sal
@@ -288,7 +281,6 @@ func (a *Agent) WithFillerWords(fw *FillerWordsConfig) *Agent {
 	return &Agent{base: clone}
 }
 
-func (a *Agent) Name() string                      { return a.base.Name }
 func (a *Agent) PipelineID() string                { return a.base.PipelineID }
 func (a *Agent) Instructions() string              { return a.base.Instructions }
 func (a *Agent) Greeting() string                  { return a.base.Greeting }
@@ -326,7 +318,10 @@ func (a *Agent) Labels() map[string]string            { return a.base.Labels }
 func (a *Agent) Rtc() *RtcConfig                      { return a.base.RTC }
 func (a *Agent) FillerWords() *FillerWordsConfig      { return a.base.FillerWords }
 
+// CreateSessionOptions configures a new AgentSession before Start.
 type CreateSessionOptions struct {
+	// Name is the agent instance identifier sent as the top-level /join "name" field.
+	// When empty, CreateSession generates agent-<unix_timestamp>.
 	Name            string
 	Channel         string
 	Token           string
@@ -341,10 +336,13 @@ type CreateSessionOptions struct {
 	Warn            func(string)
 }
 
+// CreateSession builds an AgentSession from this agent configuration.
+// Set Name on opts to identify the agent instance; omit Name to auto-generate one.
 func (a *Agent) CreateSession(opts CreateSessionOptions) *AgentSession {
 	return NewSession(a, opts)
 }
 
+// NewSession creates an AgentSession from any AgentRuntime implementation.
 func NewSession(agent agentcore.AgentRuntime, opts CreateSessionOptions) *AgentSession {
 	clientProvider, ok := agent.(interface{ Client() agentcore.ClientRuntime })
 	if !ok || clientProvider.Client() == nil {
@@ -353,7 +351,7 @@ func NewSession(agent agentcore.AgentRuntime, opts CreateSessionOptions) *AgentS
 	client := clientProvider.Client()
 	name := opts.Name
 	if name == "" {
-		name = defaultSessionName(agent.BaseAgent().Name)
+		name = fmt.Sprintf("agent-%d", time.Now().UnixMilli())
 	}
 
 	return NewAgentSession(AgentSessionOptions{
@@ -402,13 +400,6 @@ func BuildPropertiesMap(base *agentcore.BaseAgent, opts ToPropertiesOptions, tok
 
 func (a *Agent) hasEnabledAvatar() bool {
 	return a != nil && a.base.Avatar != nil && agentcore.AvatarConfigEnabled(a.base.Avatar)
-}
-
-func defaultSessionName(agentName string) string {
-	if agentName != "" {
-		return agentName
-	}
-	return fmt.Sprintf("agent-%d", time.Now().UnixMilli())
 }
 
 func vendorName(config map[string]interface{}) string {

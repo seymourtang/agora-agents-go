@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- **Agent instance name** — Removed `WithName` from the `Agent` builder. Set the `/join` `name` field with `CreateSessionOptions.Name` instead; when omitted, AgentKit generates `agent-<unix_timestamp>`.
 - **MiniMax managed presets** — MiniMax preset-backed TTS now keeps the preset model as an internal hint while sending only supported partial TTS settings such as `voice_setting.voice_id`.
 - **Vertex AI LLM routing** — `NewVertexAILLM` now keeps project and location in the generated endpoint URL instead of duplicating them in `llm.params`.
 

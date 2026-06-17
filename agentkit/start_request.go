@@ -8,6 +8,7 @@ import (
 	"github.com/AgoraIO/agora-agents-go/v2/option"
 )
 
+// startAgentsWithMapBody posts an exact /join JSON body, including the resolved session name.
 func startAgentsWithMapBody(
 	ctx context.Context,
 	client *agents.Client,

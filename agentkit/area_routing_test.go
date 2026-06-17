@@ -45,7 +45,7 @@ func TestSessionStartWithAreaUsesConvoAIPathAndAppCredentialsAuth(t *testing.T) 
 		AuthMode:       AuthModeAppCredentials,
 	}
 
-	agent := NewAgent(agoraClient, WithName("support-agent"))
+	agent := NewAgent(agoraClient)
 	session := agent.CreateSession(CreateSessionOptions{
 		Channel:    "room-1",
 		Token:      "rtc-token",
@@ -92,7 +92,7 @@ func TestSessionStartAutoGeneratesRESTAuthTokenWhenSessionTokenMissing(t *testin
 		AuthMode:       AuthModeAppCredentials,
 	}
 
-	agent := NewAgent(agoraClient, WithName("support-agent"))
+	agent := NewAgent(agoraClient)
 	session := agent.CreateSession(CreateSessionOptions{
 		Channel:    "room-1",
 		AgentUID:   "1",

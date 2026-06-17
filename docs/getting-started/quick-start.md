@@ -38,9 +38,7 @@ func main() {
         AppCertificate: "your-app-certificate",
     })
 
-    agent := agentkit.NewAgent(client,
-        agentkit.WithName("support-assistant"),
-    ).WithStt(
+    agent := agentkit.NewAgent(client).WithStt(
         vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
             Model:    "nova-3",
             Language: "en",
@@ -62,6 +60,7 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:        "support-assistant",
         Channel:     "support-room-123",
         AgentUID:    "1",
         RemoteUIDs:  []string{"100"},
@@ -86,10 +85,10 @@ func main() {
 ## What this does
 
 1. `AgoraClient` runs in app-credentials mode when you pass `AppID` and `AppCertificate` only.
-2. `Agent` holds reusable behavior such as instructions, greeting, and history settings.
+2. `Agent` holds reusable vendor and session-behavior configuration.
 3. Vendor constructors on the builder select the ASR, LLM, and TTS stack. Leave vendor credentials unset for supported Agora-managed global models, or provide keys when you want BYOK. CN MiniMax TTS always requires `Key`.
-4. `session.Start(...)` lets the SDK generate the required auth tokens automatically.
-5. `session.Start(...)` returns the unique agent session ID.
+4. `CreateSession` passes per-session values such as channel, UID, and the agent instance `Name` sent on `/join`.
+5. `session.Start(...)` lets the SDK generate the required auth tokens automatically and returns the unique agent session ID.
 
 ## When to use BYOK instead
 

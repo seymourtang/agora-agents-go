@@ -34,7 +34,6 @@ type ClientRuntime interface {
 
 type BaseAgent struct {
 	Client                   ClientRuntime
-	Name                     string
 	PipelineID               string
 	Instructions             string
 	Greeting                 string
@@ -98,12 +97,6 @@ func NewBaseAgent(opts ...AgentOption) *BaseAgent {
 		opt(a)
 	}
 	return a
-}
-
-func WithName(name string) AgentOption {
-	return func(a *BaseAgent) {
-		a.Name = name
-	}
 }
 
 func WithPipelineID(pipelineID string) AgentOption {
