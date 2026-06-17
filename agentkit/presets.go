@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	agentcore "github.com/AgoraIO/agora-agents-go/v2/agentkit/core"
 )
 
 var AgentPresets = struct {
@@ -102,7 +103,7 @@ func ResolveSessionPresetsMap(presets []string, properties map[string]interface{
 	if properties == nil {
 		return NormalizePresetInput(presets), nil, nil
 	}
-	props := cloneConfig(properties)
+	props := agentcore.CloneConfig(properties)
 	explicit := parsePresetInput(presets)
 	explicitCategories := map[string]bool{}
 	for _, preset := range explicit {

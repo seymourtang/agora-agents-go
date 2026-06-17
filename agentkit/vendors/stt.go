@@ -342,32 +342,6 @@ func (a *AssemblyAISTT) ToConfig() map[string]interface{} {
 	return config
 }
 
-type AresSTTOptions struct {
-	AdditionalParams map[string]interface{}
-}
-
-type AresSTT struct {
-	options AresSTTOptions
-}
-
-func NewAresSTT(opts AresSTTOptions) *AresSTT {
-	return &AresSTT{options: opts}
-}
-
-func (a *AresSTT) ToConfig() map[string]interface{} {
-	params := map[string]interface{}{}
-	for k, v := range a.options.AdditionalParams {
-		params[k] = v
-	}
-	config := map[string]interface{}{
-		"vendor": "ares",
-	}
-	if len(params) > 0 {
-		config["params"] = params
-	}
-	return config
-}
-
 type SarvamSTTOptions struct {
 	APIKey           string
 	Language         string

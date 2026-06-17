@@ -575,12 +575,13 @@ func (f *FishAudioTTS) ToConfig() map[string]interface{} {
 }
 
 type MiniMaxTTSOptions struct {
-	Key          string
-	GroupID      string
-	Model        string
-	VoiceID      string
-	URL          string
-	SkipPatterns []int
+	Key              string
+	GroupID          string
+	Model            string
+	VoiceID          string
+	URL              string
+	AdditionalParams map[string]interface{}
+	SkipPatterns     []int
 }
 
 type MiniMaxTTS struct {
@@ -602,9 +603,6 @@ func NewMiniMaxTTS(opts MiniMaxTTSOptions) *MiniMaxTTS {
 	if opts.Key != "" && opts.Model == "" {
 		panic("MiniMaxTTS requires Model")
 	}
-	if opts.Key != "" && opts.VoiceID == "" {
-		panic("MiniMaxTTS requires VoiceID")
-	}
 	if opts.Key != "" && opts.URL == "" {
 		panic("MiniMaxTTS requires URL")
 	}
@@ -617,6 +615,9 @@ func (m *MiniMaxTTS) GetSampleRate() *SampleRate {
 
 func (m *MiniMaxTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{}
+	for k, v := range m.options.AdditionalParams {
+		params[k] = v
+	}
 	if m.options.Key != "" {
 		params["key"] = m.options.Key
 		params["group_id"] = m.options.GroupID

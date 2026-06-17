@@ -8,15 +8,28 @@ description: The Agent builder — functional options pattern, vendor chaining, 
 
 The `agentkit.Agent` is the central configuration object. It defines what LLM, TTS, STT, MLLM, and avatar vendors your agent uses, along with session-level settings.
 
+Every `Agent` must be bound to a non-nil `*AgoraClient` from `agentkit.NewAgoraClient`. Pass that client as the first argument to `NewAgent`. If you call `CreateSession` on an agent that was created without a client (for example `NewAgent(nil)`), AgentKit panics with `agent must be bound to an AgoraClient before creating a session`.
+
+Typical flow:
+
+```go
+client := agentkit.NewAgoraClient(agentkit.AgoraClientOptions{ /* AppID, AppCertificate, Area */ })
+agent := agentkit.NewAgent(client).WithLlm(/* ... */)
+session := agent.CreateSession(agentkit.CreateSessionOptions{
+    Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+    Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
+})
+```
+
+The same rule applies to `agentkit/cn`: create `cn.NewAgoraClient` first, then `cn.NewAgent(client, ...)`.
+
 ## Functional Options Pattern
 
 `agentkit.NewAgent` uses Go's [functional options pattern](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis). Instead of a large config struct, you pass option functions that each configure one aspect of the agent:
 
 <!-- snippet: fragment -->
 ```go
-agent := agentkit.NewAgent(
-    agentkit.WithName("my-assistant"),
-).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
+agent := agentkit.NewAgent(client).WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
     APIKey:  "your-openai-key",
     BaseURL: "https://api.openai.com/v1/chat/completions",
     Model:   "gpt-4o-mini",
@@ -29,7 +42,7 @@ agent := agentkit.NewAgent(
 }))
 ```
 
-Each `With*` function has the signature `func(...) AgentOption`, where `AgentOption` is `func(*Agent)`. This pattern lets you:
+Each `With*` function has the signature `func(...) AgentOption`, where the option is applied while constructing a client-bound `Agent`. This pattern lets you:
 
 - Omit any option you don't need (sensible defaults)
 - Add new options without breaking existing code
@@ -37,11 +50,11 @@ Each `With*` function has the signature `func(...) AgentOption`, where `AgentOpt
 
 ## AgentOption Functions
 
-These are passed to `agentkit.NewAgent(opts ...AgentOption)`:
+These are passed to `agentkit.NewAgent(client, opts ...AgentOption)`:
 
 | Function | Parameter | Description |
 |---|---|---|
-| `WithName(name string)` | Agent name | Identifier for the agent |
+| `WithPipelineID(pipelineID string)` | AI Studio pipeline ID | Default pipeline for sessions created from this agent |
 | `WithInstructions(instructions string)` | System prompt | Deprecated. Use LLM vendor `SystemMessages` instead. |
 | `WithGreeting(greeting string)` | Greeting text | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
 | `WithFailureMessage(msg string)` | Fallback message | Deprecated. Use LLM/MLLM vendor `FailureMessage` instead. |
@@ -61,9 +74,7 @@ After creating an agent with `NewAgent`, attach vendors using method chaining. E
 
 <!-- snippet: fragment -->
 ```go
-agent := agentkit.NewAgent(
-    agentkit.WithName("assistant"),
-).WithLlm(
+agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:  "<key>",
         BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -96,7 +107,6 @@ agent := agentkit.NewAgent(
 | `WithTurnDetection(td *TurnDetectionConfig)` | Pointer to config | Configure `turn_detection.language` and cascading-flow SOS/EOS detection; use interruption config for interruption behavior |
 | `WithInstructions(instructions string)` | String | Deprecated. Use LLM vendor `SystemMessages` instead. |
 | `WithGreeting(greeting string)` | String | Deprecated. Use LLM/MLLM vendor `GreetingMessage` instead. |
-| `WithName(name string)` | String | Override name on a cloned agent |
 | `WithSal(sal *SalConfig)` | Pointer to config | Set SAL configuration |
 | `WithAdvancedFeatures(af *AdvancedFeatures)` | Pointer to config | Set advanced features |
 | `WithParameters(params *SessionParams)` | Pointer to config | Set session parameters |
@@ -109,11 +119,14 @@ agent := agentkit.NewAgent(
 
 Note: `WithInstructions`, `WithGreeting`, `WithFailureMessage`, and `WithMaxHistory` are compatibility shims. New code should configure those values on the LLM or MLLM vendor because that matches the core request schema.
 
+## Session name
+
+The agent instance `name` sent on `/join` is set on `CreateSession`, not on the `Agent` builder. Pass `CreateSessionOptions.Name` when creating a session; if omitted, AgentKit generates `agent-<unix_timestamp>`. See [Session](./session.md).
+
 ## Agent Getters
 
 <!-- snippet: fragment -->
 ```go
-agent.Name() string
 agent.Instructions() string
 agent.Greeting() string
 agent.FailureMessage() string

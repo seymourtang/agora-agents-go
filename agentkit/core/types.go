@@ -1,0 +1,94 @@
+package core
+
+import Agora "github.com/AgoraIO/agora-agents-go/v2"
+
+type Profile string
+
+const (
+	ProfileGlobal Profile = "global"
+	ProfileCN     Profile = "cn"
+)
+
+type TurnDetectionConfig = Agora.StartAgentsRequestPropertiesTurnDetection
+type SalConfig = Agora.StartAgentsRequestPropertiesSal
+type SalMode = Agora.StartAgentsRequestPropertiesSalSalMode
+type AdvancedFeatures = Agora.StartAgentsRequestPropertiesAdvancedFeatures
+type SessionParams = Agora.StartAgentsRequestPropertiesParameters
+type SessionParamsInput = SessionParams
+type GeofenceConfig = Agora.StartAgentsRequestPropertiesGeofence
+type RtcConfig = Agora.StartAgentsRequestPropertiesRtc
+type FillerWordsConfig = Agora.StartAgentsRequestPropertiesFillerWords
+
+type TurnDetectionNestedConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfig
+type StartOfSpeechConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigStartOfSpeech
+type StartOfSpeechMode = Agora.StartAgentsRequestPropertiesTurnDetectionConfigStartOfSpeechMode
+type StartOfSpeechVadConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigStartOfSpeechVadConfig
+type StartOfSpeechKeywordsConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigStartOfSpeechKeywordsConfig
+type StartOfSpeechDisabledConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigStartOfSpeechDisabledConfig
+type StartOfSpeechDisabledConfigStrategy = Agora.StartAgentsRequestPropertiesTurnDetectionConfigStartOfSpeechDisabledConfigStrategy
+type EndOfSpeechConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeech
+type EndOfSpeechMode = Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechMode
+type EndOfSpeechVadConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechVadConfig
+type EndOfSpeechSemanticConfig = Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechSemanticConfig
+type InterruptionConfig = Agora.StartAgentsRequestPropertiesInterruption
+type InterruptionMode = Agora.StartAgentsRequestPropertiesInterruptionMode
+
+type TurnDetectionType = Agora.StartAgentsRequestPropertiesTurnDetectionType
+type InterruptMode = Agora.StartAgentsRequestPropertiesTurnDetectionInterruptMode
+type Eagerness = Agora.StartAgentsRequestPropertiesTurnDetectionEagerness
+
+type LlmGreetingConfigs = map[string]interface{}
+type LlmGreetingConfigsMode = string
+type McpServersItem = map[string]interface{}
+
+type SilenceConfig = Agora.StartAgentsRequestPropertiesParametersSilenceConfig
+type SilenceAction = Agora.StartAgentsRequestPropertiesParametersSilenceConfigAction
+type FarewellConfig = Agora.StartAgentsRequestPropertiesParametersFarewellConfig
+type ParametersDataChannel = Agora.StartAgentsRequestPropertiesParametersDataChannel
+
+type ParametersAudioScenario string
+
+const (
+	ParametersAudioScenarioDefault  ParametersAudioScenario = "default"
+	ParametersAudioScenarioChorus   ParametersAudioScenario = "chorus"
+	ParametersAudioScenarioAIServer ParametersAudioScenario = "aiserver"
+)
+
+type GeofenceArea = Agora.StartAgentsRequestPropertiesGeofenceArea
+type GeofenceExcludeArea = Agora.StartAgentsRequestPropertiesGeofenceExcludeArea
+
+type LlmConfig = Agora.Llm
+type MllmConfig = Agora.Mllm
+type MllmTurnDetectionConfig = Agora.MllmTurnDetection
+type MllmTurnDetectionMode = Agora.MllmTurnDetectionMode
+type AsrConfig = Agora.Asr
+type SttConfig = AsrConfig
+type LlmStyle = Agora.LlmStyle
+type SttVendor = string
+type MllmVendor = Agora.MllmVendor
+type AvatarVendor = Agora.StartAgentsRequestPropertiesAvatarVendor
+type AgentConfig = Agora.StartAgentsRequestProperties
+type AgentConfigUpdate = Agora.UpdateAgentsRequestProperties
+type SessionInfo = Agora.GetAgentsResponse
+type SessionListResponse = Agora.ListAgentsResponse
+type SessionSummary = Agora.ListAgentsResponseDataListItem
+type SessionStatus = Agora.ListAgentsResponseDataListItemStatus
+type ConversationHistory = Agora.GetHistoryAgentsResponse
+type ConversationTurn = Agora.GetHistoryAgentsResponseContentsItem
+type ConversationRole = Agora.GetHistoryAgentsResponseContentsItemRole
+type ConversationTurns = Agora.GetTurnsAgentsResponse
+type ConversationSessionTurn = Agora.GetTurnsAgentsResponseTurnsItem
+type ThinkResponse = Agora.AgentThinkAgentManagementResponse
+type ThinkOnListeningAction = Agora.AgentThinkAgentManagementRequestOnListeningAction
+type ThinkOnThinkingAction = Agora.AgentThinkAgentManagementRequestOnThinkingAction
+type ThinkOnSpeakingAction = Agora.AgentThinkAgentManagementRequestOnSpeakingAction
+type SpeakPriority = Agora.SpeakAgentsRequestPriority
+type Labels = map[string]string
+type TtsConfig = Agora.Tts
+type AvatarConfig = Agora.StartAgentsRequestPropertiesAvatar
+
+type FillerWordsTrigger = Agora.StartAgentsRequestPropertiesFillerWordsTrigger
+type FillerWordsTriggerFixedTimeConfig = Agora.StartAgentsRequestPropertiesFillerWordsTriggerFixedTimeConfig
+type FillerWordsContent = Agora.StartAgentsRequestPropertiesFillerWordsContent
+type FillerWordsContentStaticConfig = Agora.StartAgentsRequestPropertiesFillerWordsContentStaticConfig
+type FillerWordsContentSelectionRule = Agora.StartAgentsRequestPropertiesFillerWordsContentStaticConfigSelectionRule

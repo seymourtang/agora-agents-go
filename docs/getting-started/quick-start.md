@@ -11,7 +11,7 @@ This guide starts with the standard AgentKit path:
 - `AppID`, `AppCertificate`, and `Area` on `AgoraClient`
 - the `Agent` builder with `WithStt()`, `WithLlm()`, and `WithTts()`
 - automatic ConvoAI REST auth and RTC join token generation
-- no vendor API keys when using supported Agora-managed models
+- no vendor API keys when using supported Agora-managed global models
 
 ## Full example
 
@@ -22,6 +22,7 @@ import (
     "context"
     "fmt"
     "log"
+    "time"
 
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
@@ -38,9 +39,7 @@ func main() {
         AppCertificate: "your-app-certificate",
     })
 
-    agent := agentkit.NewAgent(
-        agentkit.WithName("support-assistant"),
-    ).WithStt(
+    agent := agentkit.NewAgent(client).WithStt(
         vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
             Model:    "nova-3",
             Language: "en",
@@ -61,8 +60,9 @@ func main() {
         }),
     )
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
-        Channel:     "support-room-123",
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:    "1",
         RemoteUIDs:  []string{"100"},
         IdleTimeout: &idleTimeout,
@@ -86,14 +86,15 @@ func main() {
 ## What this does
 
 1. `AgoraClient` runs in app-credentials mode when you pass `AppID` and `AppCertificate` only.
-2. `Agent` holds reusable behavior such as instructions, greeting, and history settings.
-3. Vendor constructors on the builder select the ASR, LLM, and TTS stack. AgentKit uses Agora-managed configuration when credentials are omitted for supported models.
-4. `session.Start(...)` lets the SDK generate the required auth tokens automatically.
-5. `session.Start(...)` returns the unique agent session ID.
+2. `NewAgent(client)` requires that non-nil client; every agent must be bound to an `AgoraClient` before `CreateSession`.
+3. `Agent` holds reusable vendor and session-behavior configuration.
+4. Vendor constructors on the builder select the ASR, LLM, and TTS stack. Leave vendor credentials unset for supported Agora-managed global models, or provide keys when you want BYOK. CN MiniMax TTS always requires `Key`.
+5. `CreateSession` passes per-session values such as channel, UID, and the agent instance `Name` sent on `/join`.
+6. `session.Start(...)` lets the SDK generate the required auth tokens automatically and returns the unique agent session ID.
 
 ## When to use BYOK instead
 
-Use the builder without vendor API keys when you are using supported Agora-managed models.
+Use the builder without vendor API keys when you are using supported Agora-managed global models.
 
 Use BYOK when you need to:
 

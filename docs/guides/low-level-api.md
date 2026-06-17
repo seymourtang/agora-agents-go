@@ -9,6 +9,7 @@ description: Use generated clients for advanced operations while keeping app-cre
 For starting and managing realtime agent sessions, prefer the AgentKit builder:
 
 - create `agentkit.NewAgoraClient` with `AppID` and `AppCertificate`
+- pass that client to `agentkit.NewAgent(client, ...)`
 - configure vendors with `WithStt`, `WithLlm`, `WithTts`, or `WithMllm`
 - call `session.Start(ctx)`, `session.Say(ctx, ...)`, `session.Update(ctx, ...)`, and `session.Stop(ctx)`
 
@@ -22,7 +23,7 @@ The SDK also exposes generated clients for API surfaces that are not part of the
 - `client.PhoneNumbers` for phone-number list, create, retrieve, update, and delete operations
 - `client.AgentManagement` for management actions such as `agent-think`
 
-Use these when you need REST API operations outside the AgentKit session lifecycle. For new session starts, use AgentKit instead of manually constructing `StartAgentsRequest`; AgentKit handles token generation and supported Agora-managed models.
+Use these when you need REST API operations outside the AgentKit session lifecycle. For new session starts, use AgentKit instead of manually constructing `StartAgentsRequest`; AgentKit handles token generation and supported Agora-managed global models.
 
 ## App-Credentials Client
 

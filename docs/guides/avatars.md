@@ -6,7 +6,9 @@ description: Add visual avatars to your agent with token handling and sample rat
 
 # Avatars
 
-Avatars provide a visual representation of your AI agent. The SDK supports LiveAvatar, Generic Avatar, Anam, Akool, and deprecated HeyGen integrations. Avatar sessions currently require the cascading ASR/LLM/TTS pipeline; MLLM sessions do not support avatars. Vendors that publish an Agora video stream use a separate avatar UID and token from the voice agent.
+Avatars provide a visual representation of your AI agent. The SDK supports LiveAvatar, Generic Avatar, Anam, Akool, deprecated HeyGen integrations, and SenseTime (CN only). Avatar sessions currently require the cascading ASR/LLM/TTS pipeline; MLLM sessions do not support avatars. Vendors that publish an Agora video stream use a separate avatar UID and token from the voice agent.
+
+For mainland China integrations, use `agentkit/cn` with `NewSensetimeAvatar` from `agentkit/cn/vendors`. See [CN AgentKit](./cn-agentkit.md) for routing details.
 
 ## Agent Token vs Avatar Token
 
@@ -15,7 +17,7 @@ Voice agents and video avatars both use ConvoAI-compatible Agora tokens. They mu
 | Purpose | Field | UID | Default behavior |
 |---|---|---|---|
 | Voice agent | `properties.token` | `agent_rtc_uid` | Generated from session `AgentUID` when `Token` is omitted |
-| Avatar video stream | `avatar.params.agora_token` | `avatar.params.agora_uid` | Generated from avatar `AgoraUID` when `AgoraToken` is omitted |
+| Avatar video stream | `avatar.params.agora_token` | `avatar.params.agora_uid` | Auto-generated for LiveAvatar, HeyGen, Generic, and SenseTime when `AgoraToken` is omitted |
 
 Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you provide `AgoraToken`, the SDK uses it as-is and does not overwrite it.
 
@@ -28,44 +30,14 @@ Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you prov
 | Akool | `vendors.NewAkoolAvatar` | 16kHz (`SampleRate16kHz`) | `APIKey` |
 | Anam | `vendors.NewAnamAvatar` | Provider-managed | `APIKey` |
 | Generic | `vendors.NewGenericAvatar` | Vendor-dependent; not enforced by AgentKit | `APIKey`, `APIBaseURL`, `AvatarID`, `AgoraUID` |
+| SenseTime (CN) | `cn/vendors.NewSensetimeAvatar` | Not enforced by AgentKit | `AgoraUID`, `AppID`, `AppKey`, `SceneList` |
 
 ## Generic Avatar Example
 
 ```go
 sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 
-agent := agentkit.NewAgent(
-    agentkit.WithName("generic-avatar"),
-).WithLlm(
-    vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "<openai_key>"}),
-).WithTts(
-    vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
-        Key:        "<elevenlabs_key>",
-        ModelID:    "eleven_turbo_v2_5",
-        VoiceID:    "<voice_id>",
-        // Choose the sample rate required by your generic avatar provider.
-        SampleRate: &sampleRate,
-    }),
-).WithAvatar(
-    vendors.NewGenericAvatar(vendors.GenericAvatarOptions{
-        APIKey:     "<avatar_vendor_key>",
-        APIBaseURL: "https://avatar.example.com",
-        AvatarID:   "<avatar_id>",
-        AgoraUID:   "2001", // distinct from session AgentUID
-    }),
-)
-```
-
-For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar and HeyGen, AgentKit auto-generates only `agora_token` when `agora_uid` is set and `agora_token` is omitted.
-
-## Generic Avatar Example
-
-```go
-sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
-
-agent := agentkit.NewAgent(
-    agentkit.WithName("generic-avatar"),
-).WithLlm(
+agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:  "<openai_key>",
         BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -89,7 +61,7 @@ agent := agentkit.NewAgent(
 )
 ```
 
-For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar and HeyGen, AgentKit auto-generates only `agora_token` when `agora_uid` is set and `agora_token` is omitted.
+For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar, HeyGen, Generic, and SenseTime, AgentKit auto-generates `agora_token` when `agora_uid` is set and `agora_token` is omitted.
 
 ## LiveAvatar Example
 
@@ -100,6 +72,7 @@ import (
     "context"
     "fmt"
     "log"
+    "time"
 
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
@@ -115,9 +88,7 @@ func main() {
 
     sr := vendors.SampleRate24kHz
 
-    agent := agentkit.NewAgent(
-        agentkit.WithName("avatar-agent"),
-    ).WithLlm(
+    agent := agentkit.NewAgent(client).WithLlm(
         vendors.NewOpenAI(vendors.OpenAIOptions{
             APIKey:  "<openai_key>",
             BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -148,8 +119,9 @@ func main() {
         }),
     )
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
-        Channel:    "avatar-channel",
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
     })
@@ -174,9 +146,7 @@ func main() {
 ```go
 sr := vendors.SampleRate16kHz
 
-agent := agentkit.NewAgent(
-    agentkit.WithName("akool-avatar"),
-).WithLlm(
+agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:  "<openai_key>",
         BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -205,17 +175,92 @@ agent := agentkit.NewAgent(
 )
 ```
 
+## SenseTime Avatar Example (CN)
+
+SenseTime is available only from the CN facade (`agentkit/cn`). Use `agentkit/cn/vendors.NewSensetimeAvatar` with the CN agent builder. When `AgoraToken` is omitted, AgentKit auto-generates `agora_token` from the session channel and avatar `AgoraUID` (same behavior as LiveAvatar).
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+
+    agentkit "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn"
+    vendors "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors"
+)
+
+func main() {
+    client := agentkit.NewAgoraClient(agentkit.ClientOptions{
+        AppID:          "<app_id>",
+        AppCertificate: "<app_cert>",
+    })
+
+    agent := agentkit.NewAgent(client).WithStt(
+        vendors.NewTencentSTT(vendors.TencentSTTOptions{
+            Key:    "<key>",
+            AppID:  "<app_id>",
+            Secret: "<secret>",
+        }),
+    ).WithLlm(
+        vendors.NewTencentLLM(vendors.TencentLLMOptions{
+            APIKey:  "<api_key>",
+            Model:   "hunyuan-turbos-latest",
+            BaseURL: "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
+        }),
+    ).WithTts(
+        vendors.NewTencentTTS(vendors.TencentTTSOptions{
+            AppID:     "<app_id>",
+            SecretID:  "<secret_id>",
+            SecretKey: "<secret_key>",
+        }),
+    ).WithAvatar(
+        vendors.NewSensetimeAvatar(vendors.SensetimeAvatarOptions{
+            AgoraUID: "2001", // distinct from session AgentUID
+            AppID:    "<sensetime_app_id>",
+            AppKey:   "<sensetime_app_key>",
+            SceneList: []vendors.SensetimeScene{
+                {
+                    DigitalRole: vendors.SensetimeDigitalRole{
+                        FaceFeatureID: "<face_feature_id>",
+                        Position: vendors.SensetimePosition{
+                            X: 0,
+                            Y: 0,
+                        },
+                        URL: "<avatar_model_package_url>",
+                    },
+                },
+            },
+        }),
+    )
+
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
+        AgentUID:   "1001",
+        RemoteUIDs: []string{"1002"},
+    })
+
+    _, _ = session.Start(context.Background())
+}
+```
+
+See [Vendors Reference — CN Avatar Vendors](../reference/vendors.md#newsensetimeavatar) for field details.
+
 ## Sample Rate Validation and Panic Behavior
 
-The Go SDK enforces the TTS/avatar sample rate constraint at runtime using `panic()`. This differs from TypeScript (compile-time phantom types) and Python (`ValueError`).
+The Go SDK enforces TTS/avatar sample rate constraints at runtime. This differs from TypeScript (compile-time phantom types) and Python (`ValueError`).
 
 ### When does the panic occur?
 
-`WithAvatar()` checks if the agent already has a TTS configured with a mismatched sample rate. If so, it panics immediately:
+`WithAvatar()` panics immediately only when the avatar vendor is token-managed **and** publishes a non-zero `RequiredSampleRate()` that does not match an already-configured TTS sample rate. In practice this applies to **LiveAvatar and HeyGen (24kHz)**:
 
 ```
 Avatar requires TTS sample rate of 24000 Hz, but TTS is configured with 16000 Hz. Please update your TTS sample_rate to 24000.
 ```
+
+**Akool (16kHz)**, **Anam**, **Generic**, and **SenseTime** do not panic at `WithAvatar()` time. Their constraints are checked in `AgentSession.Start()` via `ValidateTtsSampleRate` or provider-specific validation.
 
 ### Why panic instead of returning an error?
 
@@ -228,7 +273,7 @@ Always configure TTS with the correct sample rate **before** calling `WithAvatar
 ```go
 // Correct: TTS sample rate matches avatar requirement
 sr := vendors.SampleRate24kHz
-agent := agentkit.NewAgent(...).
+agent := agentkit.NewAgent(client).
     WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:        "<key>",
         ModelID:    "<model>",
@@ -246,7 +291,7 @@ agent := agentkit.NewAgent(...).
 ```go
 // Wrong: This panics because TTS is 16kHz but LiveAvatar requires 24kHz.
 sr := vendors.SampleRate16kHz
-agent := agentkit.NewAgent(...).
+agent := agentkit.NewAgent(client).
     WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
         Key:        "<key>",
         ModelID:    "<model>",
@@ -285,3 +330,17 @@ agent := agentkit.NewAgent(...).
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `APIKey` | `string` | Yes | Akool API key |
+
+## SensetimeAvatarOptions Fields (CN)
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `AgoraUID` | `string` | Yes | UID for the avatar's video stream; must differ from session `AgentUID` |
+| `AgoraToken` | `string` | No | Avatar Agora token. Auto-generated when omitted. |
+| `AppID` | `string` | Yes | SenseTime application ID (serialized as `params.appId`) |
+| `AppKey` | `string` | Yes | SenseTime application key |
+| `SceneList` | `[]SensetimeScene` | Yes | Scene configuration with digital role, position, and model URL |
+| `Enable` | `*bool` | No | Enable or disable the avatar (default: `true`) |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params merged into `avatar.params` |
+
+Each `SensetimeScene` contains a `DigitalRole` (`FaceFeatureID`, `Position` with `X`/`Y`, and model package `URL`).

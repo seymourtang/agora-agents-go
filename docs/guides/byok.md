@@ -6,7 +6,7 @@ description: Bring your own vendor credentials and use custom vendor configurati
 
 # BYOK
 
-Use BYOK when you want to provide vendor credentials yourself instead of using Agora-managed models.
+Use BYOK when you want to provide vendor credentials yourself instead of using Agora-managed global models.
 
 Typical reasons:
 
@@ -25,6 +25,7 @@ import (
     "fmt"
     "log"
     "os"
+    "time"
 
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
@@ -43,9 +44,7 @@ func main() {
 
     // In BYOK mode, each vendor carries its own credentials.
     sampleRate := vendors.SampleRate24kHz
-    agent := agentkit.NewAgent(
-        agentkit.WithName("support-assistant"),
-    ).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
+    agent := agentkit.NewAgent(client).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
         APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
         Model:    "nova-3",
         Language: "en-US",
@@ -66,8 +65,9 @@ func main() {
         SampleRate: &sampleRate,
     }))
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
-        Channel:     "support-room-123",
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:    "1",
         RemoteUIDs:  []string{"100"},
         IdleTimeout: &idleTimeout,
@@ -87,5 +87,5 @@ func main() {
 
 ## Agora-managed models vs BYOK
 
-- Agora-managed models: supported models without vendor keys in app code
+- Agora-managed global models: supported global/default models without vendor keys in app code
 - BYOK: most control, your keys and your vendor configuration

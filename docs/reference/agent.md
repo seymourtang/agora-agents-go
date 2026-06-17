@@ -12,28 +12,21 @@ Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit`
 
 <!-- snippet: fragment -->
 ```go
-func NewAgent(opts ...AgentOption) *Agent
+func NewAgent(client *AgoraClient, opts ...AgentOption) *Agent
 ```
 
-Creates a new `Agent` with the given functional options.
+Creates a new `Agent` bound to the provided `AgoraClient` and configured with the given functional options.
+
+`client` is **required** and must be non-nil. Create it with `NewAgoraClient` before calling `NewAgent`. If `client` is nil, `CreateSession` and `NewSession` panic with `agent must be bound to an AgoraClient before creating a session`.
 
 ## AgentOption Type
 
 <!-- snippet: fragment -->
 ```go
-type AgentOption func(*Agent)
+type AgentOption func(*BaseAgent)
 ```
 
 ## AgentOption Functions
-
-### WithName
-
-<!-- snippet: fragment -->
-```go
-func WithName(name string) AgentOption
-```
-
-Sets the agent name identifier.
 
 ### WithPipelineID
 
@@ -192,7 +185,7 @@ Sets filler words configuration (played while waiting for LLM response).
 
 All vendor-chaining methods return a **new** `*Agent` (immutable clone). The original agent is not modified.
 
-Accessor methods include `Name()`, `PipelineID()`, vendor config getters, and getters for optional advanced configuration.
+Accessor methods include `PipelineID()`, vendor config getters, and getters for optional advanced configuration.
 
 ### WithLlm
 
@@ -249,7 +242,7 @@ enabled := true
 mode := "default"
 eosMode := Agora.StartAgentsRequestPropertiesTurnDetectionConfigEndOfSpeechModeSemantic
 
-agent := agentkit.NewAgent(
+agent := agentkit.NewAgent(client,
     agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
         Mode: &mode,
         Config: &agentkit.TurnDetectionNestedConfig{
@@ -281,13 +274,6 @@ func (a *Agent) WithGreeting(greeting string) *Agent
 ```
 
 Deprecated. Configure `GreetingMessage` on the LLM or MLLM vendor instead.
-
-### WithName (method)
-
-<!-- snippet: fragment -->
-```go
-func (a *Agent) WithName(name string) *Agent
-```
 
 ### WithSal (method)
 
@@ -378,7 +364,6 @@ func (a *Agent) WithFillerWords(fw *FillerWordsConfig) *Agent
 
 <!-- snippet: fragment -->
 ```go
-func (a *Agent) Name() string
 func (a *Agent) Instructions() string
 func (a *Agent) Greeting() string
 func (a *Agent) FailureMessage() string
@@ -401,6 +386,50 @@ func (a *Agent) Labels() map[string]string
 func (a *Agent) Rtc() *RtcConfig
 func (a *Agent) FillerWords() *FillerWordsConfig
 ```
+
+## CreateSession
+
+<!-- snippet: fragment -->
+```go
+func (a *Agent) CreateSession(opts CreateSessionOptions) *AgentSession
+```
+
+Creates an `AgentSession` from the agent builder. The agent must already be bound to a non-nil `AgoraClient` from `NewAgent(client, ...)`. Set `CreateSessionOptions.Name` to identify the agent instance on `/join`. If `Name` is empty, AgentKit generates `agent-<unix_timestamp>`.
+
+### CreateSessionOptions
+
+<!-- snippet: fragment -->
+```go
+type CreateSessionOptions struct {
+    Name            string
+    Channel         string
+    Token           string
+    AgentUID        string
+    RemoteUIDs      []string
+    IdleTimeout     *int
+    EnableStringUID *bool
+    ExpiresIn       int
+    Preset          []string
+    PipelineID      string
+    Debug           bool
+    Warn            func(string)
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `Name` | `string` | Agent instance name for `/join`. Defaults to `agent-<unix_timestamp>` when empty. |
+| `Channel` | `string` | Agora channel name |
+| `Token` | `string` | Pre-generated RTC token |
+| `AgentUID` | `string` | Agent UID in the channel |
+| `RemoteUIDs` | `[]string` | Remote participant UIDs |
+| `IdleTimeout` | `*int` | Idle timeout in seconds |
+| `EnableStringUID` | `*bool` | Enable string UID mode |
+| `ExpiresIn` | `int` | Auto-generated token lifetime in seconds |
+| `Preset` | `[]string` | Advanced preset value for project-specific routing |
+| `PipelineID` | `string` | Overrides `agent.PipelineID()` for this session |
+| `Debug` | `bool` | Log the start request payload |
+| `Warn` | `func(string)` | Custom warning sink |
 
 ## ToProperties
 
@@ -483,7 +512,7 @@ Additional SOS/EOS turn detection aliases: `TurnDetectionNestedConfig`, `StartOf
 |---|---|---|---|
 | STT payload alias (wire: `asr`) | `AsrConfig` / `SttConfig` | `SttConfig` / `AsrConfig` | `SttConfig` / `AsrConfig` |
 | xAI MLLM (primary) | `XaiGrok` / `NewXaiGrok` | `XaiGrok` | `XaiGrok` |
-| Avatar token helper | `IsAvatarTokenManaged` | `isAvatarTokenManaged` | `is_avatar_token_managed` |
+| Avatar token auto-generation | Managed vendors: `liveavatar`, `heygen`, `generic`, `sensetime` (see [Avatars Guide](../guides/avatars.md)) | `isAvatarTokenManaged` | `is_avatar_token_managed` |
 | Think inject constant | `ThinkOnListeningActionInject` | `ThinkOnListeningActionInject` | `ThinkOnListeningActionInject` |
 
 ## Token Generation

@@ -35,7 +35,7 @@ func main() {
 
 - The SDK handles ConvoAI REST auth and RTC join token generation for you.
 - Your session code stays focused on agent behavior while the SDK handles auth details.
-- Your quick start code stays vendor-key free when you use supported Agora-managed models.
+- Your quick start code stays vendor-key free when you use supported Agora-managed global models.
 
 ## Legacy auth modes
 

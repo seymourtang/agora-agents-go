@@ -164,7 +164,7 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			},
 		},
 		{
-			name: "minimax byok",
+			name: "minimax byok voice_id shortcut",
 			params: NewMiniMaxTTS(MiniMaxTTSOptions{
 				Key:     "minimax-key",
 				GroupID: "group",
@@ -181,18 +181,98 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			},
 		},
 		{
-			name: "sarvam",
-			params: NewSarvamTTS(SarvamTTSOptions{
-				Key:                "sarvam-key",
-				Speaker:            "anushka",
-				TargetLanguageCode: "en-IN",
-				SampleRate:         ptrInt(24000),
+			name: "minimax byok additional params",
+			params: NewMiniMaxTTS(MiniMaxTTSOptions{
+				Key:     "minimax-key",
+				GroupID: "group",
+				Model:   "speech-02-turbo",
+				URL:     "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+				AdditionalParams: map[string]interface{}{
+					"voice_setting": map[string]interface{}{
+						"voice_id":              "voice",
+						"speed":                 1,
+						"vol":                   1,
+						"pitch":                 0,
+						"emotion":               "happy",
+						"latex_read":            true,
+						"english_normalization": true,
+					},
+					"audio_setting": map[string]interface{}{
+						"sample_rate": 16000,
+					},
+					"pronunciation_dict": map[string]interface{}{
+						"tone": []string{"alpha/(ae1)(l)(f)(ah0)", "beta/(b)(ey1)(t)(ah0)"},
+					},
+					"language_boost": "auto",
+				},
 			}).ToConfig()["params"].(map[string]interface{}),
 			want: map[string]interface{}{
-				"api_subscription_key": "sarvam-key",
-				"speaker":              "anushka",
-				"target_language_code": "en-IN",
-				"sample_rate":          24000,
+				"key":      "minimax-key",
+				"group_id": "group",
+				"model":    "speech-02-turbo",
+				"voice_setting": map[string]interface{}{
+					"voice_id":              "voice",
+					"speed":                 1,
+					"vol":                   1,
+					"pitch":                 0,
+					"emotion":               "happy",
+					"latex_read":            true,
+					"english_normalization": true,
+				},
+				"audio_setting": map[string]interface{}{"sample_rate": 16000},
+				"pronunciation_dict": map[string]interface{}{
+					"tone": []string{"alpha/(ae1)(l)(f)(ah0)", "beta/(b)(ey1)(t)(ah0)"},
+				},
+				"language_boost": "auto",
+				"url":            "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+			},
+		},
+		{
+			name: "minimax voice_id overrides additional voice_setting",
+			params: NewMiniMaxTTS(MiniMaxTTSOptions{
+				Key:     "minimax-key",
+				GroupID: "group",
+				Model:   "speech-02-turbo",
+				VoiceID: "shortcut-voice",
+				URL:     "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+				AdditionalParams: map[string]interface{}{
+					"voice_setting": map[string]interface{}{
+						"voice_id": "additional-voice",
+						"speed":    1,
+					},
+				},
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"key":           "minimax-key",
+				"group_id":      "group",
+				"model":         "speech-02-turbo",
+				"voice_setting": map[string]interface{}{"voice_id": "shortcut-voice"},
+				"url":           "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+			},
+		},
+		{
+			name: "minimax timber_weights",
+			params: NewMiniMaxTTS(MiniMaxTTSOptions{
+				Key:     "minimax-key",
+				GroupID: "group",
+				Model:   "speech-01-turbo",
+				URL:     "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+				AdditionalParams: map[string]interface{}{
+					"timber_weights": []map[string]interface{}{
+						{"voice_id": "male-qn-qingse", "weight": 1},
+						{"voice_id": "female-shaonv", "weight": 5},
+					},
+				},
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"key":      "minimax-key",
+				"group_id": "group",
+				"model":    "speech-01-turbo",
+				"url":      "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+				"timber_weights": []map[string]interface{}{
+					{"voice_id": "male-qn-qingse", "weight": 1},
+					{"voice_id": "female-shaonv", "weight": 5},
+				},
 			},
 		},
 		{

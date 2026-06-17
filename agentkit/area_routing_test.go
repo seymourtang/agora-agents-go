@@ -40,13 +40,13 @@ func TestSessionStartWithAreaUsesConvoAIPathAndAppCredentialsAuth(t *testing.T) 
 
 	agoraClient := &AgoraClient{
 		Agents:         rawClient.Agents,
-		AppID:          "0123456789abcdef0123456789abcdef",
-		AppCertificate: "fedcba9876543210fedcba9876543210",
+		appID:          "0123456789abcdef0123456789abcdef",
+		appCertificate: "fedcba9876543210fedcba9876543210",
 		AuthMode:       AuthModeAppCredentials,
 	}
 
-	agent := NewAgent(WithName("support-agent"))
-	session := agent.CreateSession(agoraClient, CreateSessionOptions{
+	agent := NewAgent(agoraClient)
+	session := agent.CreateSession(CreateSessionOptions{
 		Channel:    "room-1",
 		Token:      "rtc-token",
 		AgentUID:   "1",
@@ -87,13 +87,13 @@ func TestSessionStartAutoGeneratesRESTAuthTokenWhenSessionTokenMissing(t *testin
 
 	agoraClient := &AgoraClient{
 		Agents:         rawClient.Agents,
-		AppID:          "0123456789abcdef0123456789abcdef",
-		AppCertificate: "fedcba9876543210fedcba9876543210",
+		appID:          "0123456789abcdef0123456789abcdef",
+		appCertificate: "fedcba9876543210fedcba9876543210",
 		AuthMode:       AuthModeAppCredentials,
 	}
 
-	agent := NewAgent(WithName("support-agent"))
-	session := agent.CreateSession(agoraClient, CreateSessionOptions{
+	agent := NewAgent(agoraClient)
+	session := agent.CreateSession(CreateSessionOptions{
 		Channel:    "room-1",
 		AgentUID:   "1",
 		RemoteUIDs: []string{"100", "101"},

@@ -8,6 +8,50 @@ description: Complete API reference for agentkit.AgentSession — lifecycle meth
 
 Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit`
 
+## CreateSession
+
+<!-- snippet: fragment -->
+```go
+func (a *Agent) CreateSession(opts CreateSessionOptions) *AgentSession
+```
+
+Creates a session from an `Agent` builder. The agent must be bound to a non-nil `AgoraClient` from `NewAgent(client, ...)`. Pass the agent instance name in `CreateSessionOptions.Name`; if empty, defaults to `agent-<unix_timestamp>`.
+
+### CreateSessionOptions
+
+<!-- snippet: fragment -->
+```go
+type CreateSessionOptions struct {
+    Name            string
+    Channel         string
+    Token           string
+    AgentUID        string
+    RemoteUIDs      []string
+    IdleTimeout     *int
+    EnableStringUID *bool
+    ExpiresIn       int
+    Preset          []string
+    PipelineID      string
+    Debug           bool
+    Warn            func(string)
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `Name` | `string` | No | Agent instance name for `/join` (default: `agent-<unix_timestamp>`) |
+| `Channel` | `string` | Yes | Agora channel name |
+| `Token` | `string` | Conditional | Pre-generated RTC token |
+| `AgentUID` | `string` | Yes | Agent's UID in the channel |
+| `RemoteUIDs` | `[]string` | Yes | Remote participant UIDs |
+| `IdleTimeout` | `*int` | No | Idle timeout in seconds |
+| `EnableStringUID` | `*bool` | No | Enable string UID mode |
+| `ExpiresIn` | `int` | No | Auto-generated token lifetime in seconds |
+| `Preset` | `[]string` | No | Advanced preset value for project-specific routing. Leave unset for normal builder usage. |
+| `PipelineID` | `string` | No | Published AI Studio pipeline ID to send on session start. Overrides `agent.PipelineID()`. |
+| `Debug` | `bool` | No | Enable debug logging of the start request |
+| `Warn` | `func(string)` | No | Custom warning sink; defaults to logger |
+
 ## NewAgentSession
 
 <!-- snippet: fragment -->
@@ -23,7 +67,7 @@ Creates a new session. If `Name` is empty, defaults to `agent-<unix_timestamp>`.
 ```go
 type AgentSessionOptions struct {
     Client          *agents.Client
-    Agent           *Agent
+    Agent           AgentRuntime
     AppID           string
     AppCertificate  string
     Name            string
@@ -45,10 +89,10 @@ type AgentSessionOptions struct {
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `Client` | `*agents.Client` | Yes | Fern-generated agents sub-client (from `c.Agents`) |
-| `Agent` | `*Agent` | Yes | Agent configuration |
+| `Agent` | `AgentRuntime` | Yes | Agent from `NewAgent(client, ...)`; must be bound to a non-nil `AgoraClient` |
 | `AppID` | `string` | Yes | Agora App ID |
 | `AppCertificate` | `string` | Conditional | Required if `Token` is not set |
-| `Name` | `string` | No | Session name (default: `agent-<unix_timestamp>`) |
+| `Name` | `string` | No | Agent instance name for `/join` (default: `agent-<unix_timestamp>`) |
 | `Channel` | `string` | Yes | Agora channel name |
 | `Token` | `string` | Conditional | Pre-generated RTC token |
 | `AgentUID` | `string` | Yes | Agent's UID in the channel |
@@ -117,6 +161,9 @@ Starts the agent session. Returns the agent ID assigned by the API.
 - **Transitions to:** `starting` -> `running` (success) or `error` (failure)
 - **Emits:** `"started"` on success, `"error"` on failure
 - **Validates:** Avatar config and avatar/TTS sample rate match before making the API call
+- **Sends:** `CreateSessionOptions.Name` as the top-level `/join` `name` field (auto-generated as `agent-<unix_timestamp>` when empty)
+- **Applies:** Explicit `Preset` values when provided and Agora-managed configuration when supported vendor credentials are omitted
+- **Resolves:** `PipelineID` as session-level value first, then agent-level value; sends the resolved value as top-level `/join.pipeline_id`
 
 ### Stop
 
@@ -239,9 +286,9 @@ Returns the current session state.
 
 <!-- snippet: fragment -->
 ```go
-func (s *AgentSession) Agent() *Agent
+func (s *AgentSession) Agent() AgentRuntime
 ```
-Returns the agent configuration.
+Returns the bound agent runtime abstraction.
 
 <!-- snippet: fragment -->
 ```go
@@ -254,6 +301,16 @@ Returns the App ID.
 func (s *AgentSession) Raw() *agents.Client
 ```
 Returns the generated agents client for direct API access.
+
+## Presets and BYOK
+
+Prefer configuring vendors on the `Agent` builder. When you omit credentials for supported Agora-managed global models, AgentKit sends the matching Agora-managed configuration at session start. CN MiniMax TTS is not Agora-managed and always requires `Key`.
+
+`Preset` is an advanced session option for project-specific settings, not for selecting Agora-managed models. Most applications should use the builder instead.
+
+- Omit vendor credentials on the builder for supported Agora-managed global models.
+- Provide vendor API keys when you want BYOK.
+- Pass `Preset` on `agent.CreateSession(...)` only when you need project-specific settings.
 
 ## Event System
 

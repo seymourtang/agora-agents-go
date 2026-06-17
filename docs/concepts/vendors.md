@@ -6,7 +6,12 @@ description: Vendor catalog — LLM, TTS, STT, MLLM, and Avatar constructors wit
 
 # Vendors
 
-The `agentkit/vendors` package provides constructor functions for all supported third-party vendors. Each vendor implements one of five interfaces: `LLM`, `TTS`, `STT`, `MLLM`, or `Avatar`.
+The default `agentkit/vendors` package provides constructor functions for the global/default vendor catalog. The `agentkit/cn/vendors` package provides constructors for mainland China providers.
+
+## Package layout
+
+- Global/default package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`
+- CN package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`
 
 ## Vendor Interfaces
 
@@ -39,7 +44,7 @@ type Avatar interface {
 
 | Constructor | Options Struct | Required Fields | Default Model |
 |---|---|---|---|
-| `NewOpenAI` | `OpenAIOptions` | `Model` for Agora-managed models; `APIKey`, `BaseURL`, `Model` for BYOK | — |
+| `NewOpenAI` | `OpenAIOptions` | `Model` for Agora-managed global/default models; `APIKey`, `BaseURL`, `Model` for BYOK | — |
 | `NewAzureOpenAI` | `AzureOpenAIOptions` | `APIKey`, `Model`, `Endpoint`, `DeploymentName` | — |
 | `NewAnthropic` | `AnthropicOptions` | `APIKey`, `Model`, `URL`, `Headers`, `MaxTokens` | — |
 | `NewGemini` | `GeminiOptions` | `APIKey`, `Model` | — |
@@ -55,7 +60,7 @@ llm := vendors.NewOpenAI(vendors.OpenAIOptions{
     Model: "gpt-5-mini",
 })
 
-agent := agentkit.NewAgent(...).WithLlm(llm)
+agent := agentkit.NewAgent(client).WithLlm(llm)
 ```
 
 ## TTS Vendors
@@ -71,10 +76,10 @@ agent := agentkit.NewAgent(...).WithLlm(llm)
 | `NewHumeAITTS` | `HumeAITTSOptions` | `Key`, `VoiceID`, `Provider` |
 | `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker`, `ModelID` |
 | `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID`, `Backend` |
-| `NewGroqTTS` | `GroqTTSOptions` | `Key` |
-| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed MiniMax models; `Key`, `GroupID`, `Model`, `VoiceID`, `URL` for BYOK |
+| `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed global/default MiniMax models; `Key`, `GroupID`, `Model`, `VoiceID`, `URL` for BYOK |
 | `NewDeepgramTTS` | `DeepgramTTSOptions` | `APIKey`, `Model` |
 | `NewSarvamTTS` | `SarvamTTSOptions` | `APIKey` |
+| `NewMurfTTS` | `MurfTTSOptions` | `Key` |
 
 <!-- snippet: fragment -->
 ```go
@@ -110,13 +115,12 @@ Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults t
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
 | `NewSpeechmaticsSTT` | `SpeechmaticsSTTOptions` | `APIKey`, `Language` |
-| `NewDeepgramSTT` | `DeepgramSTTOptions` | `APIKey` for BYOK; none for supported Agora-managed Deepgram models; `Keyterm?` |
+| `NewDeepgramSTT` | `DeepgramSTTOptions` | `APIKey` for BYOK; none for supported Agora-managed global/default Deepgram models; `Keyterm?` |
 | `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region`, `Language` |
 | `NewOpenAISTT` | `OpenAISTTOptions` | `APIKey` |
 | `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString`, `Language` |
 | `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region`, `Language` |
 | `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey`, `Language` |
-| `NewAresSTT` | `AresSTTOptions` | None |
 | `NewSarvamSTT` | `SarvamSTTOptions` | `APIKey`, `Language` |
 
 <!-- snippet: fragment -->
@@ -135,6 +139,7 @@ agent = agent.WithStt(stt)
 | Constructor | Options Struct | Required Fields | Default Model |
 |---|---|---|---|
 | `NewOpenAIRealtime` | `OpenAIRealtimeOptions` | `APIKey` | `gpt-4o-realtime-preview` |
+| `NewXaiGrok` | `XaiGrokOptions` | `APIKey`, `Model` | — |
 | `NewGeminiLive` | `GeminiLiveOptions` | `APIKey`, `Model` | — |
 | `NewVertexAI` | `VertexAIOptions` | `ProjectID` | `gemini-2.0-flash-exp` |
 
@@ -160,6 +165,55 @@ agent = agent.WithMllm(mllm)
 | `NewAnamAvatar` | `AnamAvatarOptions` | `APIKey` | Provider-managed |
 | `NewAkoolAvatar` | `AkoolAvatarOptions` | `APIKey` | 16kHz |
 | `NewHeyGenAvatar` | `HeyGenAvatarOptions` | `APIKey`, `Quality`, `AgoraUID` | 24kHz; deprecated alias |
+| `NewSensetimeAvatar` (CN) | `SensetimeAvatarOptions` | `AgoraUID`, `AppID`, `AppKey`, `SceneList` | Not enforced; see [Avatars Guide](../guides/avatars.md) |
+
+## CN Vendors (`agentkit/cn/vendors`)
+
+Use with `agentkit/cn.Agent`. CN LLM constructors share `OpenAIOptions` shape and require `APIKey`, `Model`, and `BaseURL`.
+
+### CN LLM
+
+| Constructor | Wire `vendor` | Required fields |
+|---|---|---|
+| `NewAliyun` | `aliyun` | `APIKey`, `Model`, `BaseURL` |
+| `NewBytedance` | `bytedance` | `APIKey`, `Model`, `BaseURL` |
+| `NewDeepSeek` | `deepseek` | `APIKey`, `Model`, `BaseURL` |
+| `NewTencentLLM` | `tencent` | `APIKey`, `Model`, `BaseURL` |
+
+### CN STT
+
+REST `asr.language` comes from `TurnDetectionConfig.Language` (default `en-US`), not from CN STT constructors. Provider-specific language values go under `asr.params` when set.
+
+| Constructor | Wire `vendor` | Required fields |
+|---|---|---|
+| `NewFengmingSTT()` | `fengming` | none |
+| `NewTencentSTT` | `tencent` | `Key`, `AppID`, `Secret` |
+| `NewMicrosoftSTT` | `microsoft` | `Key`, `Region`, `Language` (in `params.language`) |
+| `NewXfyunSTT` | `xfyun` | `APIKey`, `AppID`, `APISecret`; `Language` optional in `params` |
+| `NewXfyunBigModelSTT` | `xfyun_bigmodel` | `APIKey`, `AppID`, `APISecret`; `Language` / `LanguageName` optional in `params` |
+| `NewXfyunDialectSTT` | `xfyun_dialect` | `AppID`, `AccessKeyID`, `AccessKeySecret`; `Language` optional in `params` |
+
+### CN TTS
+
+All CN TTS option structs support `AdditionalParams` and `SkipPatterns`.
+
+| Constructor | Wire `vendor` |
+|---|---|
+| `NewMiniMaxTTS` | `minimax` |
+| `NewTencentTTS` | `tencent` |
+| `NewMicrosoftTTS` | `microsoft` |
+| `NewBytedanceTTS` | `bytedance` |
+| `NewCosyVoiceTTS` | `cosyvoice` |
+| `NewBytedanceDuplexTTS` | `bytedance_duplex` |
+| `NewStepFunTTS` | `stepfun` |
+
+### CN Avatar
+
+| Constructor | Wire `vendor` | Required fields |
+|---|---|---|
+| `NewSensetimeAvatar` | `sensetime` | `AgoraUID`, `AppID`, `AppKey`, `SceneList` |
+
+See [CN AgentKit](../guides/cn-agentkit.md) and [Vendors Reference](../reference/vendors.md#newsensetimeavatar) for examples.
 
 <!-- snippet: fragment -->
 ```go

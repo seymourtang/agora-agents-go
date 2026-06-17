@@ -1,9 +1,9 @@
 # Agora Agents Go
 
-[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgoraIO%2Fagora-agents-go)
-[![Go Reference](https://pkg.go.dev/badge/github.com/AgoraIO/agora-agents-go/v2.svg)](https://pkg.go.dev/github.com/AgoraIO/agora-agents-go/v2)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AgoraIO/agora-agents-go)](https://goreportcard.com/report/github.com/AgoraIO/agora-agents-go)
-[![Release](https://img.shields.io/github/v/release/AgoraIO/agora-agents-go?sort=semver)](https://github.com/AgoraIO/agora-agents-go/releases)
+[fern shield](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgoraIO%2Fagora-agents-go)
+[Go Reference](https://pkg.go.dev/github.com/AgoraIO/agora-agents-go/v2)
+[Go Report Card](https://goreportcard.com/report/github.com/AgoraIO/agora-agents-go)
+[Release](https://github.com/AgoraIO/agora-agents-go/releases)
 
 The Agora Conversational AI SDK provides convenient access to the Agora Conversational AI APIs, 
 enabling you to build voice-powered AI agents with support for both cascading flows (ASR -> LLM -> TTS) 
@@ -21,7 +21,7 @@ go get github.com/AgoraIO/agora-agents-go/v2@v2.0.0
 
 ## Quick Start
 
-Start with the `Agent` builder: create a client with app credentials, choose your ASR, LLM, and TTS providers, then start a session. Omit vendor API keys for supported Agora-managed models, or provide keys when you want BYOK.
+Start with the `Agent` builder: create a client with app credentials, choose your ASR, LLM, and TTS providers, then start a session. Omit vendor API keys for supported Agora-managed global models, or provide keys when you want BYOK.
 Set Agora interaction language with `TurnDetectionConfig.Language`; provider-specific STT language values remain under `asr.params`. Ares uses only the REST `asr.language` value sourced from `TurnDetectionConfig.Language`.
 
 ```go
@@ -77,8 +77,7 @@ func startConversation(ctx context.Context) (string, error) {
         AppCertificate: appCertificate,
     })
 
-    agent := agentkit.NewAgent(
-        agentkit.WithName(fmt.Sprintf("conversation-%d", time.Now().UnixMilli())),
+    agent := agentkit.NewAgoraClient(client,
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
             Language: Agora.AsrLanguageEnUs.Ptr(),
             Config: &agentkit.TurnDetectionNestedConfig{
@@ -91,7 +90,7 @@ func startConversation(ctx context.Context) (string, error) {
                     },
                 },
                 EndOfSpeech: &agentkit.EndOfSpeechConfig{
-                    Mode: agentkit.EndOfSpeechMode("vad"),
+                    Mode: agentkit.EndOfSpeechMode("vad").Ptr(),
                     VadConfig: &agentkit.EndOfSpeechVadConfig{
                         SilenceDurationMs: intPtr(480),
                     },
@@ -103,7 +102,7 @@ func startConversation(ctx context.Context) (string, error) {
             EnableTools: boolPtr(true),
         }),
         agentkit.WithParameters(&agentkit.SessionParams{
-            DataChannel:        &agentkit.DataChannelRtm,
+            DataChannel:        agentkit.DataChannelRtm.Ptr(),
             EnableErrorMessage: boolPtr(true),
         }),
     ).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
@@ -125,7 +124,8 @@ func startConversation(ctx context.Context) (string, error) {
         VoiceID: "English_captivating_female1",
     }))
 
-    session := agent.CreateSession(client, agentkit.CreateSessionOptions{
+    session := agent.CreateSession(agentkit.CreateSessionOptions{
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
         Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:    "123456",
         RemoteUIDs:  []string{"*"},
@@ -148,20 +148,24 @@ func main() {
 
 ### Why no token or vendor key in the example?
 
-`AgoraClient` generates the required ConvoAI REST auth and RTC join tokens automatically when you provide `AppID` and `AppCertificate`. For supported Agora-managed models, leave vendor API keys unset; provide keys when you want BYOK.
+`AgoraClient` generates the required ConvoAI REST auth and RTC join tokens automatically when you provide `AppID` and `AppCertificate`. For supported Agora-managed global models, leave vendor API keys unset; provide keys when you want BYOK. CN MiniMax TTS is not Agora-managed and always requires `Key`. CN custom LLM routing reuses the OpenAI-compatible shape, so `APIKey` is also required there.
+
+### Regional agent builders
+
+`Area` on `AgoraClient` controls regional API routing. Vendor constructors live in `agentkit/vendors` (global/default) and `agentkit/cn/vendors` (mainland China). The Quick Start above uses the global (`option.AreaUS`) pattern. See `[docs/guides/regional-routing.md](./docs/guides/regional-routing.md)` for routing and package layout.
 
 ## AI Studio pipeline IDs
 
 Use `WithPipelineID` when you want a published AI Studio pipeline to provide the base agent configuration:
 
 ```go
-agent := agentkit.NewAgent(
-    agentkit.WithName("support"),
+agent := agentkit.NewAgent(client,
     agentkit.WithPipelineID("studio-pipeline-id"),
 )
 
-session := agent.CreateSession(client, agentkit.CreateSessionOptions{
-    Channel:    "support-room",
+session := agent.CreateSession(agentkit.CreateSessionOptions{
+    Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+    Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
 })
@@ -170,8 +174,9 @@ session := agent.CreateSession(client, agentkit.CreateSessionOptions{
 You can override it per session:
 
 ```go
-session := agent.CreateSession(client, agentkit.CreateSessionOptions{
-    Channel:    "support-room",
+session := agent.CreateSession(agentkit.CreateSessionOptions{
+    Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+    Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
     PipelineID: "session-pipeline-id",
@@ -182,10 +187,10 @@ AgentKit sends the resolved value as the top-level `/join` field `pipeline_id`, 
 
 ### BYOK version
 
-Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed models.
+Use the same `Agent` builder shape, but provide credentials explicitly when you want vendor-managed billing and routing instead of Agora-managed global models.
 
 ```go
-agent := agentkit.NewAgent(agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
+agent := agentkit.NewAgent(client, agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
     Language: Agora.AsrLanguageEnUs.Ptr(),
 })).WithStt(vendors.NewDeepgramSTT(vendors.DeepgramSTTOptions{
     APIKey:   os.Getenv("DEEPGRAM_API_KEY"),
@@ -213,7 +218,7 @@ Migrating from `github.com/AgoraIO-Conversational-AI/agent-server-sdk-go`? Updat
 
 ## BYOK
 
-If you want to bring your own vendor credentials instead of using Agora-managed models, use the BYOK guide:
+If you want to bring your own vendor credentials instead of using Agora-managed global models, use the BYOK guide:
 
 - [BYOK Guide](./docs/guides/byok.md)
 
@@ -222,9 +227,7 @@ If you want to bring your own vendor credentials instead of using Agora-managed 
 Use `WithMllm()` for OpenAI Realtime, Gemini Live, Vertex AI, or xAI Grok. No STT, LLM, or TTS vendor is needed when MLLM mode is enabled.
 
 ```go
-agent := agentkit.NewAgent(
-    agentkit.WithName("realtime-assistant"),
-).WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
+agent := agentkit.NewAgent(client).WithMllm(vendors.NewOpenAIRealtime(vendors.OpenAIRealtimeOptions{
     APIKey:          os.Getenv("OPENAI_API_KEY"),
     Model:           "gpt-4o-realtime-preview",
     GreetingMessage: "Hello! Ready to chat.",
@@ -243,33 +246,19 @@ See the [Avatar Integration guide](./docs/guides/avatars.md) for sample-rate req
 
 ## Documentation
 
-API reference documentation is available [here](https://docs.agora.io/en/conversational-ai/overview).
+- [Overview](./docs/index.md)
+- [Authentication](./docs/getting-started/authentication.md)
+- [Quick Start](./docs/getting-started/quick-start.md)
+- [CN AgentKit](./docs/guides/cn-agentkit.md)
+- [BYOK Guide](./docs/guides/byok.md)
+- [Regional Routing](./docs/guides/regional-routing.md)
+- [MLLM Flow](./docs/guides/mllm-flow.md)
+- [Low-Level API](./docs/guides/low-level-api.md)
 
 ## Reference
 
-A full reference for this library is available [here](https://github.com/AgoraIO/agora-agents-go/blob/HEAD/./reference.md).
-
-## Usage
-
-Instantiate the high-level client with app credentials:
-
-```go
-package example
-
-import (
-    "github.com/AgoraIO/agora-agents-go/v2/agentkit"
-    option "github.com/AgoraIO/agora-agents-go/v2/option"
-)
-
-func do() {
-    client := agentkit.NewAgoraClient(agentkit.AgoraClientOptions{
-        Area:           option.AreaUS,
-        AppID:          "your-app-id",
-        AppCertificate: "your-app-certificate",
-    })
-    _ = client
-}
-```
+- [SDK Reference](./reference.md)
+- [Agora Conversational AI Docs](https://docs.agora.io/en/conversational-ai/overview)
 
 ## Contributing
 

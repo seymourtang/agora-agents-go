@@ -22,10 +22,11 @@ func startPipelineIDSession(t *testing.T, agent *Agent, opts CreateSessionOption
 	)
 	agoraClient := &AgoraClient{
 		Agents: rawClient.Agents,
-		AppID:  "appid",
+		appID:  "appid",
 	}
 
-	session := agent.CreateSession(agoraClient, opts)
+	agent.base.Client = agoraClient
+	session := agent.CreateSession(opts)
 	agentID, err := session.Start(context.Background())
 	require.NoError(t, err)
 	assert.Equal(t, "agent_123", agentID)
@@ -37,6 +38,7 @@ func startPipelineIDSession(t *testing.T, agent *Agent, opts CreateSessionOption
 
 func basePipelineSessionOptions() CreateSessionOptions {
 	return CreateSessionOptions{
+		Name:       "support",
 		Channel:    "channel",
 		Token:      "token",
 		AgentUID:   "1",
@@ -45,7 +47,7 @@ func basePipelineSessionOptions() CreateSessionOptions {
 }
 
 func TestAgentPipelineIDSendsTopLevelPipelineID(t *testing.T) {
-	payload := startPipelineIDSession(t, NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")), basePipelineSessionOptions())
+	payload := startPipelineIDSession(t, NewAgent(nil, WithPipelineID("studio-pipeline-id")), basePipelineSessionOptions())
 
 	assert.Equal(t, "support", payload["name"])
 	assert.Equal(t, "studio-pipeline-id", payload["pipeline_id"])
@@ -60,7 +62,7 @@ func TestSessionPipelineIDOverridesAgentPipelineID(t *testing.T) {
 	opts := basePipelineSessionOptions()
 	opts.PipelineID = "session-pipeline"
 
-	payload := startPipelineIDSession(t, NewAgent(WithName("support"), WithPipelineID("agent-pipeline")), opts)
+	payload := startPipelineIDSession(t, NewAgent(nil, WithPipelineID("agent-pipeline")), opts)
 
 	assert.Equal(t, "session-pipeline", payload["pipeline_id"])
 	properties := payload["properties"].(map[string]interface{})
@@ -68,7 +70,7 @@ func TestSessionPipelineIDOverridesAgentPipelineID(t *testing.T) {
 }
 
 func TestAgentPipelineIDSkipsMissingVendorValidation(t *testing.T) {
-	payload := startPipelineIDSession(t, NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")), basePipelineSessionOptions())
+	payload := startPipelineIDSession(t, NewAgent(nil, WithPipelineID("studio-pipeline-id")), basePipelineSessionOptions())
 
 	assert.Equal(t, "studio-pipeline-id", payload["pipeline_id"])
 	properties := payload["properties"].(map[string]interface{})
@@ -78,7 +80,7 @@ func TestAgentPipelineIDSkipsMissingVendorValidation(t *testing.T) {
 }
 
 func TestPipelineIDAllowsSingleLLMOverrideWithoutTTSOrASR(t *testing.T) {
-	agent := NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")).WithLlm(
+	agent := NewAgent(nil, WithPipelineID("studio-pipeline-id")).WithLlm(
 		vendors.NewOpenAI(vendors.OpenAIOptions{
 			APIKey:  "openai-key",
 			BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -98,7 +100,7 @@ func TestPipelineIDAllowsSingleLLMOverrideWithoutTTSOrASR(t *testing.T) {
 }
 
 func TestPipelineIDAllowsMultipleOverridesWithoutASR(t *testing.T) {
-	agent := NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")).
+	agent := NewAgent(nil, WithPipelineID("studio-pipeline-id")).
 		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
 			APIKey:  "openai-key",
 			BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -123,7 +125,7 @@ func TestPipelineIDAllowsMultipleOverridesWithoutASR(t *testing.T) {
 }
 
 func TestAgentPipelineIDSurvivesBuilderClone(t *testing.T) {
-	agent := NewAgent(WithName("support"), WithPipelineID("studio-pipeline-id")).WithTools(true)
+	agent := NewAgent(nil, WithPipelineID("studio-pipeline-id")).WithTools(true)
 
 	assert.Equal(t, "studio-pipeline-id", agent.PipelineID())
 	payload := startPipelineIDSession(t, agent, basePipelineSessionOptions())
