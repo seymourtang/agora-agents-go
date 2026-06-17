@@ -456,7 +456,7 @@ func IsGenericAvatar(vendor string) bool {
 }
 
 func IsAvatarTokenManaged(vendor string) bool {
-	return IsHeyGenAvatar(vendor) || IsLiveAvatarAvatar(vendor) || IsGenericAvatar(vendor)
+	return IsHeyGenAvatar(vendor) || IsLiveAvatarAvatar(vendor) || IsGenericAvatar(vendor) || IsSensetimeAvatar(vendor)
 }
 
 func ValidateAvatarConfig(vendor string, params map[string]interface{}) error {

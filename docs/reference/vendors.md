@@ -836,6 +836,60 @@ Generic avatars do not enforce a fixed TTS sample rate. Use the sample rate requ
 | `Enable` | `*bool` | No | Enable or disable the avatar |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
+## CN Avatar Vendors
+
+CN avatar constructors live in `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors` and are used with `agentkit/cn.Agent.WithAvatar`.
+
+### NewSensetimeAvatar
+
+Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`
+
+Use with `agentkit/cn.Agent.WithAvatar`. See [Avatars Guide](../guides/avatars.md#sensetime-avatar-example-cn) for a full example.
+
+<!-- snippet: fragment -->
+```go
+func NewSensetimeAvatar(opts SensetimeAvatarOptions) *SensetimeAvatar
+```
+
+Panics if `AgoraUID`, `AppID`, `AppKey`, or `SceneList` is empty.
+
+Required TTS sample rate: **not enforced** (`RequiredSampleRate()` returns `0`). Configure TTS according to your SenseTime deployment.
+
+`AgoraToken` is optional; AgentKit auto-generates `agora_token` on `Start()` when it is omitted and `AppCertificate` is configured on the client.
+
+#### SensetimeAvatarOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `AgoraUID` | `string` | Yes | UID for avatar video stream; use a different UID from `AgentUID` |
+| `AgoraToken` | `string` | No | Avatar Agora token; auto-generated when omitted |
+| `AppID` | `string` | Yes | SenseTime app ID (wire key: `params.appId`) |
+| `AppKey` | `string` | Yes | SenseTime app key |
+| `SceneList` | `[]SensetimeScene` | Yes | One or more scenes with digital role configuration |
+| `Enable` | `*bool` | No | Enable or disable the avatar (default: `true`) |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
+
+#### SensetimeScene
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `DigitalRole` | `SensetimeDigitalRole` | Yes | Digital role within the scene |
+
+#### SensetimeDigitalRole
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `FaceFeatureID` | `string` | No | Face feature identifier (wire key: `params.sceneList[].digital_role.face_feature_id`) |
+| `Position` | `SensetimePosition` | No | Avatar position (`x`, `y`) within the scene |
+| `URL` | `string` | No | Avatar model package URL |
+
+#### SensetimePosition
+
+| Field | Type | Description |
+|---|---|---|
+| `X` | `int` | Horizontal position |
+| `Y` | `int` | Vertical position |
+
 ---
 
 ## Sample Rate Constants
