@@ -17135,9 +17135,12 @@ var (
 	startAgentsRequestPropertiesTurnDetectionFieldCreateResponse      = big.NewInt(1 << 9)
 	startAgentsRequestPropertiesTurnDetectionFieldInterruptResponse   = big.NewInt(1 << 10)
 	startAgentsRequestPropertiesTurnDetectionFieldEagerness           = big.NewInt(1 << 11)
+	startAgentsRequestPropertiesTurnDetectionFieldLanguage            = big.NewInt(1 << 12)
 )
 
 type StartAgentsRequestPropertiesTurnDetection struct {
+	// BCP-47 language tag identifying the primary language used for agent interaction.
+	Language *AsrLanguage `json:"language,omitempty" url:"language,omitempty"`
 	// Conversation turn detection mode:
 	// - `default`: Uses standard conversation turn detection configuration.
 	Mode *string `json:"mode,omitempty" url:"mode,omitempty"`
@@ -17190,6 +17193,13 @@ func (s *StartAgentsRequestPropertiesTurnDetection) GetConfig() *StartAgentsRequ
 		return nil
 	}
 	return s.Config
+}
+
+func (s *StartAgentsRequestPropertiesTurnDetection) GetLanguage() *AsrLanguage {
+	if s == nil {
+		return nil
+	}
+	return s.Language
 }
 
 func (s *StartAgentsRequestPropertiesTurnDetection) GetType() *StartAgentsRequestPropertiesTurnDetectionType {
@@ -17278,6 +17288,13 @@ func (s *StartAgentsRequestPropertiesTurnDetection) require(field *big.Int) {
 func (s *StartAgentsRequestPropertiesTurnDetection) SetMode(mode *string) {
 	s.Mode = mode
 	s.require(startAgentsRequestPropertiesTurnDetectionFieldMode)
+}
+
+// SetLanguage sets the Language field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *StartAgentsRequestPropertiesTurnDetection) SetLanguage(language *AsrLanguage) {
+	s.Language = language
+	s.require(startAgentsRequestPropertiesTurnDetectionFieldLanguage)
 }
 
 // SetConfig sets the Config field and marks it as non-optional;

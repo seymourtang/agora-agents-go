@@ -885,6 +885,10 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	}
 
 	if a.mllm != nil {
+		return propsMap, nil
+	}
+
+	if a.mllm != nil {
 		if a.turnDetection != nil {
 			if err := setStructMap(propsMap, "turn_detection", a.turnDetection); err != nil {
 				return nil, err
@@ -930,6 +934,8 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 	if a.tts != nil {
 		propsMap["tts"] = cloneConfig(a.tts)
 	}
+	return mllmConfig
+}
 
 	return propsMap, nil
 }
@@ -1014,6 +1020,17 @@ func (a *Agent) buildLlmConfigMap() map[string]interface{} {
 			} else {
 				llmConfig["greeting_configs"] = a.greetingConfigs
 			}
+			generated, err := GenerateAvatarRtcToken(GenerateAvatarRtcTokenOptions{
+				AppID:          opts.AppID,
+				AppCertificate: opts.AppCertificate,
+				Channel:        opts.Channel,
+				UID:            avatarUID,
+				ExpirySeconds:  opts.ExpiresIn,
+			})
+			if err != nil {
+				return nil, err
+			}
+			params["agora_token"] = generated
 		}
 	}
 	return llmConfig
