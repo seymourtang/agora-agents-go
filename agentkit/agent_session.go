@@ -302,13 +302,6 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		s.emit("error", err)
 		return "", err
 	}
-	if err := agentcore.ValidateProfileProviders(s.agent.Profile(), resolvedProperties, resolvedPreset); err != nil {
-		s.mu.Lock()
-		s.status = StatusError
-		s.mu.Unlock()
-		s.emit("error", err)
-		return "", err
-	}
 
 	if s.debug {
 		debugPayload := map[string]interface{}{

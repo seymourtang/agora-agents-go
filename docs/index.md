@@ -19,7 +19,7 @@ Source: [github.com/AgoraIO/agora-agents-go](https://github.com/AgoraIO/agora-ag
 ## Start here
 
 - Start with [Quick Start](./getting-started/quick-start.md). It shows the baseline app-credentials setup and starts a cascading ASR -> LLM -> TTS agent.
-- Use [CN AgentKit](./guides/cn-agentkit.md) when you want the mainland China facade with `agentkit/cn` and CN-specific vendors.
+- Use [CN AgentKit](./guides/cn-agentkit.md) when you want the mainland China facade (`agentkit/cn`) for `option.AreaCN` routing.
 - Use [MLLM Flow](./guides/mllm-flow.md) when your agent uses one realtime multimodal model, such as OpenAI Realtime or Gemini Live.
 - Use [Cascading Flow](./guides/cascading-flow.md) for more examples of the default ASR -> LLM -> TTS flow, including provider-specific configuration.
 
@@ -45,7 +45,7 @@ Requires Go 1.21 or later.
 | [Installation](./getting-started/installation.md) | Prerequisites, package install, import paths |
 | [Authentication](./getting-started/authentication.md) | App credentials for REST auth and RTC joins |
 | [Quick Start](./getting-started/quick-start.md) | App credentials and the global/default AgentKit flow |
-| [CN AgentKit](./guides/cn-agentkit.md) | Mainland China facade and CN-specific vendor packages |
+| [CN AgentKit](./guides/cn-agentkit.md) | Mainland China facade (`agentkit/cn`) and `agentkit/cn/vendors` |
 | [BYOK](./guides/byok.md) | Bring your own vendor credentials and config |
 | [Architecture](./concepts/architecture.md) | SDK structure and generated REST clients |
 | [Agent](./concepts/agent.md) | Builder pattern, immutable reuse, vendor configuration |

@@ -36,16 +36,16 @@ func main() {
 | `option.AreaAP` | Asia-Pacific (southeast + northeast) |
 | `option.AreaCN` | Chinese mainland (east + north) |
 
-## Area-aware package hints
+## AgentKit packages
 
-Use the default/global surface with `agentkit` and `agentkit/vendors` when you want `option.AreaUS`, `option.AreaEU`, or `option.AreaAP`.
+`Area` on `agentkit.NewAgoraClient` controls regional API routing (domain pool and path). Vendor constructors are organized in separate packages:
 
-Use `agentkit/cn` and `agentkit/cn/vendors` when you want the Chinese mainland defaults from `option.AreaCN`.
-
-| Area | Agent package | Vendor package | Notes |
-|---|---|---|---|
-| `option.AreaUS`, `option.AreaEU`, `option.AreaAP` | `agentkit` | `agentkit/vendors` | Supports cascading, MLLM, and the default/global vendor catalog |
-| `option.AreaCN` | `agentkit/cn` | `agentkit/cn/vendors` | Supports cascading and CN-specific vendors; MLLM helpers are not exposed |
+| Package | Description |
+|---|---|
+| `agentkit` | Global/default agent builder; supports cascading and MLLM |
+| `agentkit/vendors` | Global/default vendor constructors |
+| `agentkit/cn` | Mainland China facade; sets `option.AreaCN` on the client |
+| `agentkit/cn/vendors` | Mainland China vendor constructors |
 
 Global/default example:
 

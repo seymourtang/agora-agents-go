@@ -6,16 +6,12 @@ description: Vendor catalog — LLM, TTS, STT, MLLM, and Avatar constructors wit
 
 # Vendors
 
-The default `agentkit/vendors` package provides constructor functions for the global/default vendor surface. For mainland China integrations, use `agentkit/cn` with `agentkit/cn/vendors`.
+The default `agentkit/vendors` package provides constructor functions for the global/default vendor catalog. The `agentkit/cn/vendors` package provides constructors for mainland China providers.
 
 ## Package layout
 
 - Global/default package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`
 - CN package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`
-
-Use the global/default package for `option.AreaUS`, `option.AreaEU`, and `option.AreaAP`.
-
-Use the CN package for `option.AreaCN`.
 
 ## Vendor Interfaces
 

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 5
 title: CN AgentKit
-description: Use the CN AgentKit facade and CN-specific vendor package for Chinese mainland integrations.
+description: Use the CN AgentKit facade for Chinese mainland API routing.
 ---
 
 # CN AgentKit
 
-Use the CN AgentKit facade when your integration should default to Chinese mainland routing and use CN-specific vendors.
+Use the CN AgentKit facade when your integration should route to Chinese mainland API endpoints (`option.AreaCN`).
 
 ```go
 package main

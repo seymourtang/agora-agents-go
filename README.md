@@ -152,7 +152,7 @@ func main() {
 
 ### Regional agent builders
 
-Use `agentkit/vendors` so vendor availability follows your routing surface. The Quick Start above is the global (`option.AreaUS`) pattern; CN uses a different vendor catalog and the `agentkit/cn` facade. See [`docs/guides/regional-routing.md`](./docs/guides/regional-routing.md) for global and CN regional examples.
+`Area` on `AgoraClient` controls regional API routing. Vendor constructors live in `agentkit/vendors` (global/default) and `agentkit/cn/vendors` (mainland China). The Quick Start above uses the global (`option.AreaUS`) pattern. See [`docs/guides/regional-routing.md`](./docs/guides/regional-routing.md) for routing and package layout.
 
 ## AI Studio pipeline IDs
 

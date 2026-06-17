@@ -8,16 +8,12 @@ description: Complete API reference for all vendor constructors and configuratio
 
 Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`
 
-This reference describes the default/global vendor package. CN-specific vendors live under `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`.
+This reference describes the default/global vendor package. Mainland China vendor constructors live under `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`.
 
 ## Package layout
 
 - Global/default package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`
 - CN package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`
-
-Use the global/default package for `option.AreaUS`, `option.AreaEU`, and `option.AreaAP`.
-
-Use the CN package for `option.AreaCN`.
 
 ## SampleRate
 
