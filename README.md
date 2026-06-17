@@ -1,9 +1,9 @@
 # Agora Agents Go
 
-[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgoraIO%2Fagora-agents-go)
-[![Go Reference](https://pkg.go.dev/badge/github.com/AgoraIO/agora-agents-go/v2.svg)](https://pkg.go.dev/github.com/AgoraIO/agora-agents-go/v2)
-[![Go Report Card](https://goreportcard.com/badge/github.com/AgoraIO/agora-agents-go)](https://goreportcard.com/report/github.com/AgoraIO/agora-agents-go)
-[![Release](https://img.shields.io/github/v/release/AgoraIO/agora-agents-go?sort=semver)](https://github.com/AgoraIO/agora-agents-go/releases)
+[fern shield](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgoraIO%2Fagora-agents-go)
+[Go Reference](https://pkg.go.dev/github.com/AgoraIO/agora-agents-go/v2)
+[Go Report Card](https://goreportcard.com/report/github.com/AgoraIO/agora-agents-go)
+[Release](https://github.com/AgoraIO/agora-agents-go/releases)
 
 The Agora Conversational AI SDK provides convenient access to the Agora Conversational AI APIs, 
 enabling you to build voice-powered AI agents with support for both cascading flows (ASR -> LLM -> TTS) 
@@ -77,7 +77,7 @@ func startConversation(ctx context.Context) (string, error) {
         AppCertificate: appCertificate,
     })
 
-    agent := agentkit.NewAgent(client,
+    agent := agentkit.NewAgoraClient(client,
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
             Language: Agora.AsrLanguageEnUs.Ptr(),
             Config: &agentkit.TurnDetectionNestedConfig{
@@ -152,7 +152,7 @@ func main() {
 
 ### Regional agent builders
 
-`Area` on `AgoraClient` controls regional API routing. Vendor constructors live in `agentkit/vendors` (global/default) and `agentkit/cn/vendors` (mainland China). The Quick Start above uses the global (`option.AreaUS`) pattern. See [`docs/guides/regional-routing.md`](./docs/guides/regional-routing.md) for routing and package layout.
+`Area` on `AgoraClient` controls regional API routing. Vendor constructors live in `agentkit/vendors` (global/default) and `agentkit/cn/vendors` (mainland China). The Quick Start above uses the global (`option.AreaUS`) pattern. See `[docs/guides/regional-routing.md](./docs/guides/regional-routing.md)` for routing and package layout.
 
 ## AI Studio pipeline IDs
 
@@ -164,8 +164,8 @@ agent := agentkit.NewAgent(client,
 )
 
 session := agent.CreateSession(agentkit.CreateSessionOptions{
-    Name:       "support",
-    Channel:    "support-room",
+    Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+    Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
 })
@@ -175,8 +175,8 @@ You can override it per session:
 
 ```go
 session := agent.CreateSession(agentkit.CreateSessionOptions{
-    Name:       "support",
-    Channel:    "support-room",
+    Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+    Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
     AgentUID:   "1",
     RemoteUIDs: []string{"100"},
     PipelineID: "session-pipeline-id",

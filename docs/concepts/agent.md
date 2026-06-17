@@ -8,6 +8,21 @@ description: The Agent builder — functional options pattern, vendor chaining, 
 
 The `agentkit.Agent` is the central configuration object. It defines what LLM, TTS, STT, MLLM, and avatar vendors your agent uses, along with session-level settings.
 
+Every `Agent` must be bound to a non-nil `*AgoraClient` from `agentkit.NewAgoraClient`. Pass that client as the first argument to `NewAgent`. If you call `CreateSession` on an agent that was created without a client (for example `NewAgent(nil)`), AgentKit panics with `agent must be bound to an AgoraClient before creating a session`.
+
+Typical flow:
+
+```go
+client := agentkit.NewAgoraClient(agentkit.AgoraClientOptions{ /* AppID, AppCertificate, Area */ })
+agent := agentkit.NewAgent(client).WithLlm(/* ... */)
+session := agent.CreateSession(agentkit.CreateSessionOptions{
+    Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+    Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
+})
+```
+
+The same rule applies to `agentkit/cn`: create `cn.NewAgoraClient` first, then `cn.NewAgent(client, ...)`.
+
 ## Functional Options Pattern
 
 `agentkit.NewAgent` uses Go's [functional options pattern](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis). Instead of a large config struct, you pass option functions that each configure one aspect of the agent:

@@ -9,6 +9,7 @@ description: Use generated clients for advanced operations while keeping app-cre
 For starting and managing realtime agent sessions, prefer the AgentKit builder:
 
 - create `agentkit.NewAgoraClient` with `AppID` and `AppCertificate`
+- pass that client to `agentkit.NewAgent(client, ...)`
 - configure vendors with `WithStt`, `WithLlm`, `WithTts`, or `WithMllm`
 - call `session.Start(ctx)`, `session.Say(ctx, ...)`, `session.Update(ctx, ...)`, and `session.Stop(ctx)`
 

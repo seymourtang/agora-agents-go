@@ -8,11 +8,15 @@ description: Use the CN AgentKit facade for Chinese mainland API routing.
 
 Use the CN AgentKit facade when your integration should route to Chinese mainland API endpoints (`option.AreaCN`).
 
+`NewAgent` requires a non-nil `*AgoraClient` from `NewAgoraClient` — the same binding rule as the global facade.
+
 ```go
 package main
 
 import (
     "context"
+    "fmt"
+    "time"
 
     agentkit "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn"
     vendors "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors"
@@ -45,8 +49,8 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:       "cn-support",
-        Channel:    "cn-room",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
     })
@@ -71,10 +75,26 @@ func main() {
 The CN facade currently supports:
 
 - Cascading ASR / LLM / TTS flows
-- CN-specific STT, LLM, TTS, and avatar vendors
-- CN-specific STT vendors such as Fengming, Tencent, Microsoft, and Xfyun are exposed from `agentkit/cn/vendors`
-- The CN avatar surface currently exposes Sensetime only
+- `WithStt`, `WithLlm`, `WithTts`, and `WithAvatar` on `cn.Agent`
+- CN-specific STT, LLM, TTS, and avatar vendors from `agentkit/cn/vendors`
+- Session-level options via `NewAgent(client, opts...)` such as `WithTurnDetectionConfig`, `WithInterruptionConfig`, `WithAdvancedFeatures`, `WithParameters`, `WithGeofence`, `WithRtc`, and `WithFillerWords`
 
-For CN TTS vendors, `AdditionalParams map[string]interface{}` and `SkipPatterns []int` are available consistently across all TTS option structs as shared extension fields.
+The CN facade does **not** support:
 
-The CN facade does not expose MLLM helpers.
+- `WithMllm` or MLLM vendors
+- Chain methods such as `WithTurnDetection`, `WithSal`, or `WithLabels` on `cn.Agent` (use the matching `AgentOption` on `NewAgent` instead where available)
+- `WithSalConfig`, `WithGreetingConfigs`, or `WithLabels` as `AgentOption` helpers
+- `AgentPresets` or `ResolveSessionPresets*` helpers
+
+For CN TTS vendors, `AdditionalParams map[string]interface{}` and `SkipPatterns []int` are available consistently across all TTS option structs.
+
+### Global vs CN Agent API
+
+| Capability | Global `agentkit` | `agentkit/cn` |
+|---|---|---|
+| Client options | `AgoraClientOptions` with `Area` | `ClientOptions` (fixed `AreaCN`) |
+| Vendor chaining | `WithStt`, `WithLlm`, `WithTts`, `WithMllm`, `WithAvatar` | `WithStt`, `WithLlm`, `WithTts`, `WithAvatar` |
+| Avatar vendors | LiveAvatar, Generic, Anam, Akool, HeyGen | SenseTime only |
+| Turn detection | `WithTurnDetectionConfig` or `WithTurnDetection` | `WithTurnDetectionConfig` on `NewAgent` only |
+
+See [Vendors](./concepts/vendors.md#cn-vendors-agentkitcnvendors) for the CN constructor catalog.

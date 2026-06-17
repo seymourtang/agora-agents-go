@@ -22,6 +22,7 @@ import (
     "context"
     "fmt"
     "log"
+    "time"
 
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
@@ -60,8 +61,8 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:        "support-assistant",
-        Channel:     "support-room-123",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:    "1",
         RemoteUIDs:  []string{"100"},
         IdleTimeout: &idleTimeout,
@@ -85,10 +86,11 @@ func main() {
 ## What this does
 
 1. `AgoraClient` runs in app-credentials mode when you pass `AppID` and `AppCertificate` only.
-2. `Agent` holds reusable vendor and session-behavior configuration.
-3. Vendor constructors on the builder select the ASR, LLM, and TTS stack. Leave vendor credentials unset for supported Agora-managed global models, or provide keys when you want BYOK. CN MiniMax TTS always requires `Key`.
-4. `CreateSession` passes per-session values such as channel, UID, and the agent instance `Name` sent on `/join`.
-5. `session.Start(...)` lets the SDK generate the required auth tokens automatically and returns the unique agent session ID.
+2. `NewAgent(client)` requires that non-nil client; every agent must be bound to an `AgoraClient` before `CreateSession`.
+3. `Agent` holds reusable vendor and session-behavior configuration.
+4. Vendor constructors on the builder select the ASR, LLM, and TTS stack. Leave vendor credentials unset for supported Agora-managed global models, or provide keys when you want BYOK. CN MiniMax TTS always requires `Key`.
+5. `CreateSession` passes per-session values such as channel, UID, and the agent instance `Name` sent on `/join`.
+6. `session.Start(...)` lets the SDK generate the required auth tokens automatically and returns the unique agent session ID.
 
 ## When to use BYOK instead
 

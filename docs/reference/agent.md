@@ -17,6 +17,8 @@ func NewAgent(client *AgoraClient, opts ...AgentOption) *Agent
 
 Creates a new `Agent` bound to the provided `AgoraClient` and configured with the given functional options.
 
+`client` is **required** and must be non-nil. Create it with `NewAgoraClient` before calling `NewAgent`. If `client` is nil, `CreateSession` and `NewSession` panic with `agent must be bound to an AgoraClient before creating a session`.
+
 ## AgentOption Type
 
 <!-- snippet: fragment -->
@@ -392,7 +394,7 @@ func (a *Agent) FillerWords() *FillerWordsConfig
 func (a *Agent) CreateSession(opts CreateSessionOptions) *AgentSession
 ```
 
-Creates an `AgentSession` from the agent builder. Set `CreateSessionOptions.Name` to identify the agent instance on `/join`. If `Name` is empty, AgentKit generates `agent-<unix_timestamp>`.
+Creates an `AgentSession` from the agent builder. The agent must already be bound to a non-nil `AgoraClient` from `NewAgent(client, ...)`. Set `CreateSessionOptions.Name` to identify the agent instance on `/join`. If `Name` is empty, AgentKit generates `agent-<unix_timestamp>`.
 
 ### CreateSessionOptions
 
@@ -510,7 +512,7 @@ Additional SOS/EOS turn detection aliases: `TurnDetectionNestedConfig`, `StartOf
 |---|---|---|---|
 | STT payload alias (wire: `asr`) | `AsrConfig` / `SttConfig` | `SttConfig` / `AsrConfig` | `SttConfig` / `AsrConfig` |
 | xAI MLLM (primary) | `XaiGrok` / `NewXaiGrok` | `XaiGrok` | `XaiGrok` |
-| Avatar token helper | `IsAvatarTokenManaged` | `isAvatarTokenManaged` | `is_avatar_token_managed` |
+| Avatar token auto-generation | Managed vendors: `liveavatar`, `heygen`, `generic`, `sensetime` (see [Avatars Guide](../guides/avatars.md)) | `isAvatarTokenManaged` | `is_avatar_token_managed` |
 | Think inject constant | `ThinkOnListeningActionInject` | `ThinkOnListeningActionInject` | `ThinkOnListeningActionInject` |
 
 ## Token Generation

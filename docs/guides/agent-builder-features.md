@@ -224,7 +224,9 @@ package main
 
 import (
     "context"
+    "fmt"
     "log"
+    "time"
 
     Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
@@ -299,8 +301,8 @@ func main() {
     }))
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:       "full-featured-assistant",
-        Channel:    "demo-channel",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
     })

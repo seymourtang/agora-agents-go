@@ -16,9 +16,9 @@ The SDK is organized into two layers with distinct responsibilities.
 ├─────────────────────────────────────────────────────┤
 │  agentkit/         │  agentkit/vendors/              │
 │  ─────────         │  ────────────────               │
-│  NewAgent(client)  │  NewOpenAI()                    │
-│  CreateSession()   │  NewElevenLabsTTS()             │
-│  AgentOption funcs │  NewDeepgramSTT()               │
+│  NewAgoraClient()  │  NewOpenAI()                    │
+│  NewAgent(client)  │  NewElevenLabsTTS()             │
+│  CreateSession()   │  NewDeepgramSTT()               │
 │  Session lifecycle │  NewOpenAIRealtime()            │
 │  Token generation  │  NewLiveAvatarAvatar()          │
 │                    │  ... (30+ vendor constructors)  │
@@ -60,7 +60,8 @@ resp, err := c.Agents.Start(ctx, &Agora.StartAgentsRequest{...})
 
 Built on top of the Fern-generated client. This layer provides:
 
-- **`agentkit.NewAgent`** — functional options pattern for building agent configurations
+- **`agentkit.NewAgoraClient`** — creates the client handle required by `NewAgent`
+- **`agentkit.NewAgent`** — functional options pattern for building agent configurations; `client` is required
 - **Vendor constructors** — `vendors.NewOpenAI()`, `vendors.NewElevenLabsTTS()`, etc. with validation
 - **`agent.CreateSession`** — session lifecycle management (start, stop, say, interrupt, update)
 - **Automatic token generation** — generates RTC tokens from app credentials
@@ -70,7 +71,7 @@ Built on top of the Fern-generated client. This layer provides:
 
 | Use Case | Layer | Example |
 |---|---|---|
-| Build a conversational agent | `agentkit` | `NewAgent` -> `WithLlm` -> `WithTts` -> `CreateSession` -> `Start` |
+| Build a conversational agent | `agentkit` | `NewAgoraClient` -> `NewAgent(client)` -> `WithLlm` -> `WithTts` -> `CreateSession` -> `Start` |
 | Make a telephony call | `client` | `c.Telephony.Call(ctx, req)` |
 | Manage phone numbers | `client` | `c.PhoneNumbers.List(ctx, req)` |
 | Custom request construction | `client` | `c.Agents.Start(ctx, req)` with manually built properties |

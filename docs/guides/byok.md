@@ -25,6 +25,7 @@ import (
     "fmt"
     "log"
     "os"
+    "time"
 
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
@@ -65,8 +66,8 @@ func main() {
     }))
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:        "support-assistant",
-        Channel:     "support-room-123",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:    "1",
         RemoteUIDs:  []string{"100"},
         IdleTimeout: &idleTimeout,

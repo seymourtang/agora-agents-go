@@ -840,6 +840,8 @@ Generic avatars do not enforce a fixed TTS sample rate. Use the sample rate requ
 
 CN avatar constructors live in `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors` and are used with `agentkit/cn.Agent.WithAvatar`.
 
+For CN STT, LLM, and TTS constructors, see [Vendors concept — CN Vendors](../concepts/vendors.md#cn-vendors-agentkitcnvendors).
+
 ### NewSensetimeAvatar
 
 Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`

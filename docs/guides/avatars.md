@@ -38,33 +38,6 @@ Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you prov
 sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
 
 agent := agentkit.NewAgent(client).WithLlm(
-    vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "<openai_key>"}),
-).WithTts(
-    vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
-        Key:        "<elevenlabs_key>",
-        ModelID:    "eleven_turbo_v2_5",
-        VoiceID:    "<voice_id>",
-        // Choose the sample rate required by your generic avatar provider.
-        SampleRate: &sampleRate,
-    }),
-).WithAvatar(
-    vendors.NewGenericAvatar(vendors.GenericAvatarOptions{
-        APIKey:     "<avatar_vendor_key>",
-        APIBaseURL: "https://avatar.example.com",
-        AvatarID:   "<avatar_id>",
-        AgoraUID:   "2001", // distinct from session AgentUID
-    }),
-)
-```
-
-For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar, HeyGen, and SenseTime, AgentKit auto-generates only `agora_token` when `agora_uid` is set and `agora_token` is omitted.
-
-## Generic Avatar Example
-
-```go
-sampleRate := vendors.SampleRate24kHz // or 16kHz, depending on your provider
-
-agent := agentkit.NewAgent(client).WithLlm(
     vendors.NewOpenAI(vendors.OpenAIOptions{
         APIKey:  "<openai_key>",
         BaseURL: "https://api.openai.com/v1/chat/completions",
@@ -88,7 +61,7 @@ agent := agentkit.NewAgent(client).WithLlm(
 )
 ```
 
-For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar, HeyGen, and SenseTime, AgentKit auto-generates only `agora_token` when `agora_uid` is set and `agora_token` is omitted.
+For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar, HeyGen, Generic, and SenseTime, AgentKit auto-generates `agora_token` when `agora_uid` is set and `agora_token` is omitted.
 
 ## LiveAvatar Example
 
@@ -99,6 +72,7 @@ import (
     "context"
     "fmt"
     "log"
+    "time"
 
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors"
@@ -146,8 +120,8 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:       "avatar-agent",
-        Channel:    "avatar-channel",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
     })
@@ -210,6 +184,8 @@ package main
 
 import (
     "context"
+    "fmt"
+    "time"
 
     agentkit "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn"
     vendors "github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors"
@@ -260,8 +236,8 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:       "cn-avatar-agent",
-        Channel:    "cn-avatar-channel",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
     })
@@ -274,15 +250,17 @@ See [Vendors Reference — CN Avatar Vendors](../reference/vendors.md#newsenseti
 
 ## Sample Rate Validation and Panic Behavior
 
-The Go SDK enforces the TTS/avatar sample rate constraint at runtime using `panic()`. This differs from TypeScript (compile-time phantom types) and Python (`ValueError`).
+The Go SDK enforces TTS/avatar sample rate constraints at runtime. This differs from TypeScript (compile-time phantom types) and Python (`ValueError`).
 
 ### When does the panic occur?
 
-`WithAvatar()` checks if the agent already has a TTS configured with a mismatched sample rate. If so, it panics immediately:
+`WithAvatar()` panics immediately only when the avatar vendor is token-managed **and** publishes a non-zero `RequiredSampleRate()` that does not match an already-configured TTS sample rate. In practice this applies to **LiveAvatar and HeyGen (24kHz)**:
 
 ```
 Avatar requires TTS sample rate of 24000 Hz, but TTS is configured with 16000 Hz. Please update your TTS sample_rate to 24000.
 ```
+
+**Akool (16kHz)**, **Anam**, **Generic**, and **SenseTime** do not panic at `WithAvatar()` time. Their constraints are checked in `AgentSession.Start()` via `ValidateTtsSampleRate` or provider-specific validation.
 
 ### Why panic instead of returning an error?
 

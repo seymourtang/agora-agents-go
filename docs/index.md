@@ -53,7 +53,7 @@ Requires Go 1.21 or later.
 | [Vendors](./concepts/vendors.md) | LLM, TTS, STT, MLLM, and Avatar provider catalog |
 | [Cascading Flow](./guides/cascading-flow.md) | Step-by-step ASR -> LLM -> TTS |
 | [MLLM Flow](./guides/mllm-flow.md) | OpenAI Realtime, Gemini Live, Vertex AI, and xAI Grok |
-| [Avatars](./guides/avatars.md) | LiveAvatar, Generic Avatar, Anam, Akool, and deprecated HeyGen |
+| [Avatars](./guides/avatars.md) | LiveAvatar, Generic, Anam, Akool, SenseTime (CN), and deprecated HeyGen |
 | [Regional Routing](./guides/regional-routing.md) | Area enum, domain pool, failover |
 | [Error Handling](./guides/error-handling.md) | API errors and Go error handling patterns |
 | [Pagination](./guides/pagination.md) | Iterate over paginated list endpoints |

@@ -17,6 +17,7 @@ import (
     "context"
     "fmt"
     "log"
+    "time"
 
     Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
@@ -58,8 +59,8 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:       "openai-assistant",
-        Channel:    "demo-channel",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
     })
@@ -90,6 +91,7 @@ import (
     "context"
     "fmt"
     "log"
+    "time"
 
     Agora "github.com/AgoraIO/agora-agents-go/v2"
     "github.com/AgoraIO/agora-agents-go/v2/agentkit"
@@ -131,8 +133,8 @@ func main() {
     )
 
     session := agent.CreateSession(agentkit.CreateSessionOptions{
-        Name:       "claude-assistant",
-        Channel:    "support-channel",
+        Name:        fmt.Sprintf("conversation-%d", time.Now().UnixMilli()),
+        Channel:     fmt.Sprintf("demo-channel-%d", time.Now().UnixMilli()),
         AgentUID:   "1001",
         RemoteUIDs: []string{"1002"},
     })
