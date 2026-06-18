@@ -86,7 +86,7 @@ func main() {
 ## What this does
 
 1. `AgoraClient` runs in app-credentials mode when you pass `AppID` and `AppCertificate` only.
-2. `NewAgent(client)` requires that non-nil client; every agent must be bound to an `AgoraClient` before `CreateSession`.
+2. `NewAgent(client, ...)` requires a non-nil client; `NewAgent(nil)` panics.
 3. `Agent` holds reusable vendor and session-behavior configuration.
 4. Vendor constructors on the builder select the ASR, LLM, and TTS stack. Leave vendor credentials unset for supported Agora-managed global models, or provide keys when you want BYOK. CN MiniMax TTS always requires `Key`.
 5. `CreateSession` passes per-session values such as channel, UID, and the agent instance `Name` sent on `/join`.

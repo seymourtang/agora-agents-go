@@ -95,6 +95,7 @@ func BuildPropertiesMap(base *BaseAgent, opts ToPropertiesOptions, tokenFactory 
 		}
 		parameters["audio_scenario"] = string(*base.AudioScenario)
 	}
+	ensureDefaultAudioScenario(propsMap)
 	if base.Geofence != nil {
 		if err := SetStructMap(propsMap, "geofence", base.Geofence); err != nil {
 			return nil, err
@@ -173,6 +174,17 @@ func BuildPropertiesMap(base *BaseAgent, opts ToPropertiesOptions, tokenFactory 
 	}
 
 	return propsMap, nil
+}
+
+func ensureDefaultAudioScenario(propsMap map[string]interface{}) {
+	parameters, ok := propsMap["parameters"].(map[string]interface{})
+	if !ok || parameters == nil {
+		parameters = map[string]interface{}{}
+		propsMap["parameters"] = parameters
+	}
+	if v, ok := parameters["audio_scenario"].(string); !ok || v == "" {
+		parameters["audio_scenario"] = string(ParametersAudioScenarioDefault)
+	}
 }
 
 func resolveAsrConfig(base *BaseAgent, turnDetection map[string]interface{}) map[string]interface{} {

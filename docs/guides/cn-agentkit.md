@@ -8,7 +8,7 @@ description: Use the CN AgentKit facade for Chinese mainland API routing.
 
 Use the CN AgentKit facade when your integration should route to Chinese mainland API endpoints (`option.AreaCN`).
 
-`NewAgent` requires a non-nil `*AgoraClient` from `NewAgoraClient` — the same binding rule as the global facade.
+`NewAgent(client, opts...)` requires a non-nil `*AgoraClient` from `NewAgoraClient`. Passing `nil` panics with `NewAgent requires AgoraClient`.
 
 ```go
 package main

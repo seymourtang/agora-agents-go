@@ -1,9 +1,9 @@
 # Agora Agents Go
 
-[fern shield](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgoraIO%2Fagora-agents-go)
-[Go Reference](https://pkg.go.dev/github.com/AgoraIO/agora-agents-go/v2)
-[Go Report Card](https://goreportcard.com/report/github.com/AgoraIO/agora-agents-go)
-[Release](https://github.com/AgoraIO/agora-agents-go/releases)
+[![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgoraIO%2Fagora-agents-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/AgoraIO/agora-agents-go/v2.svg)](https://pkg.go.dev/github.com/AgoraIO/agora-agents-go/v2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/AgoraIO/agora-agents-go)](https://goreportcard.com/report/github.com/AgoraIO/agora-agents-go)
+[![Release](https://img.shields.io/github/v/release/AgoraIO/agora-agents-go?sort=semver)](https://github.com/AgoraIO/agora-agents-go/releases)
 
 The Agora Conversational AI SDK provides convenient access to the Agora Conversational AI APIs, 
 enabling you to build voice-powered AI agents with support for both cascading flows (ASR -> LLM -> TTS) 
@@ -21,7 +21,7 @@ go get github.com/AgoraIO/agora-agents-go/v2@v2.0.0
 
 ## Quick Start
 
-Start with the `Agent` builder: create a client with app credentials, choose your ASR, LLM, and TTS providers, then start a session. Omit vendor API keys for supported Agora-managed global models, or provide keys when you want BYOK.
+Start with the `Agent` builder: create a client with app credentials, pass it to `NewAgent(client, ...)` (required; `nil` panics), choose your ASR, LLM, and TTS providers, then start a session. Omit vendor API keys for supported Agora-managed global models, or provide keys when you want BYOK.
 Set Agora interaction language with `TurnDetectionConfig.Language`; provider-specific STT language values remain under `asr.params`. Ares uses only the REST `asr.language` value sourced from `TurnDetectionConfig.Language`.
 
 ```go
@@ -77,7 +77,7 @@ func startConversation(ctx context.Context) (string, error) {
         AppCertificate: appCertificate,
     })
 
-    agent := agentkit.NewAgoraClient(client,
+    agent := agentkit.NewAgent(client,
         agentkit.WithTurnDetectionConfig(&agentkit.TurnDetectionConfig{
             Language: Agora.AsrLanguageEnUs.Ptr(),
             Config: &agentkit.TurnDetectionNestedConfig{
@@ -240,7 +240,7 @@ See the [MLLM Flow guide](./docs/guides/mllm-flow.md) for full examples with Gem
 
 ## Avatars
 
-AgentKit supports LiveAvatar, Generic Avatar, Anam, Akool, and deprecated HeyGen. Avatar `AgoraToken` is optional: when omitted, `session.Start()` generates a token using the same ConvoAI token format as the agent token, scoped to the avatar `AgoraUID`. Avatars require the cascading ASR + LLM + TTS pipeline (not MLLM).
+AgentKit supports LiveAvatar, Generic Avatar, Anam, Akool, deprecated HeyGen, and SenseTime (CN). Avatar `AgoraToken` is optional: when omitted, `session.Start()` generates a token using the same ConvoAI token format as the agent token, scoped to the avatar `AgoraUID`. Avatars require the cascading ASR + LLM + TTS pipeline (not MLLM).
 
 See the [Avatar Integration guide](./docs/guides/avatars.md) for sample-rate requirements and Generic Avatar setup.
 
