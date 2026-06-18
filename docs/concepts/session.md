@@ -10,8 +10,6 @@ description: AgentSession lifecycle — state machine, methods, and event handli
 
 ## Creating a Session
 
-The agent passed to `CreateSession` must be bound to a non-nil `*AgoraClient` (see [Agent](./agent.md)). `CreateSession` reads `AppID`, `AppCertificate`, and the generated REST clients from that binding.
-
 Pass the agent instance name in `CreateSessionOptions.Name`. This value is sent as the top-level `name` field on `/join`. If omitted, AgentKit generates `agent-<unix_timestamp>`.
 
 <!-- snippet: fragment -->
@@ -48,7 +46,7 @@ Low-level `NewAgentSession` accepts the same session fields via `AgentSessionOpt
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `Client` | `*agents.Client` | Yes | The Fern-generated agents sub-client |
-| `Agent` | `*Agent` | Yes | Agent built with `NewAgent(client, ...)`; `client` must be non-nil |
+| `Agent` | `*Agent` | Yes | Agent from `NewAgent(client, ...)` |
 | `AppID` | `string` | Yes | Agora App ID |
 | `AppCertificate` | `string` | Conditional | Required if `Token` is not provided |
 | `Name` | `string` | No | Session name (defaults to `agent-<unix_timestamp>`) |

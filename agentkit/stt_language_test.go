@@ -10,7 +10,7 @@ import (
 )
 
 func baseAgentForSTTLanguage() *Agent {
-	return NewAgent(nil).
+	return NewAgent(testAgoraClient()).
 		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{APIKey: "llm-key", Model: "gpt-4o-mini", BaseURL: "https://api.openai.com/v1/chat/completions"})).
 		WithTts(vendors.NewElevenLabsTTS(vendors.ElevenLabsTTSOptions{
 			Key:     "tts-key",

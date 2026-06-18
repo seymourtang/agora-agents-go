@@ -92,6 +92,9 @@ type Agent struct {
 }
 
 func NewAgent(client *AgoraClient, opts ...AgentOption) *Agent {
+	if client == nil {
+		panic("NewAgent requires AgoraClient")
+	}
 	baseAgent := agentcore.NewBaseAgent(opts...)
 	baseAgent.Client = client
 	return &Agent{base: baseAgent}

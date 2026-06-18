@@ -15,7 +15,7 @@ Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit`
 func (a *Agent) CreateSession(opts CreateSessionOptions) *AgentSession
 ```
 
-Creates a session from an `Agent` builder. The agent must be bound to a non-nil `AgoraClient` from `NewAgent(client, ...)`. Pass the agent instance name in `CreateSessionOptions.Name`; if empty, defaults to `agent-<unix_timestamp>`.
+Creates a session from an `Agent` builder. Pass the agent instance name in `CreateSessionOptions.Name`; if empty, defaults to `agent-<unix_timestamp>`.
 
 ### CreateSessionOptions
 
@@ -89,7 +89,7 @@ type AgentSessionOptions struct {
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `Client` | `*agents.Client` | Yes | Fern-generated agents sub-client (from `c.Agents`) |
-| `Agent` | `AgentRuntime` | Yes | Agent from `NewAgent(client, ...)`; must be bound to a non-nil `AgoraClient` |
+| `Agent` | `AgentRuntime` | Yes | Agent from `NewAgent(client, ...)` |
 | `AppID` | `string` | Yes | Agora App ID |
 | `AppCertificate` | `string` | Conditional | Required if `Token` is not set |
 | `Name` | `string` | No | Agent instance name for `/join` (default: `agent-<unix_timestamp>`) |

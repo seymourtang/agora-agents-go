@@ -8,7 +8,7 @@ description: The Agent builder — functional options pattern, vendor chaining, 
 
 The `agentkit.Agent` is the central configuration object. It defines what LLM, TTS, STT, MLLM, and avatar vendors your agent uses, along with session-level settings.
 
-Every `Agent` must be bound to a non-nil `*AgoraClient` from `agentkit.NewAgoraClient`. Pass that client as the first argument to `NewAgent`. If you call `CreateSession` on an agent that was created without a client (for example `NewAgent(nil)`), AgentKit panics with `agent must be bound to an AgoraClient before creating a session`.
+Every `Agent` is created with `agentkit.NewAgent(client, opts...)`. The `client` argument is required and must be a non-nil `*AgoraClient` from `NewAgoraClient`. Passing `nil` panics immediately with `NewAgent requires AgoraClient`.
 
 Typical flow:
 
