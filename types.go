@@ -635,6 +635,210 @@ func (s *SensetimeAvatarParamsSceneListItemDigitalRolePosition) String() string 
 	return fmt.Sprintf("%#v", s)
 }
 
+// Spatius Avatar configuration parameters.
+var (
+	spatiusAvatarParamsFieldSpatiusAPIKey        = big.NewInt(1 << 0)
+	spatiusAvatarParamsFieldSpatiusAppID         = big.NewInt(1 << 1)
+	spatiusAvatarParamsFieldSpatiusAvatarID      = big.NewInt(1 << 2)
+	spatiusAvatarParamsFieldAgoraUID             = big.NewInt(1 << 3)
+	spatiusAvatarParamsFieldAgoraToken           = big.NewInt(1 << 4)
+	spatiusAvatarParamsFieldRegion               = big.NewInt(1 << 5)
+	spatiusAvatarParamsFieldSampleRate           = big.NewInt(1 << 6)
+	spatiusAvatarParamsFieldSessionExpireMinutes = big.NewInt(1 << 7)
+)
+
+type SpatiusAvatarParams struct {
+	// Spatius API key.
+	SpatiusAPIKey string `json:"spatius_api_key" url:"spatius_api_key"`
+	// Spatius application ID.
+	SpatiusAppID string `json:"spatius_app_id" url:"spatius_app_id"`
+	// Spatius avatar ID.
+	SpatiusAvatarID string `json:"spatius_avatar_id" url:"spatius_avatar_id"`
+	// Agora UID used by the avatar service.
+	AgoraUID string `json:"agora_uid" url:"agora_uid"`
+	// RTC token generated for `agora_uid` in the target channel.
+	AgoraToken *string `json:"agora_token,omitempty" url:"agora_token,omitempty"`
+	// Spatius service region, for example `cn-beijing`.
+	Region *string `json:"region,omitempty" url:"region,omitempty"`
+	// Audio sample rate in Hz. Recommended to match the TTS sample rate.
+	SampleRate *int `json:"sample_rate,omitempty" url:"sample_rate,omitempty"`
+	// Spatius session validity duration in minutes. Defaults to 30.
+	SessionExpireMinutes *int `json:"session_expire_minutes,omitempty" url:"session_expire_minutes,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (s *SpatiusAvatarParams) GetSpatiusAPIKey() string {
+	if s == nil {
+		return ""
+	}
+	return s.SpatiusAPIKey
+}
+
+func (s *SpatiusAvatarParams) GetSpatiusAppID() string {
+	if s == nil {
+		return ""
+	}
+	return s.SpatiusAppID
+}
+
+func (s *SpatiusAvatarParams) GetSpatiusAvatarID() string {
+	if s == nil {
+		return ""
+	}
+	return s.SpatiusAvatarID
+}
+
+func (s *SpatiusAvatarParams) GetAgoraUID() string {
+	if s == nil {
+		return ""
+	}
+	return s.AgoraUID
+}
+
+func (s *SpatiusAvatarParams) GetAgoraToken() *string {
+	if s == nil {
+		return nil
+	}
+	return s.AgoraToken
+}
+
+func (s *SpatiusAvatarParams) GetRegion() *string {
+	if s == nil {
+		return nil
+	}
+	return s.Region
+}
+
+func (s *SpatiusAvatarParams) GetSampleRate() *int {
+	if s == nil {
+		return nil
+	}
+	return s.SampleRate
+}
+
+func (s *SpatiusAvatarParams) GetSessionExpireMinutes() *int {
+	if s == nil {
+		return nil
+	}
+	return s.SessionExpireMinutes
+}
+
+func (s *SpatiusAvatarParams) GetExtraProperties() map[string]interface{} {
+	return s.ExtraProperties
+}
+
+func (s *SpatiusAvatarParams) require(field *big.Int) {
+	if s.explicitFields == nil {
+		s.explicitFields = big.NewInt(0)
+	}
+	s.explicitFields.Or(s.explicitFields, field)
+}
+
+// SetSpatiusAPIKey sets the SpatiusAPIKey field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetSpatiusAPIKey(spatiusAPIKey string) {
+	s.SpatiusAPIKey = spatiusAPIKey
+	s.require(spatiusAvatarParamsFieldSpatiusAPIKey)
+}
+
+// SetSpatiusAppID sets the SpatiusAppID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetSpatiusAppID(spatiusAppID string) {
+	s.SpatiusAppID = spatiusAppID
+	s.require(spatiusAvatarParamsFieldSpatiusAppID)
+}
+
+// SetSpatiusAvatarID sets the SpatiusAvatarID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetSpatiusAvatarID(spatiusAvatarID string) {
+	s.SpatiusAvatarID = spatiusAvatarID
+	s.require(spatiusAvatarParamsFieldSpatiusAvatarID)
+}
+
+// SetAgoraUID sets the AgoraUID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetAgoraUID(agoraUID string) {
+	s.AgoraUID = agoraUID
+	s.require(spatiusAvatarParamsFieldAgoraUID)
+}
+
+// SetAgoraToken sets the AgoraToken field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetAgoraToken(agoraToken *string) {
+	s.AgoraToken = agoraToken
+	s.require(spatiusAvatarParamsFieldAgoraToken)
+}
+
+// SetRegion sets the Region field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetRegion(region *string) {
+	s.Region = region
+	s.require(spatiusAvatarParamsFieldRegion)
+}
+
+// SetSampleRate sets the SampleRate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetSampleRate(sampleRate *int) {
+	s.SampleRate = sampleRate
+	s.require(spatiusAvatarParamsFieldSampleRate)
+}
+
+// SetSessionExpireMinutes sets the SessionExpireMinutes field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (s *SpatiusAvatarParams) SetSessionExpireMinutes(sessionExpireMinutes *int) {
+	s.SessionExpireMinutes = sessionExpireMinutes
+	s.require(spatiusAvatarParamsFieldSessionExpireMinutes)
+}
+
+func (s *SpatiusAvatarParams) UnmarshalJSON(data []byte) error {
+	type embed SpatiusAvatarParams
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*s),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*s = SpatiusAvatarParams(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.ExtraProperties = extraProperties
+	s.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SpatiusAvatarParams) MarshalJSON() ([]byte, error) {
+	type embed SpatiusAvatarParams
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*s),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, s.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, s.ExtraProperties)
+}
+
+func (s *SpatiusAvatarParams) String() string {
+	if len(s.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(s.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
 // Error response returned when a Telephony or Phone Number Management API request fails.
 //
 // The response body includes `error_type` and `description` fields (not the Agent Management `detail`/`reason` shape).
