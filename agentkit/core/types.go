@@ -9,7 +9,31 @@ const (
 	ProfileCN     Profile = "cn"
 )
 
-type TurnDetectionConfig = Agora.StartAgentsRequestPropertiesTurnDetection
+// TurnDetectionConfig configures conversation turn detection.
+//
+// AgentKit owns this type rather than aliasing the generated SDK struct so the
+// agentkit-specific `language` field (which drives ASR language; see
+// resolveTurnDetectionConfig) survives SDK regeneration. The remaining fields
+// mirror Agora.StartAgentsRequestPropertiesTurnDetection. AgentKit serializes
+// this config to a JSON map (see StructToMap) when building the join payload, so
+// only JSON tags are required.
+type TurnDetectionConfig struct {
+	// Language is the BCP-47 language tag identifying the primary language used
+	// for agent interaction. AgentKit-only field; not present in the generated SDK.
+	Language            *Agora.AsrLanguage                                            `json:"language,omitempty"`
+	Mode                *string                                                       `json:"mode,omitempty"`
+	Config              *Agora.StartAgentsRequestPropertiesTurnDetectionConfig        `json:"config,omitempty"`
+	Type                *Agora.StartAgentsRequestPropertiesTurnDetectionType          `json:"type,omitempty"`
+	InterruptMode       *Agora.StartAgentsRequestPropertiesTurnDetectionInterruptMode `json:"interrupt_mode,omitempty"`
+	InterruptDurationMs *float64                                                      `json:"interrupt_duration_ms,omitempty"`
+	InterruptKeywords   []string                                                      `json:"interrupt_keywords,omitempty"`
+	PrefixPaddingMs     *int                                                          `json:"prefix_padding_ms,omitempty"`
+	SilenceDurationMs   *int                                                          `json:"silence_duration_ms,omitempty"`
+	Threshold           *float64                                                      `json:"threshold,omitempty"`
+	CreateResponse      *bool                                                         `json:"create_response,omitempty"`
+	InterruptResponse   *bool                                                         `json:"interrupt_response,omitempty"`
+	Eagerness           *Agora.StartAgentsRequestPropertiesTurnDetectionEagerness     `json:"eagerness,omitempty"`
+}
 type SalConfig = Agora.StartAgentsRequestPropertiesSal
 type SalMode = Agora.StartAgentsRequestPropertiesSalSalMode
 type AdvancedFeatures = Agora.StartAgentsRequestPropertiesAdvancedFeatures
