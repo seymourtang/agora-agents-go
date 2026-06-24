@@ -380,3 +380,44 @@ func (s *SarvamSTT) ToConfig() map[string]interface{} {
 	}
 	return config
 }
+
+type XaiSTTOptions struct {
+	APIKey           string
+	BaseURL          string
+	Language         string
+	SampleRate       *SampleRate
+	AdditionalParams map[string]interface{}
+}
+
+type XaiSTT struct {
+	options XaiSTTOptions
+}
+
+func NewXaiSTT(opts XaiSTTOptions) *XaiSTT {
+	if opts.APIKey == "" {
+		panic("XaiSTT requires APIKey")
+	}
+	return &XaiSTT{options: opts}
+}
+
+func (x *XaiSTT) ToConfig() map[string]interface{} {
+	params := map[string]interface{}{}
+	for k, v := range x.options.AdditionalParams {
+		params[k] = v
+	}
+	params["api_key"] = x.options.APIKey
+	if x.options.BaseURL != "" {
+		params["base_url"] = x.options.BaseURL
+	}
+	if x.options.Language != "" {
+		params["language"] = x.options.Language
+	}
+	if x.options.SampleRate != nil {
+		params["sample_rate"] = int(*x.options.SampleRate)
+	}
+
+	return map[string]interface{}{
+		"vendor": "xai",
+		"params": params,
+	}
+}

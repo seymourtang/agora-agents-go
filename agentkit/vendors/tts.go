@@ -203,6 +203,121 @@ func (o *OpenAITTS) ToConfig() map[string]interface{} {
 	return config
 }
 
+type GenericTTSOptions struct {
+	URL          string
+	Headers      map[string]string
+	APIKey       string
+	Model        string
+	Voice        string
+	Speed        *float64
+	SampleRate   *SampleRate
+	Instruction  string
+	SkipPatterns []int
+}
+
+type GenericTTS struct {
+	options GenericTTSOptions
+}
+
+func NewGenericTTS(opts GenericTTSOptions) *GenericTTS {
+	if opts.URL == "" {
+		panic("GenericTTS requires URL")
+	}
+	if len(opts.Headers) == 0 {
+		panic("GenericTTS requires Headers")
+	}
+	if opts.Model == "" {
+		panic("GenericTTS requires Model")
+	}
+	if opts.Voice == "" {
+		panic("GenericTTS requires Voice")
+	}
+	return &GenericTTS{options: opts}
+}
+
+func (g *GenericTTS) GetSampleRate() *SampleRate {
+	return g.options.SampleRate
+}
+
+func (g *GenericTTS) ToConfig() map[string]interface{} {
+	params := map[string]interface{}{
+		"model":           g.options.Model,
+		"voice":           g.options.Voice,
+		"response_format": "pcm",
+	}
+	if g.options.APIKey != "" {
+		params["api_key"] = g.options.APIKey
+	}
+	if g.options.Speed != nil {
+		params["speed"] = *g.options.Speed
+	}
+	if g.options.SampleRate != nil {
+		params["sample_rate"] = int(*g.options.SampleRate)
+	}
+	if g.options.Instruction != "" {
+		params["instruction"] = g.options.Instruction
+	}
+
+	config := map[string]interface{}{
+		"vendor":  "generic",
+		"url":     g.options.URL,
+		"headers": g.options.Headers,
+		"params":  params,
+	}
+	if g.options.SkipPatterns != nil {
+		config["skip_patterns"] = g.options.SkipPatterns
+	}
+	return config
+}
+
+type XaiTTSOptions struct {
+	APIKey       string
+	VoiceID      string
+	Language     string
+	SampleRate   *SampleRate
+	SkipPatterns []int
+}
+
+type XaiTTS struct {
+	options XaiTTSOptions
+}
+
+func NewXaiTTS(opts XaiTTSOptions) *XaiTTS {
+	if opts.APIKey == "" {
+		panic("XaiTTS requires APIKey")
+	}
+	if opts.Language == "" {
+		panic("XaiTTS requires Language")
+	}
+	return &XaiTTS{options: opts}
+}
+
+func (x *XaiTTS) GetSampleRate() *SampleRate {
+	return x.options.SampleRate
+}
+
+func (x *XaiTTS) ToConfig() map[string]interface{} {
+	params := map[string]interface{}{
+		"api_key":  x.options.APIKey,
+		"language": x.options.Language,
+	}
+	if x.options.VoiceID != "" {
+		params["voice_id"] = x.options.VoiceID
+	}
+	if x.options.SampleRate != nil {
+		params["sample_rate"] = int(*x.options.SampleRate)
+	}
+
+	config := map[string]interface{}{
+		"vendor": "xai",
+		"params": params,
+	}
+	if x.options.SkipPatterns != nil {
+		config["skip_patterns"] = x.options.SkipPatterns
+	}
+	return config
+}
+
 type CartesiaTTSOptions struct {
 	APIKey       string
 	VoiceID      string

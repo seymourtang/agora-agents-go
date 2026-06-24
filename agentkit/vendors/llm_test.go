@@ -35,6 +35,21 @@ func TestCustomLLMMarksRequestAsCustom(t *testing.T) {
 	}
 }
 
+func TestXaiLLMSerializesAsOpenAICompatibleWithXaiVendor(t *testing.T) {
+	config := NewXaiLLM(XaiLLMOptions{
+		APIKey:  "xai-key",
+		Model:   "grok-4",
+		BaseURL: "https://api.x.ai/v1/chat/completions",
+	}).ToConfig()
+
+	if config["vendor"] != "xai" {
+		t.Fatalf("unexpected vendor: %v", config["vendor"])
+	}
+	if config["style"] != "openai" {
+		t.Fatalf("unexpected style: %v", config["style"])
+	}
+}
+
 func TestAnthropicSerializesRequiredClaudeFields(t *testing.T) {
 	maxTokens := 1024
 	config := NewAnthropic(AnthropicOptions{
@@ -178,6 +193,12 @@ func TestLLMVendorsRequireModels(t *testing.T) {
 			AccessKey: "aws-access",
 			SecretKey: "aws-secret",
 			Region:    "us-east-1",
+		})
+	})
+	assertPanic(t, "XaiLLM requires Model", func() {
+		NewXaiLLM(XaiLLMOptions{
+			APIKey:  "xai-key",
+			BaseURL: "https://api.x.ai/v1/chat/completions",
 		})
 	})
 }

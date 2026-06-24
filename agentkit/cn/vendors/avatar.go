@@ -85,3 +85,76 @@ func (s *SensetimeAvatar) ToConfig() map[string]interface{} {
 		"params": params,
 	}
 }
+
+type SpatiusAvatarOptions struct {
+	SpatiusAPIKey        string
+	SpatiusAppID         string
+	SpatiusAvatarID      string
+	AgoraUID             string
+	AgoraToken           string
+	Region               string
+	SampleRate           *SampleRate
+	SessionExpireMinutes *int
+	Enable               *bool
+	AdditionalParams     map[string]interface{}
+}
+
+type SpatiusAvatar struct {
+	options SpatiusAvatarOptions
+}
+
+func NewSpatiusAvatar(opts SpatiusAvatarOptions) *SpatiusAvatar {
+	if opts.SpatiusAPIKey == "" {
+		panic("SpatiusAvatar requires SpatiusAPIKey")
+	}
+	if opts.SpatiusAppID == "" {
+		panic("SpatiusAvatar requires SpatiusAppID")
+	}
+	if opts.SpatiusAvatarID == "" {
+		panic("SpatiusAvatar requires SpatiusAvatarID")
+	}
+	if opts.AgoraUID == "" {
+		panic("SpatiusAvatar requires AgoraUID")
+	}
+	return &SpatiusAvatar{options: opts}
+}
+
+func (s *SpatiusAvatar) RequiredSampleRate() SampleRate {
+	if s.options.SampleRate != nil {
+		return *s.options.SampleRate
+	}
+	return 0
+}
+
+func (s *SpatiusAvatar) ToConfig() map[string]interface{} {
+	params := map[string]interface{}{}
+	for k, v := range s.options.AdditionalParams {
+		params[k] = v
+	}
+	params["spatius_api_key"] = s.options.SpatiusAPIKey
+	params["spatius_app_id"] = s.options.SpatiusAppID
+	params["spatius_avatar_id"] = s.options.SpatiusAvatarID
+	params["agora_uid"] = s.options.AgoraUID
+	if s.options.AgoraToken != "" {
+		params["agora_token"] = s.options.AgoraToken
+	}
+	if s.options.Region != "" {
+		params["region"] = s.options.Region
+	}
+	if s.options.SampleRate != nil {
+		params["sample_rate"] = int(*s.options.SampleRate)
+	}
+	if s.options.SessionExpireMinutes != nil {
+		params["session_expire_minutes"] = *s.options.SessionExpireMinutes
+	}
+
+	enable := true
+	if s.options.Enable != nil {
+		enable = *s.options.Enable
+	}
+	return map[string]interface{}{
+		"enable": enable,
+		"vendor": "spatius",
+		"params": params,
+	}
+}

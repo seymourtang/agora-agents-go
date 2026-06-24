@@ -72,3 +72,8 @@ var (
 	SpeakPriorityAppend    = base.SpeakPriorityAppend
 	SpeakPriorityIgnore    = base.SpeakPriorityIgnore
 )
+
+var (
+	StartOfSpeechModeManual = base.StartOfSpeechModeManual
+	EndOfSpeechModeManual   = base.EndOfSpeechModeManual
+)
