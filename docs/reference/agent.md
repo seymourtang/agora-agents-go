@@ -100,6 +100,15 @@ func WithGreetingConfigs(configs *LlmGreetingConfigs) AgentOption
 
 Deprecated. Configure `GreetingConfigs` on the LLM vendor instead.
 
+### WithGreetingAudioURL
+
+<!-- snippet: fragment -->
+```go
+func WithGreetingAudioURL(url string) AgentOption
+```
+
+Sets `llm.greeting_audio_url` for the cascading-flow LLM configuration.
+
 ### WithSalConfig
 
 <!-- snippet: fragment -->
@@ -135,6 +144,15 @@ func WithParameters(params *SessionParams) AgentOption
 ```
 
 Sets additional session parameters.
+
+### WithSessionOptOut
+
+<!-- snippet: fragment -->
+```go
+func WithSessionOptOut(optOut bool) AgentOption
+```
+
+Sets `parameters.opt_out` for the session start request.
 
 ### WithAudioScenario
 
