@@ -182,6 +182,29 @@ func TestRequestBodyScenario3AgentGreetingFillsIn(t *testing.T) {
 	assert.Equal(t, "agent greeting", llm["greeting_message"])
 }
 
+func TestRequestBodyScenario3GreetingAudioURLAndSessionOptOut(t *testing.T) {
+	opts := basePropertiesOpts()
+	opts.AllowMissingVendorCategories = []string{"asr", "tts"}
+
+	agent := NewAgent(testAgoraClient()).
+		WithLlm(vendors.NewOpenAI(vendors.OpenAIOptions{
+			APIKey:  "openai-key",
+			BaseURL: "https://api.openai.com/v1/chat/completions",
+			Model:   "gpt-4o",
+		})).
+		WithGreetingAudioURL("https://cdn.example.com/greeting.wav").
+		WithSessionOptOut(true)
+
+	props, err := agent.ToPropertiesMap(opts)
+	require.NoError(t, err)
+
+	llm := props["llm"].(map[string]interface{})
+	assert.Equal(t, "https://cdn.example.com/greeting.wav", llm["greeting_audio_url"])
+
+	parameters := props["parameters"].(map[string]interface{})
+	assert.Equal(t, true, parameters["opt_out"])
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Scenario 4 — VertexAI URL construction
 // ─────────────────────────────────────────────────────────────────────────────
@@ -796,6 +819,21 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 		assert.Equal(t, "openai", llm["style"])
 	})
 
+	t.Run("XaiLLM", func(t *testing.T) {
+		agent := NewAgent(testAgoraClient()).
+			WithLlm(vendors.NewXaiLLM(vendors.XaiLLMOptions{
+				APIKey:  "xai-key",
+				Model:   "grok-4",
+				BaseURL: "https://api.x.ai/v1/chat/completions",
+			}))
+		props, err := agent.ToPropertiesMap(llmOpts())
+		require.NoError(t, err)
+		llm := props["llm"].(map[string]interface{})
+		assert.Equal(t, "xai", llm["vendor"])
+		assert.Equal(t, "openai", llm["style"])
+		assert.Equal(t, "grok-4", llm["params"].(map[string]interface{})["model"])
+	})
+
 	t.Run("VertexAILLM", func(t *testing.T) {
 		agent := NewAgent(testAgoraClient()).
 			WithLlm(vendors.NewVertexAILLM(vendors.VertexAILLMOptions{
@@ -916,6 +954,43 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 		assert.Equal(t, "tts-1-hd", p["model"])
 		assert.Equal(t, "alloy", p["voice"])
 		assert.Equal(t, "https://api.openai.com/v1/audio/speech", p["base_url"])
+	})
+
+	t.Run("GenericTTS", func(t *testing.T) {
+		agent := agentWithTTS(vendors.NewGenericTTS(vendors.GenericTTSOptions{
+			URL:     "https://tts.example.com/v1/audio/speech",
+			Headers: map[string]string{"Authorization": "Bearer token"},
+			APIKey:  "generic-key",
+			Model:   "gpt-4o-mini-tts",
+			Voice:   "alloy",
+		}))
+		props, err := agent.ToPropertiesMap(ttsOpts())
+		require.NoError(t, err)
+		tts := props["tts"].(map[string]interface{})
+		assert.Equal(t, "generic", tts["vendor"])
+		assert.Equal(t, "https://tts.example.com/v1/audio/speech", tts["url"])
+		assert.Equal(t, map[string]string{"Authorization": "Bearer token"}, tts["headers"])
+		p := tts["params"].(map[string]interface{})
+		assert.Equal(t, "generic-key", p["api_key"])
+		assert.Equal(t, "gpt-4o-mini-tts", p["model"])
+		assert.Equal(t, "alloy", p["voice"])
+		assert.Equal(t, "pcm", p["response_format"])
+	})
+
+	t.Run("XaiTTS", func(t *testing.T) {
+		agent := agentWithTTS(vendors.NewXaiTTS(vendors.XaiTTSOptions{
+			APIKey:   "xai-key",
+			Language: "en-US",
+			VoiceID:  "voice-1",
+		}))
+		props, err := agent.ToPropertiesMap(ttsOpts())
+		require.NoError(t, err)
+		tts := props["tts"].(map[string]interface{})
+		assert.Equal(t, "xai", tts["vendor"])
+		p := tts["params"].(map[string]interface{})
+		assert.Equal(t, "xai-key", p["api_key"])
+		assert.Equal(t, "en-US", p["language"])
+		assert.Equal(t, "voice-1", p["voice_id"])
 	})
 
 	t.Run("Cartesia", func(t *testing.T) {

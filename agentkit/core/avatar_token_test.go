@@ -8,6 +8,12 @@ func TestIsAvatarTokenManagedIncludesSensetime(t *testing.T) {
 	}
 }
 
+func TestIsAvatarTokenManagedIncludesSpatius(t *testing.T) {
+	if !IsAvatarTokenManaged("spatius") {
+		t.Fatal("expected spatius avatar to use managed agora_token generation")
+	}
+}
+
 func TestBuildPropertiesMapAutoGeneratesSensetimeAvatarToken(t *testing.T) {
 	base := &BaseAgent{
 		Avatar: map[string]interface{}{
@@ -34,13 +40,13 @@ func TestBuildPropertiesMapAutoGeneratesSensetimeAvatarToken(t *testing.T) {
 	}
 
 	props, err := BuildPropertiesMap(base, ToPropertiesOptions{
-		Channel:                "avatar-channel",
-		AgentUID:               "1001",
-		RemoteUIDs:             []string{"1002"},
-		AppID:                  "agora-app",
-		AppCertificate:         "agora-cert",
-		ExpiresIn:              3600,
-		SkipVendorValidation:   true,
+		Channel:              "avatar-channel",
+		AgentUID:             "1001",
+		RemoteUIDs:           []string{"1002"},
+		AppID:                "agora-app",
+		AppCertificate:       "agora-cert",
+		ExpiresIn:            3600,
+		SkipVendorValidation: true,
 	}, func(GenerateConvoAITokenOptions) (string, error) {
 		return "avatar-token", nil
 	})

@@ -534,6 +534,33 @@ func (c *CustomLLM) ToConfig() map[string]interface{} {
 	return (&OpenAI{options: opts}).ToConfig()
 }
 
+type XaiLLMOptions = OpenAIOptions
+
+type XaiLLM struct {
+	options XaiLLMOptions
+}
+
+func NewXaiLLM(opts XaiLLMOptions) *XaiLLM {
+	if opts.APIKey == "" {
+		panic("XaiLLM requires APIKey")
+	}
+	if opts.Model == "" {
+		panic("XaiLLM requires Model")
+	}
+	if opts.BaseURL == "" {
+		panic("XaiLLM requires BaseURL")
+	}
+	return &XaiLLM{options: opts}
+}
+
+func (x *XaiLLM) ToConfig() map[string]interface{} {
+	opts := x.options
+	if opts.Vendor == "" {
+		opts.Vendor = "xai"
+	}
+	return (&OpenAI{options: opts}).ToConfig()
+}
+
 type VertexAILLMOptions struct {
 	GeminiOptions
 	ProjectID string

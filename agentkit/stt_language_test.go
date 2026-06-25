@@ -144,8 +144,8 @@ func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {
 
 	assert.PanicsWithValue(t, "OpenAISTT: input_audio_transcription.language is required", func() {
 		vendors.NewOpenAISTT(vendors.OpenAISTTOptions{
-			APIKey:  "openai-key",
-			Prompt:  "Transcribe speech",
+			APIKey: "openai-key",
+			Prompt: "Transcribe speech",
 		}).ToConfig()
 	})
 
@@ -186,6 +186,19 @@ func TestSTTVendorParamsMatchDocumentedShapes(t *testing.T) {
 		"language": "en-US",
 		"uri":      "wss://example.test/ws",
 	}, assemblyAIConfig["params"])
+
+	xaiSampleRate := vendors.SampleRate24kHz
+	assert.Equal(t, map[string]interface{}{
+		"api_key":     "xai-key",
+		"base_url":    "wss://api.x.ai/v1/stt",
+		"language":    "en-US",
+		"sample_rate": 24000,
+	}, vendors.NewXaiSTT(vendors.XaiSTTOptions{
+		APIKey:     "xai-key",
+		BaseURL:    "wss://api.x.ai/v1/stt",
+		Language:   "en-US",
+		SampleRate: &xaiSampleRate,
+	}).ToConfig()["params"])
 }
 
 func TestAssemblyAIParamsStayNestedAndASRLanguageComesFromTurnDetection(t *testing.T) {

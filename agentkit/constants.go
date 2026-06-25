@@ -171,3 +171,11 @@ var (
 	// MllmTurnDetectionModeSemanticVad uses semantic detection (OpenAI Realtime only).
 	MllmTurnDetectionModeSemanticVad = Agora.MllmTurnDetectionModeSemanticVad
 )
+
+var (
+	// StartOfSpeechModeManual lets the client explicitly signal the start of a user turn.
+	StartOfSpeechModeManual StartOfSpeechMode = "manual"
+
+	// EndOfSpeechModeManual lets the client explicitly signal the end of a user turn.
+	EndOfSpeechModeManual EndOfSpeechMode = "manual"
+)

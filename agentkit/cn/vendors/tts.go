@@ -191,14 +191,14 @@ func (t *TencentTTS) ToConfig() map[string]interface{} {
 }
 
 type MicrosoftTTSOptions struct {
-	Key          string
-	Region       string
-	VoiceName    string
-	SampleRate   *SampleRate
-	Speed        *float64
-	Volume       *float64
+	Key              string
+	Region           string
+	VoiceName        string
+	SampleRate       *SampleRate
+	Speed            *float64
+	Volume           *float64
 	AdditionalParams map[string]interface{}
-	SkipPatterns []int
+	SkipPatterns     []int
 }
 
 type MicrosoftTTS struct {
@@ -250,17 +250,84 @@ func (m *MicrosoftTTS) ToConfig() map[string]interface{} {
 	return config
 }
 
-type BytedanceTTSOptions struct {
-	Token        string
-	AppID        string
-	Cluster      string
-	VoiceType    string
-	SpeedRatio   *float64
-	VolumeRatio  *float64
-	PitchRatio   *float64
-	Emotion      string
-	AdditionalParams map[string]interface{}
+type GenericTTSOptions struct {
+	URL          string
+	Headers      map[string]string
+	APIKey       string
+	Model        string
+	Voice        string
+	Speed        *float64
+	SampleRate   *SampleRate
+	Instruction  string
 	SkipPatterns []int
+}
+
+type GenericTTS struct {
+	options GenericTTSOptions
+}
+
+func NewGenericTTS(opts GenericTTSOptions) *GenericTTS {
+	if opts.URL == "" {
+		panic("GenericTTS requires URL")
+	}
+	if len(opts.Headers) == 0 {
+		panic("GenericTTS requires Headers")
+	}
+	if opts.Model == "" {
+		panic("GenericTTS requires Model")
+	}
+	if opts.Voice == "" {
+		panic("GenericTTS requires Voice")
+	}
+	return &GenericTTS{options: opts}
+}
+
+func (g *GenericTTS) GetSampleRate() *SampleRate {
+	return g.options.SampleRate
+}
+
+func (g *GenericTTS) ToConfig() map[string]interface{} {
+	params := map[string]interface{}{
+		"model":           g.options.Model,
+		"voice":           g.options.Voice,
+		"response_format": "pcm",
+	}
+	if g.options.APIKey != "" {
+		params["api_key"] = g.options.APIKey
+	}
+	if g.options.Speed != nil {
+		params["speed"] = *g.options.Speed
+	}
+	if g.options.SampleRate != nil {
+		params["sample_rate"] = int(*g.options.SampleRate)
+	}
+	if g.options.Instruction != "" {
+		params["instruction"] = g.options.Instruction
+	}
+
+	config := map[string]interface{}{
+		"vendor":  "generic",
+		"url":     g.options.URL,
+		"headers": g.options.Headers,
+		"params":  params,
+	}
+	if g.options.SkipPatterns != nil {
+		config["skip_patterns"] = g.options.SkipPatterns
+	}
+	return config
+}
+
+type BytedanceTTSOptions struct {
+	Token            string
+	AppID            string
+	Cluster          string
+	VoiceType        string
+	SpeedRatio       *float64
+	VolumeRatio      *float64
+	PitchRatio       *float64
+	Emotion          string
+	AdditionalParams map[string]interface{}
+	SkipPatterns     []int
 }
 
 type BytedanceTTS struct {
@@ -319,12 +386,12 @@ func (b *BytedanceTTS) ToConfig() map[string]interface{} {
 }
 
 type CosyVoiceTTSOptions struct {
-	APIKey       string
-	Model        string
-	Voice        string
-	SampleRate   *int
+	APIKey           string
+	Model            string
+	Voice            string
+	SampleRate       *int
 	AdditionalParams map[string]interface{}
-	SkipPatterns []int
+	SkipPatterns     []int
 }
 
 type CosyVoiceTTS struct {
@@ -374,11 +441,11 @@ func (c *CosyVoiceTTS) ToConfig() map[string]interface{} {
 }
 
 type BytedanceDuplexTTSOptions struct {
-	AppID        string
-	Token        string
-	Speaker      string
+	AppID            string
+	Token            string
+	Speaker          string
 	AdditionalParams map[string]interface{}
-	SkipPatterns []int
+	SkipPatterns     []int
 }
 
 type BytedanceDuplexTTS struct {

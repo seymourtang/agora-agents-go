@@ -70,13 +70,13 @@ func TestCNTTSVendorParams(t *testing.T) {
 		{
 			name: "tencent",
 			params: NewTencentTTS(TencentTTSOptions{
-				AppID:           "app-id",
-				SecretID:        "secret-id",
-				SecretKey:       "secret-key",
+				AppID:     "app-id",
+				SecretID:  "secret-id",
+				SecretKey: "secret-key",
 				AdditionalParams: map[string]interface{}{
-					"app_id":   "override-app",
+					"app_id":     "override-app",
 					"voice_type": 999,
-					"codec":    "pcm",
+					"codec":      "pcm",
 				},
 				VoiceType:       ptrInt(601005),
 				Volume:          ptrFloat(0),
@@ -148,14 +148,30 @@ func TestCNTTSVendorParams(t *testing.T) {
 		{
 			name: "stepfun",
 			params: NewStepFunTTS(StepFunTTSOptions{
-				APIKey: "step-key",
-				Model:  "step-tts-mini",
+				APIKey:  "step-key",
+				Model:   "step-tts-mini",
 				VoiceID: "cixingnansheng",
 			}).ToConfig()["params"].(map[string]interface{}),
 			want: map[string]interface{}{
 				"api_key":  "step-key",
 				"model":    "step-tts-mini",
 				"voice_id": "cixingnansheng",
+			},
+		},
+		{
+			name: "generic",
+			params: NewGenericTTS(GenericTTSOptions{
+				URL:     "https://tts.example.com/v1/audio/speech",
+				Headers: map[string]string{"Authorization": "Bearer token"},
+				APIKey:  "generic-key",
+				Model:   "gpt-4o-mini-tts",
+				Voice:   "alloy",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"api_key":         "generic-key",
+				"model":           "gpt-4o-mini-tts",
+				"voice":           "alloy",
+				"response_format": "pcm",
 			},
 		},
 	}

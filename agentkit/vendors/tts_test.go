@@ -151,6 +151,35 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			want:   map[string]interface{}{"voice": "coral"},
 		},
 		{
+			name: "generic",
+			params: NewGenericTTS(GenericTTSOptions{
+				URL:     "https://tts.example.com/v1/audio/speech",
+				Headers: map[string]string{"Authorization": "Bearer token"},
+				APIKey:  "generic-key",
+				Model:   "gpt-4o-mini-tts",
+				Voice:   "alloy",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"api_key":         "generic-key",
+				"model":           "gpt-4o-mini-tts",
+				"voice":           "alloy",
+				"response_format": "pcm",
+			},
+		},
+		{
+			name: "xai",
+			params: NewXaiTTS(XaiTTSOptions{
+				APIKey:   "xai-key",
+				Language: "en-US",
+				VoiceID:  "voice-1",
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"api_key":  "xai-key",
+				"language": "en-US",
+				"voice_id": "voice-1",
+			},
+		},
+		{
 			name: "humeai",
 			params: NewHumeAITTS(HumeAITTSOptions{
 				Key:      "hume-key",

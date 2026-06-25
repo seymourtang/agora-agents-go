@@ -188,9 +188,25 @@ The SDK also includes named helpers for the remaining Agora-supported LLM provid
 |---|---|---|
 | `NewGroq` | `GroqOptions` | `APIKey`, `Model`, `BaseURL` |
 | `NewVertexAILLM` | `VertexAILLMOptions` | `APIKey`, `Model`, `ProjectID`, `Location` |
+| `NewXaiLLM` | `XaiLLMOptions` | `APIKey`, `Model`, `BaseURL` |
 | `NewAmazonBedrock` | `AmazonBedrockOptions` | `AccessKey`, `SecretKey`, `Region`, `Model` |
 | `NewDify` | `DifyOptions` | `APIKey`, `URL`, `Model` |
 | `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` |
+
+### NewXaiLLM
+
+<!-- snippet: fragment -->
+```go
+func NewXaiLLM(opts XaiLLMOptions) *XaiLLM
+```
+
+Panics if `APIKey`, `Model`, or `BaseURL` is empty.
+
+#### XaiLLMOptions
+
+`XaiLLMOptions` is an alias of `OpenAIOptions`.
+
+Use `NewXaiLLM` for xAI Grok chat-completions style LLM integrations in the global/default vendor package. It emits `vendor: "xai"` with OpenAI-compatible request formatting.
 
 ---
 
@@ -262,6 +278,29 @@ Panics if `Voice` is empty. `APIKey`, `Model`, and `BaseURL` are required togeth
 | `Instructions`   | `string`   | No       | Custom instructions for voice style, accent, pace, and tone |
 | `Speed`          | `*float64` | No       | Speech speed multiplier            |
 | `SkipPatterns`   | `[]int`    | No       | Patterns to skip                   |
+
+### NewGenericTTS
+
+<!-- snippet: fragment -->
+```go
+func NewGenericTTS(opts GenericTTSOptions) *GenericTTS
+```
+
+Panics if `URL`, `Headers`, `Model`, or `Voice` is empty.
+
+#### GenericTTSOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `URL` | `string` | Yes | Generic OpenAI-compatible TTS endpoint |
+| `Headers` | `map[string]string` | Yes | Custom HTTP headers forwarded to the TTS service |
+| `APIKey` | `string` | No | API key sent as `params.api_key` |
+| `Model` | `string` | Yes | TTS model name |
+| `Voice` | `string` | Yes | Voice name |
+| `Speed` | `*float64` | No | Speech rate |
+| `SampleRate` | `*SampleRate` | No | Output sample rate |
+| `Instruction` | `string` | No | Additional style instruction |
+| `SkipPatterns` | `[]int` | No | Patterns to skip |
 
 ### NewCartesiaTTS
 
@@ -467,6 +506,25 @@ Panics if `Key`, `Speaker`, or `TargetLanguageCode` is empty.
 | `SampleRate`         | `*int`   | No       | Audio sample rate |
 | `SkipPatterns`       | `[]int`  | No       | Patterns to skip     |
 
+### NewXaiTTS
+
+<!-- snippet: fragment -->
+```go
+func NewXaiTTS(opts XaiTTSOptions) *XaiTTS
+```
+
+Panics if `APIKey` or `Language` is empty.
+
+#### XaiTTSOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | xAI API key |
+| `VoiceID` | `string` | No | xAI voice identifier |
+| `Language` | `string` | Yes | BCP-47 language code |
+| `SampleRate` | `*SampleRate` | No | Output sample rate |
+| `SkipPatterns` | `[]int` | No | Patterns to skip |
+
 ---
 
 ## STT Vendors
@@ -621,6 +679,25 @@ Panics if `APIKey` is empty.
 | `APIKey`   | `string` | Yes      | Sarvam API key   |
 | `Language` | `string` | No       | Language code    |
 | `Model`    | `string` | No       | Model identifier |
+
+### NewXaiSTT
+
+<!-- snippet: fragment -->
+```go
+func NewXaiSTT(opts XaiSTTOptions) *XaiSTT
+```
+
+Panics if `APIKey` is empty.
+
+#### XaiSTTOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | xAI API key |
+| `BaseURL` | `string` | No | xAI streaming STT WebSocket URL |
+| `Language` | `string` | No | Recognition language |
+| `SampleRate` | `*SampleRate` | No | Audio sample rate |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ---
 
@@ -891,6 +968,38 @@ Required TTS sample rate: **not enforced** (`RequiredSampleRate()` returns `0`).
 |---|---|---|
 | `X` | `int` | Horizontal position |
 | `Y` | `int` | Vertical position |
+
+### NewSpatiusAvatar
+
+Package: `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`
+
+Use with `agentkit/cn.Agent.WithAvatar`.
+
+<!-- snippet: fragment -->
+```go
+func NewSpatiusAvatar(opts SpatiusAvatarOptions) *SpatiusAvatar
+```
+
+Panics if `SpatiusAPIKey`, `SpatiusAppID`, `SpatiusAvatarID`, or `AgoraUID` is empty.
+
+Required TTS sample rate: **not enforced** (`RequiredSampleRate()` returns `0`). Configure TTS according to your Spatius deployment.
+
+`AgoraToken` is optional; AgentKit auto-generates `agora_token` on `Start()` when it is omitted and `AppCertificate` is configured on the client.
+
+#### SpatiusAvatarOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `SpatiusAPIKey` | `string` | Yes | Spatius API key |
+| `SpatiusAppID` | `string` | Yes | Spatius application ID |
+| `SpatiusAvatarID` | `string` | Yes | Spatius avatar ID |
+| `AgoraUID` | `string` | Yes | UID for avatar video stream; use a different UID from `AgentUID` |
+| `AgoraToken` | `string` | No | Avatar Agora token; auto-generated when omitted |
+| `Region` | `string` | No | Spatius service region, for example `cn-beijing` |
+| `SampleRate` | `*SampleRate` | No | Avatar audio sample rate hint |
+| `SessionExpireMinutes` | `*int` | No | Session validity duration in minutes |
+| `Enable` | `*bool` | No | Enable or disable the avatar |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 
 ---
 

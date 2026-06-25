@@ -6,9 +6,9 @@ description: Add visual avatars to your agent with token handling and sample rat
 
 # Avatars
 
-Avatars provide a visual representation of your AI agent. The SDK supports LiveAvatar, Generic Avatar, Anam, Akool, deprecated HeyGen integrations, and SenseTime (CN only). Avatar sessions currently require the cascading ASR/LLM/TTS pipeline; MLLM sessions do not support avatars. Vendors that publish an Agora video stream use a separate avatar UID and token from the voice agent.
+Avatars provide a visual representation of your AI agent. The SDK supports LiveAvatar, Generic Avatar, Anam, Akool, deprecated HeyGen integrations, and the CN-only SenseTime and Spatius avatar integrations. Avatar sessions currently require the cascading ASR/LLM/TTS pipeline; MLLM sessions do not support avatars. Vendors that publish an Agora video stream use a separate avatar UID and token from the voice agent.
 
-For mainland China integrations, use `agentkit/cn` with `NewSensetimeAvatar` from `agentkit/cn/vendors`. See [CN AgentKit](./cn-agentkit.md) for routing details.
+For mainland China integrations, use `agentkit/cn` with `NewSensetimeAvatar` or `NewSpatiusAvatar` from `agentkit/cn/vendors`. See [CN AgentKit](./cn-agentkit.md) for routing details.
 
 ## Agent Token vs Avatar Token
 
@@ -17,7 +17,7 @@ Voice agents and video avatars both use ConvoAI-compatible Agora tokens. They mu
 | Purpose | Field | UID | Default behavior |
 |---|---|---|---|
 | Voice agent | `properties.token` | `agent_rtc_uid` | Generated from session `AgentUID` when `Token` is omitted |
-| Avatar video stream | `avatar.params.agora_token` | `avatar.params.agora_uid` | Auto-generated for LiveAvatar, HeyGen, Generic, and SenseTime when `AgoraToken` is omitted |
+| Avatar video stream | `avatar.params.agora_token` | `avatar.params.agora_uid` | Auto-generated for LiveAvatar, HeyGen, Generic, SenseTime, and Spatius when `AgoraToken` is omitted |
 
 Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you provide `AgoraToken`, the SDK uses it as-is and does not overwrite it.
 
@@ -31,6 +31,7 @@ Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you prov
 | Anam | `vendors.NewAnamAvatar` | Provider-managed | `APIKey` |
 | Generic | `vendors.NewGenericAvatar` | Vendor-dependent; not enforced by AgentKit | `APIKey`, `APIBaseURL`, `AvatarID`, `AgoraUID` |
 | SenseTime (CN) | `cn/vendors.NewSensetimeAvatar` | Not enforced by AgentKit | `AgoraUID`, `AppID`, `AppKey`, `SceneList` |
+| Spatius (CN) | `cn/vendors.NewSpatiusAvatar` | Not enforced by AgentKit | `SpatiusAPIKey`, `SpatiusAppID`, `SpatiusAvatarID`, `AgoraUID` |
 
 ## Generic Avatar Example
 
@@ -61,7 +62,7 @@ agent := agentkit.NewAgent(client).WithLlm(
 )
 ```
 
-For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar, HeyGen, Generic, and SenseTime, AgentKit auto-generates `agora_token` when `agora_uid` is set and `agora_token` is omitted.
+For Generic avatars, `agora_appid`, `agora_channel`, and `agora_token` are filled from the session when omitted. For LiveAvatar, HeyGen, Generic, SenseTime, and Spatius, AgentKit auto-generates `agora_token` when `agora_uid` is set and `agora_token` is omitted.
 
 ## LiveAvatar Example
 
@@ -248,6 +249,22 @@ func main() {
 
 See [Vendors Reference — CN Avatar Vendors](../reference/vendors.md#newsensetimeavatar) for field details.
 
+## Spatius Avatar Example (CN)
+
+Spatius is available only from the CN facade (`agentkit/cn`). Use `agentkit/cn/vendors.NewSpatiusAvatar` with the CN agent builder. When `AgoraToken` is omitted, AgentKit auto-generates `agora_token` from the session channel and avatar `AgoraUID`.
+
+```go
+agent := agentkit.NewAgent(client).WithAvatar(
+    vendors.NewSpatiusAvatar(vendors.SpatiusAvatarOptions{
+        SpatiusAPIKey:   "<spatius_api_key>",
+        SpatiusAppID:    "<spatius_app_id>",
+        SpatiusAvatarID: "<spatius_avatar_id>",
+        AgoraUID:        "2001",
+        Region:          "cn-beijing",
+    }),
+)
+```
+
 ## Sample Rate Validation and Panic Behavior
 
 The Go SDK enforces TTS/avatar sample rate constraints at runtime. This differs from TypeScript (compile-time phantom types) and Python (`ValueError`).
@@ -260,7 +277,7 @@ The Go SDK enforces TTS/avatar sample rate constraints at runtime. This differs 
 Avatar requires TTS sample rate of 24000 Hz, but TTS is configured with 16000 Hz. Please update your TTS sample_rate to 24000.
 ```
 
-**Akool (16kHz)**, **Anam**, **Generic**, and **SenseTime** do not panic at `WithAvatar()` time. Their constraints are checked in `AgentSession.Start()` via `ValidateTtsSampleRate` or provider-specific validation.
+**Akool (16kHz)**, **Anam**, **Generic**, **SenseTime**, and **Spatius** do not panic at `WithAvatar()` time. Their constraints are checked in `AgentSession.Start()` via `ValidateTtsSampleRate` or provider-specific validation.
 
 ### Why panic instead of returning an error?
 
@@ -344,3 +361,18 @@ agent := agentkit.NewAgent(client).
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params merged into `avatar.params` |
 
 Each `SensetimeScene` contains a `DigitalRole` (`FaceFeatureID`, `Position` with `X`/`Y`, and model package `URL`).
+
+## SpatiusAvatarOptions Fields (CN)
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `SpatiusAPIKey` | `string` | Yes | Spatius API key |
+| `SpatiusAppID` | `string` | Yes | Spatius application ID |
+| `SpatiusAvatarID` | `string` | Yes | Spatius avatar ID |
+| `AgoraUID` | `string` | Yes | UID for the avatar's video stream; must differ from session `AgentUID` |
+| `AgoraToken` | `string` | No | Avatar Agora token. Auto-generated when omitted. |
+| `Region` | `string` | No | Spatius service region, for example `cn-beijing` |
+| `SampleRate` | `*vendors.SampleRate` | No | Avatar audio sample rate hint |
+| `SessionExpireMinutes` | `*int` | No | Session validity duration in minutes |
+| `Enable` | `*bool` | No | Enable or disable the avatar |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params merged into `avatar.params` |

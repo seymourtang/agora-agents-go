@@ -107,6 +107,10 @@ func WithInstructions(instructions string) AgentOption {
 func WithGreeting(greeting string) AgentOption  { return agentcore.WithGreeting(greeting) }
 func WithFailureMessage(msg string) AgentOption { return agentcore.WithFailureMessage(msg) }
 func WithMaxHistory(n int) AgentOption          { return agentcore.WithMaxHistory(n) }
+func WithGreetingAudioURL(url string) AgentOption {
+	return agentcore.WithGreetingAudioURL(url)
+}
+func WithSessionOptOut(optOut bool) AgentOption { return agentcore.WithSessionOptOut(optOut) }
 func WithTurnDetectionConfig(cfg *TurnDetectionConfig) AgentOption {
 	return agentcore.WithTurnDetectionConfig(cfg)
 }
@@ -133,19 +137,19 @@ func (a *Agent) Client() agentcore.ClientRuntime {
 	return a.base.Client
 }
 
-func (a *Agent) WithStt(vendor cnvendors.STT) *Agent {
+func (a *Agent) WithStt(vendor agentcore.STTVendor) *Agent {
 	return &Agent{base: a.base.ApplySTTConfig(vendor.ToConfig())}
 }
 
-func (a *Agent) WithLlm(vendor cnvendors.LLM) *Agent {
+func (a *Agent) WithLlm(vendor agentcore.LLMVendor) *Agent {
 	return &Agent{base: a.base.ApplyLLMConfig(vendor.ToConfig())}
 }
 
-func (a *Agent) WithTts(vendor cnvendors.TTS) *Agent {
+func (a *Agent) WithTts(vendor agentcore.TTSVendor) *Agent {
 	return &Agent{base: a.base.ApplyTTSConfig(vendor.ToConfig(), vendor.GetSampleRate())}
 }
 
-func (a *Agent) WithAvatar(vendor cnvendors.Avatar) *Agent {
+func (a *Agent) WithAvatar(vendor agentcore.AvatarVendorConfig) *Agent {
 	requiredSR := agentcore.SampleRate(vendor.RequiredSampleRate())
 	avatarConfig := vendor.ToConfig()
 	if agentcore.IsAvatarTokenManaged(vendorName(avatarConfig)) && requiredSR != 0 && a.base.TTSSampleRate != nil && *a.base.TTSSampleRate != requiredSR {
@@ -174,6 +178,7 @@ func (a *Agent) SttConfig() map[string]interface{} { return a.Stt() }
 func (a *Agent) MllmConfig() map[string]interface{} {
 	return a.base.MLLM
 }
+
 func (a *Agent) TtsSampleRate() *cnvendors.SampleRate {
 	if a.base.TTSSampleRate == nil {
 		return nil
@@ -181,6 +186,7 @@ func (a *Agent) TtsSampleRate() *cnvendors.SampleRate {
 	sr := cnvendors.SampleRate(*a.base.TTSSampleRate)
 	return &sr
 }
+
 func (a *Agent) AvatarRequiredSampleRate() *cnvendors.SampleRate {
 	if a.base.AvatarRequiredSampleRate == nil {
 		return nil

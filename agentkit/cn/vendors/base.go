@@ -1,6 +1,6 @@
 package vendors
 
-import core "github.com/AgoraIO/agora-agents-go/v2/agentkit/core"
+import "github.com/AgoraIO/agora-agents-go/v2/agentkit/core"
 
 type SampleRate = core.SampleRate
 
@@ -13,20 +13,9 @@ const (
 	SampleRate48kHz = core.SampleRate48kHz
 )
 
-type LLM interface {
-	ToConfig() map[string]interface{}
-}
-
-type TTS interface {
-	ToConfig() map[string]interface{}
-	GetSampleRate() *SampleRate
-}
-
-type STT interface {
-	ToConfig() map[string]interface{}
-}
-
-type Avatar interface {
-	ToConfig() map[string]interface{}
-	RequiredSampleRate() SampleRate
-}
+type (
+	LLM    = core.LLMVendor
+	TTS    = core.TTSVendor
+	STT    = core.STTVendor
+	Avatar = core.AvatarVendorConfig
+)

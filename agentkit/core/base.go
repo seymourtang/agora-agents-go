@@ -22,6 +22,28 @@ const (
 	SampleRate48kHz SampleRate = 48000
 )
 
+type LLMVendor interface {
+	ToConfig() map[string]interface{}
+}
+
+type TTSVendor interface {
+	ToConfig() map[string]interface{}
+	GetSampleRate() *SampleRate
+}
+
+type STTVendor interface {
+	ToConfig() map[string]interface{}
+}
+
+type MLLMVendor interface {
+	ToConfig() map[string]interface{}
+}
+
+type AvatarVendorConfig interface {
+	ToConfig() map[string]interface{}
+	RequiredSampleRate() SampleRate
+}
+
 type AgentOption func(*BaseAgent)
 
 type ClientRuntime interface {
@@ -201,6 +223,24 @@ func WithRtc(rtc *RtcConfig) AgentOption {
 func WithFillerWords(fw *FillerWordsConfig) AgentOption {
 	return func(a *BaseAgent) {
 		a.FillerWords = fw
+	}
+}
+
+func WithGreetingAudioURL(url string) AgentOption {
+	return func(a *BaseAgent) {
+		if a.LLM == nil {
+			a.LLM = map[string]interface{}{}
+		}
+		a.LLM["greeting_audio_url"] = url
+	}
+}
+
+func WithSessionOptOut(optOut bool) AgentOption {
+	return func(a *BaseAgent) {
+		if a.Parameters == nil {
+			a.Parameters = &SessionParams{}
+		}
+		a.Parameters.OptOut = &optOut
 	}
 }
 
@@ -451,12 +491,16 @@ func IsSensetimeAvatar(vendor string) bool {
 	return vendor == "sensetime"
 }
 
+func IsSpatiusAvatar(vendor string) bool {
+	return vendor == "spatius"
+}
+
 func IsGenericAvatar(vendor string) bool {
 	return vendor == "generic"
 }
 
 func IsAvatarTokenManaged(vendor string) bool {
-	return IsHeyGenAvatar(vendor) || IsLiveAvatarAvatar(vendor) || IsGenericAvatar(vendor) || IsSensetimeAvatar(vendor)
+	return IsHeyGenAvatar(vendor) || IsLiveAvatarAvatar(vendor) || IsGenericAvatar(vendor) || IsSensetimeAvatar(vendor) || IsSpatiusAvatar(vendor)
 }
 
 func ValidateAvatarConfig(vendor string, params map[string]interface{}) error {
@@ -514,6 +558,22 @@ func ValidateAvatarConfig(vendor string, params map[string]interface{}) error {
 			if typed, ok := params["sceneList"].([]map[string]interface{}); !ok || len(typed) == 0 {
 				return fmt.Errorf("Sensetime avatar requires sceneList")
 			}
+		}
+	} else if IsSpatiusAvatar(vendor) {
+		if params == nil {
+			return fmt.Errorf("Spatius avatar requires params")
+		}
+		if !HasNonEmptyString(params, "spatius_api_key") {
+			return fmt.Errorf("Spatius avatar requires spatius_api_key")
+		}
+		if !HasNonEmptyString(params, "spatius_app_id") {
+			return fmt.Errorf("Spatius avatar requires spatius_app_id")
+		}
+		if !HasNonEmptyString(params, "spatius_avatar_id") {
+			return fmt.Errorf("Spatius avatar requires spatius_avatar_id")
+		}
+		if avatarUIDString(params["agora_uid"]) == "" {
+			return fmt.Errorf("Spatius avatar requires agora_uid")
 		}
 	} else if IsGenericAvatar(vendor) {
 		if params == nil {
