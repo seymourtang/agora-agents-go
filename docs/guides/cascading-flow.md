@@ -156,7 +156,7 @@ func main() {
 
 ## Required Vendors
 
-In cascading mode, **LLM and TTS are required**. STT is optional — if omitted, the platform uses a default ASR provider. `ToProperties` returns an error if LLM or TTS is missing:
+In cascading mode, **LLM and TTS are required**. STT is optional — if omitted, the SDK uses a default ASR provider. Global/default `agentkit` falls back to `ares`; `agentkit/cn` falls back to `fengming`. `ToProperties` returns an error if LLM or TTS is missing:
 
 ```go
 agent := agentkit.NewAgent(client)

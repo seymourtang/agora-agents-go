@@ -97,7 +97,7 @@ func TestInvalidTurnDetectionLanguagePanics(t *testing.T) {
 	})
 }
 
-func TestSTTDefaultTurnDetectionLanguageIsSentWithoutSTT(t *testing.T) {
+func TestGlobalDefaultASRIsAresWhenSTTIsOmitted(t *testing.T) {
 	props := propertiesForSTTLanguage(t, baseAgentForSTTLanguage())
 
 	assert.Equal(t, map[string]interface{}{"vendor": "ares", "language": "en-US"}, props["asr"])

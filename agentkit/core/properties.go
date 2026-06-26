@@ -2,7 +2,7 @@ package core
 
 import "fmt"
 
-func BuildPropertiesMap(base *BaseAgent, opts ToPropertiesOptions, tokenFactory TokenFactory) (map[string]interface{}, error) {
+func BuildPropertiesMap(profile Profile, base *BaseAgent, opts ToPropertiesOptions, tokenFactory TokenFactory) (map[string]interface{}, error) {
 	if base == nil {
 		return nil, fmt.Errorf("agent is required")
 	}
@@ -155,7 +155,7 @@ func BuildPropertiesMap(base *BaseAgent, opts ToPropertiesOptions, tokenFactory 
 		return nil, err
 	}
 	if base.STT != nil || !allowMissingCategories["asr"] {
-		propsMap["asr"] = resolveAsrConfig(base, turnDetection)
+		propsMap["asr"] = resolveAsrConfig(profile, base, turnDetection)
 	}
 	propsMap["turn_detection"] = turnDetection
 
@@ -187,16 +187,23 @@ func ensureDefaultAudioScenario(propsMap map[string]interface{}) {
 	}
 }
 
-func resolveAsrConfig(base *BaseAgent, turnDetection map[string]interface{}) map[string]interface{} {
+func resolveAsrConfig(profile Profile, base *BaseAgent, turnDetection map[string]interface{}) map[string]interface{} {
 	asrConfig := CloneConfig(base.STT)
 	if asrConfig == nil {
-		asrConfig = map[string]interface{}{"vendor": "ares"}
+		asrConfig = map[string]interface{}{"vendor": defaultASRVendor(profile)}
 	}
 	if len(asrConfig) == 0 {
-		asrConfig["vendor"] = "ares"
+		asrConfig["vendor"] = defaultASRVendor(profile)
 	}
 	asrConfig["language"] = turnDetection["language"]
 	return asrConfig
+}
+
+func defaultASRVendor(profile Profile) string {
+	if profile == ProfileCN {
+		return "fengming"
+	}
+	return "ares"
 }
 
 func resolveTurnDetectionConfig(base *BaseAgent) (map[string]interface{}, error) {

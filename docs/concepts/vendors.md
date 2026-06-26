@@ -113,7 +113,7 @@ Note: `OpenAITTS` always returns `SampleRate24kHz`. Other TTS vendors return the
 
 ## STT Vendors
 
-Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults to `en-US`. STT vendor `Language` fields are serialized under `asr.params` using each provider's own format. Ares does not take a provider language option; AgentKit uses `TurnDetectionConfig.Language` for REST `asr.language`.
+Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults to `en-US`. STT vendor `Language` fields are serialized under `asr.params` using each provider's own format. When global/default `agentkit` omits `WithStt()`, AgentKit falls back to `asr.vendor = "ares"`. Ares does not take a provider language option; AgentKit uses `TurnDetectionConfig.Language` for REST `asr.language`.
 
 | Constructor | Options Struct | Required Fields |
 |---|---|---|
@@ -187,7 +187,7 @@ Use with `agentkit/cn.Agent`. CN LLM constructors share `OpenAIOptions` shape an
 
 ### CN STT
 
-REST `asr.language` comes from `TurnDetectionConfig.Language` (default `en-US`), not from CN STT constructors. Provider-specific language values go under `asr.params` when set.
+REST `asr.language` comes from `TurnDetectionConfig.Language` (default `en-US`), not from CN STT constructors. When `agentkit/cn` omits `WithStt()`, AgentKit falls back to `asr.vendor = "fengming"`. Provider-specific language values go under `asr.params` when set.
 
 | Constructor | Wire `vendor` | Required fields |
 |---|---|---|

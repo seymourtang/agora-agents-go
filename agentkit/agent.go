@@ -420,7 +420,7 @@ func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{
 }
 
 func BuildPropertiesMap(base *agentcore.BaseAgent, opts ToPropertiesOptions, tokenFactory func(GenerateConvoAITokenOptions) (string, error)) (map[string]interface{}, error) {
-	return agentcore.BuildPropertiesMap(base, agentcore.ToPropertiesOptions(opts), func(coreOpts agentcore.GenerateConvoAITokenOptions) (string, error) {
+	return agentcore.BuildPropertiesMap(agentcore.ProfileGlobal, base, agentcore.ToPropertiesOptions(opts), func(coreOpts agentcore.GenerateConvoAITokenOptions) (string, error) {
 		return tokenFactory(GenerateConvoAITokenOptions(coreOpts))
 	})
 }

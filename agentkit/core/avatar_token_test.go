@@ -39,7 +39,7 @@ func TestBuildPropertiesMapAutoGeneratesSensetimeAvatarToken(t *testing.T) {
 		},
 	}
 
-	props, err := BuildPropertiesMap(base, ToPropertiesOptions{
+	props, err := BuildPropertiesMap(ProfileGlobal, base, ToPropertiesOptions{
 		Channel:              "avatar-channel",
 		AgentUID:             "1001",
 		RemoteUIDs:           []string{"1002"},
