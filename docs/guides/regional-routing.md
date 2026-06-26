@@ -75,6 +75,8 @@ func main() {
 }
 ```
 
+If you omit `WithStt()` in the global/default facade, AgentKit falls back to `asr.vendor = "ares"`.
+
 CN example:
 
 ```go
@@ -110,6 +112,8 @@ func main() {
     )
 }
 ```
+
+If you omit `WithStt()` in the CN facade, AgentKit falls back to `asr.vendor = "fengming"`.
 
 ## How the domain pool works
 

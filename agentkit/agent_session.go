@@ -280,7 +280,7 @@ func (s *AgentSession) Start(ctx context.Context) (string, error) {
 		Warn:                           s.warnf,
 	}
 
-	properties, err := agentcore.BuildPropertiesMap(baseAgent, propOpts, func(opts agentcore.GenerateConvoAITokenOptions) (string, error) {
+	properties, err := agentcore.BuildPropertiesMap(s.agent.Profile(), baseAgent, propOpts, func(opts agentcore.GenerateConvoAITokenOptions) (string, error) {
 		return GenerateConvoAIToken(GenerateConvoAITokenOptions(opts))
 	})
 	if err != nil {

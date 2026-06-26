@@ -221,7 +221,9 @@ func (a *Agent) ToProperties(opts ToPropertiesOptions) (*Agora.StartAgentsReques
 }
 
 func (a *Agent) ToPropertiesMap(opts ToPropertiesOptions) (map[string]interface{}, error) {
-	return base.BuildPropertiesMap(a.base, base.ToPropertiesOptions(opts), base.GenerateConvoAIToken)
+	return agentcore.BuildPropertiesMap(agentcore.ProfileCN, a.base, agentcore.ToPropertiesOptions(opts), func(coreOpts agentcore.GenerateConvoAITokenOptions) (string, error) {
+		return base.GenerateConvoAIToken(base.GenerateConvoAITokenOptions(coreOpts))
+	})
 }
 
 func ExpiresInHours(hours float64) (int, error) {

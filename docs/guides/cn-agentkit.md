@@ -63,6 +63,8 @@ func main() {
 
 `agentkit/cn.NewAgoraClient(...)` always uses `option.AreaCN` internally. You do not need to pass an `Area` value.
 
+When `WithStt()` is omitted on `agentkit/cn.Agent`, the request falls back to `asr.vendor = "fengming"` automatically.
+
 ## Package Layout
 
 - Global/default package: `github.com/AgoraIO/agora-agents-go/v2/agentkit`
