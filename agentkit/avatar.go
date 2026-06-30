@@ -83,12 +83,6 @@ func ValidateAvatarConfig(vendor string, params map[string]interface{}) error {
 		if !agentcore.HasNonEmptyString(params, "app_key") {
 			return fmt.Errorf("Sensetime avatar requires app_key")
 		}
-		sceneList, ok := params["sceneList"].([]interface{})
-		if !ok || len(sceneList) == 0 {
-			if typed, ok := params["sceneList"].([]map[string]interface{}); !ok || len(typed) == 0 {
-				return fmt.Errorf("Sensetime avatar requires sceneList")
-			}
-		}
 	} else if IsGenericAvatar(vendor) {
 		if params == nil {
 			return fmt.Errorf("Generic avatar requires params")

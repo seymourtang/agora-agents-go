@@ -30,7 +30,7 @@ Use a unique avatar `AgoraUID`; do not reuse the session `AgentUID`. If you prov
 | Akool | `vendors.NewAkoolAvatar` | 16kHz (`SampleRate16kHz`) | `APIKey` |
 | Anam | `vendors.NewAnamAvatar` | Provider-managed | `APIKey` |
 | Generic | `vendors.NewGenericAvatar` | Vendor-dependent; not enforced by AgentKit | `APIKey`, `APIBaseURL`, `AvatarID`, `AgoraUID` |
-| SenseTime (CN) | `cn/vendors.NewSensetimeAvatar` | Not enforced by AgentKit | `AgoraUID`, `AppID`, `AppKey`, `SceneList` |
+| SenseTime (CN) | `cn/vendors.NewSensetimeAvatar` | Not enforced by AgentKit | `AgoraUID`, `AppID`, `AppKey` |
 | Spatius (CN) | `cn/vendors.NewSpatiusAvatar` | Not enforced by AgentKit | `SpatiusAPIKey`, `SpatiusAppID`, `SpatiusAvatarID`, `AgoraUID` |
 
 ## Generic Avatar Example
@@ -365,7 +365,7 @@ agent := agentkit.NewAgent(client).
 | `AgoraToken` | `string` | No | Avatar Agora token. Auto-generated when omitted. |
 | `AppID` | `string` | Yes | SenseTime application ID (serialized as `params.appId`) |
 | `AppKey` | `string` | Yes | SenseTime application key |
-| `SceneList` | `[]SensetimeScene` | Yes | Scene configuration with digital role, position, and model URL |
+| `SceneList` | `[]SensetimeScene` | No | Optional scene configuration with digital role, position, and model URL |
 | `Enable` | `*bool` | No | Enable or disable the avatar (default: `true`) |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params merged into `avatar.params` |
 
