@@ -1226,12 +1226,15 @@ func TestMLLMVendorShapes(t *testing.T) {
 		mllm := props["mllm"].(map[string]interface{})
 		assert.Equal(t, "vertexai", mllm["vendor"])
 		assert.Equal(t, true, mllm["enable"])
-		assert.Equal(t, "my-project", mllm["project_id"])
-		assert.Equal(t, "us-central1", mllm["location"])
-		assert.Equal(t, `{"type":"service_account"}`, mllm["adc_credentials_string"])
 		assert.Equal(t, "", mllm["url"])
+		assert.NotContains(t, mllm, "project_id")
+		assert.NotContains(t, mllm, "location")
+		assert.NotContains(t, mllm, "adc_credentials_string")
 		params := mllm["params"].(map[string]interface{})
 		assert.Equal(t, "gemini-live-2.5-flash", params["model"])
+		assert.Equal(t, "my-project", params["project_id"])
+		assert.Equal(t, "us-central1", params["location"])
+		assert.Equal(t, `{"type":"service_account"}`, params["adc_credentials_string"])
 	})
 
 	t.Run("XaiGrok", func(t *testing.T) {
