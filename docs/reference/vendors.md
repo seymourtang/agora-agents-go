@@ -164,8 +164,9 @@ Panics if `APIKey` or `Model` is empty.
 
 | Field             | Type                       | Required | Default                  | Description          |
 | ----------------- | -------------------------- | -------- | ------------------------ | -------------------- |
-| `APIKey`          | `string`                   | Yes      | —                        | Google AI API key    |
+| `APIKey`          | `string`                   | Yes      | —                        | Google AI API key |
 | `Model`           | `string`                   | Yes      | —                        | Model identifier     |
+| `URL`             | `string`                   | No       | auto-generated           | Optional full Gemini `streamGenerateContent` URL override |
 | `Temperature`     | `*float64`                 | No       | —                        | Sampling temperature |
 | `TopP`            | `*float64`                 | No       | —                        | Nucleus sampling     |
 | `TopK`            | `*int`                     | No       | —                        | Top-K sampling       |
@@ -192,6 +193,8 @@ The SDK also includes named helpers for the remaining Agora-supported LLM provid
 | `NewAmazonBedrock` | `AmazonBedrockOptions` | `AccessKey`, `SecretKey`, `Region`, `Model` |
 | `NewDify` | `DifyOptions` | `APIKey`, `URL`, `Model` |
 | `NewCustomLLM` | `CustomLLMOptions` | `APIKey`, `BaseURL`, `Model` |
+
+`VertexAILLMOptions` accepts an optional `URL` override. When omitted, AgentKit builds the Vertex AI `streamGenerateContent` endpoint from `ProjectID`, `Location`, and `Model`.
 
 ### NewXaiLLM
 

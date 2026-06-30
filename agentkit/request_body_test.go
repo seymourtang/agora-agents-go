@@ -229,6 +229,7 @@ func TestRequestBodyScenario4VertexAIURLConstruction(t *testing.T) {
 	llm := props["llm"].(map[string]interface{})
 	expectedURL := "https://us-central1-aiplatform.googleapis.com/v1/projects/my-project/locations/us-central1/publishers/google/models/gemini-2.0-flash:streamGenerateContent?alt=sse"
 	assert.Equal(t, expectedURL, llm["url"])
+	assert.Equal(t, "vertex-key", llm["api_key"])
 	assert.Equal(t, "gemini", llm["style"])
 
 	params := llm["params"].(map[string]interface{})
@@ -257,6 +258,7 @@ func TestRequestBodyScenario4VertexAIExplicitURLOverride(t *testing.T) {
 
 	llm := props["llm"].(map[string]interface{})
 	assert.Equal(t, "https://custom.vertex.example.com", llm["url"])
+	assert.Equal(t, "vertex-key", llm["api_key"])
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -784,8 +786,9 @@ func TestBYOKLLMVendorShapes(t *testing.T) {
 		props, err := agent.ToPropertiesMap(llmOpts())
 		require.NoError(t, err)
 		llm := props["llm"].(map[string]interface{})
-		assert.Equal(t, "gem-key", llm["api_key"])
 		assert.Equal(t, "gemini", llm["style"])
+		assert.Equal(t, "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:streamGenerateContent?alt=sse&key=gem-key", llm["url"])
+		assert.NotContains(t, llm, "api_key")
 		assert.Equal(t, "gemini-1.5-flash", llm["params"].(map[string]interface{})["model"])
 	})
 
