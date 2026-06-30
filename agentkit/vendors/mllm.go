@@ -314,6 +314,9 @@ func (v *VertexAI) ToConfig() map[string]interface{} {
 		params[k] = val
 	}
 	params["model"] = v.options.Model
+	params["project_id"] = v.options.ProjectID
+	params["location"] = v.options.Location
+	params["adc_credentials_string"] = v.options.ADCredentialsString
 	if v.options.Voice != "" {
 		params["voice"] = v.options.Voice
 	}
@@ -335,14 +338,14 @@ func (v *VertexAI) ToConfig() map[string]interface{} {
 	if v.options.HttpOptions != nil {
 		params["http_options"] = v.options.HttpOptions
 	}
+	params["project_id"] = v.options.ProjectID
+	params["location"] = v.options.Location
+	params["adc_credentials_string"] = v.options.ADCredentialsString
 
 	config := map[string]interface{}{
-		"vendor":                 "vertexai",
-		"project_id":             v.options.ProjectID,
-		"location":               v.options.Location,
-		"adc_credentials_string": v.options.ADCredentialsString,
-		"url":                    v.options.URL,
-		"params":                 params,
+		"vendor": "vertexai",
+		"url":    v.options.URL,
+		"params": params,
 	}
 	if v.options.GreetingMessage != "" {
 		config["greeting_message"] = v.options.GreetingMessage
