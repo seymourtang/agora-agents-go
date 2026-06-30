@@ -2,6 +2,19 @@ package vendors
 
 import "testing"
 
+func TestSensetimeAvatarOmitsEmptySceneList(t *testing.T) {
+	config := NewSensetimeAvatar(SensetimeAvatarOptions{
+		AgoraUID: "2001",
+		AppID:    "sensetime-app",
+		AppKey:   "sensetime-key",
+	}).ToConfig()
+
+	params := config["params"].(map[string]interface{})
+	if _, ok := params["sceneList"]; ok {
+		t.Fatalf("expected empty sceneList to be omitted, got %#v", params["sceneList"])
+	}
+}
+
 func TestSpatiusAvatarSerializesExpectedParams(t *testing.T) {
 	sr := SampleRate24kHz
 	expire := 30

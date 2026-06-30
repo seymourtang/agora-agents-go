@@ -11,3 +11,12 @@ func TestNewAgentRequiresClient(t *testing.T) {
 		NewAgent(nil)
 	})
 }
+
+func TestValidateAvatarConfigAllowsSensetimeWithoutSceneList(t *testing.T) {
+	err := ValidateAvatarConfig("sensetime", map[string]interface{}{
+		"agora_uid": "2001",
+		"appId":     "sensetime-app",
+		"app_key":   "sensetime-key",
+	})
+	require.NoError(t, err)
+}

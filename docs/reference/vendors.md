@@ -942,7 +942,7 @@ Use with `agentkit/cn.Agent.WithAvatar`. See [Avatars Guide](../guides/avatars.m
 func NewSensetimeAvatar(opts SensetimeAvatarOptions) *SensetimeAvatar
 ```
 
-Panics if `AgoraUID`, `AppID`, `AppKey`, or `SceneList` is empty.
+Panics if `AgoraUID`, `AppID`, or `AppKey` is empty.
 
 Required TTS sample rate: **not enforced** (`RequiredSampleRate()` returns `0`). Configure TTS according to your SenseTime deployment.
 
@@ -956,7 +956,7 @@ Required TTS sample rate: **not enforced** (`RequiredSampleRate()` returns `0`).
 | `AgoraToken` | `string` | No | Avatar Agora token; auto-generated when omitted |
 | `AppID` | `string` | Yes | SenseTime app ID (wire key: `params.appId`) |
 | `AppKey` | `string` | Yes | SenseTime app key |
-| `SceneList` | `[]SensetimeScene` | Yes | One or more scenes with digital role configuration |
+| `SceneList` | `[]SensetimeScene` | No | Optional scene configuration with digital role settings |
 | `Enable` | `*bool` | No | Enable or disable the avatar (default: `true`) |
 | `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
 

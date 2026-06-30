@@ -39,9 +39,6 @@ func NewSensetimeAvatar(opts SensetimeAvatarOptions) *SensetimeAvatar {
 	if opts.AppKey == "" {
 		panic("SensetimeAvatar requires AppKey")
 	}
-	if len(opts.SceneList) == 0 {
-		panic("SensetimeAvatar requires SceneList")
-	}
 	return &SensetimeAvatar{options: opts}
 }
 
@@ -60,20 +57,22 @@ func (s *SensetimeAvatar) ToConfig() map[string]interface{} {
 	}
 	params["appId"] = s.options.AppID
 	params["app_key"] = s.options.AppKey
-	sceneList := make([]map[string]interface{}, 0, len(s.options.SceneList))
-	for _, scene := range s.options.SceneList {
-		sceneList = append(sceneList, map[string]interface{}{
-			"digital_role": map[string]interface{}{
-				"face_feature_id": scene.DigitalRole.FaceFeatureID,
-				"position": map[string]interface{}{
-					"x": scene.DigitalRole.Position.X,
-					"y": scene.DigitalRole.Position.Y,
+	if len(s.options.SceneList) > 0 {
+		sceneList := make([]map[string]interface{}, 0, len(s.options.SceneList))
+		for _, scene := range s.options.SceneList {
+			sceneList = append(sceneList, map[string]interface{}{
+				"digital_role": map[string]interface{}{
+					"face_feature_id": scene.DigitalRole.FaceFeatureID,
+					"position": map[string]interface{}{
+						"x": scene.DigitalRole.Position.X,
+						"y": scene.DigitalRole.Position.Y,
+					},
+					"url": scene.DigitalRole.URL,
 				},
-				"url": scene.DigitalRole.URL,
-			},
-		})
+			})
+		}
+		params["sceneList"] = sceneList
 	}
-	params["sceneList"] = sceneList
 
 	enable := true
 	if s.options.Enable != nil {

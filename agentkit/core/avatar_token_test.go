@@ -2,6 +2,17 @@ package core
 
 import "testing"
 
+func TestValidateAvatarConfigAllowsSensetimeWithoutSceneList(t *testing.T) {
+	err := ValidateAvatarConfig("sensetime", map[string]interface{}{
+		"agora_uid": "2001",
+		"appId":     "sensetime-app",
+		"app_key":   "sensetime-key",
+	})
+	if err != nil {
+		t.Fatalf("expected sensetime avatar without sceneList to be valid, got %v", err)
+	}
+}
+
 func TestIsAvatarTokenManagedIncludesSensetime(t *testing.T) {
 	if !IsAvatarTokenManaged("sensetime") {
 		t.Fatal("expected sensetime avatar to use managed agora_token generation")

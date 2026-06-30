@@ -169,7 +169,7 @@ agent = agent.WithMllm(mllm)
 | `NewAnamAvatar` | `AnamAvatarOptions` | `APIKey` | Provider-managed |
 | `NewAkoolAvatar` | `AkoolAvatarOptions` | `APIKey` | 16kHz |
 | `NewHeyGenAvatar` | `HeyGenAvatarOptions` | `APIKey`, `Quality`, `AgoraUID` | 24kHz; deprecated alias |
-| `NewSensetimeAvatar` (CN) | `SensetimeAvatarOptions` | `AgoraUID`, `AppID`, `AppKey`, `SceneList` | Not enforced; see [Avatars Guide](../guides/avatars.md) |
+| `NewSensetimeAvatar` (CN) | `SensetimeAvatarOptions` | `AgoraUID`, `AppID`, `AppKey` | Not enforced; see [Avatars Guide](../guides/avatars.md) |
 | `NewSpatiusAvatar` (CN) | `SpatiusAvatarOptions` | `SpatiusAPIKey`, `SpatiusAppID`, `SpatiusAvatarID`, `AgoraUID` | Not enforced; see [Avatars Guide](../guides/avatars.md) |
 
 ## CN Vendors (`agentkit/cn/vendors`)
@@ -217,7 +217,7 @@ All CN TTS option structs support `AdditionalParams` and `SkipPatterns`.
 
 | Constructor | Wire `vendor` | Required fields |
 |---|---|---|
-| `NewSensetimeAvatar` | `sensetime` | `AgoraUID`, `AppID`, `AppKey`, `SceneList` |
+| `NewSensetimeAvatar` | `sensetime` | `AgoraUID`, `AppID`, `AppKey` |
 | `NewSpatiusAvatar` | `spatius` | `SpatiusAPIKey`, `SpatiusAppID`, `SpatiusAvatarID`, `AgoraUID` |
 
 See [CN AgentKit](../guides/cn-agentkit.md) and [Vendors Reference](../reference/vendors.md#cn-avatar-vendors) for examples.
