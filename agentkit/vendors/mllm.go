@@ -242,10 +242,8 @@ func (g *GeminiLive) ToConfig() map[string]interface{} {
 	config := map[string]interface{}{
 		"vendor":  "gemini",
 		"api_key": g.options.APIKey,
+		"url":     g.options.URL,
 		"params":  params,
-	}
-	if g.options.URL != "" {
-		config["url"] = g.options.URL
 	}
 	if g.options.GreetingMessage != "" {
 		config["greeting_message"] = g.options.GreetingMessage
@@ -343,11 +341,8 @@ func (v *VertexAI) ToConfig() map[string]interface{} {
 		"project_id":             v.options.ProjectID,
 		"location":               v.options.Location,
 		"adc_credentials_string": v.options.ADCredentialsString,
+		"url":                    v.options.URL,
 		"params":                 params,
-	}
-
-	if v.options.URL != "" {
-		config["url"] = v.options.URL
 	}
 	if v.options.GreetingMessage != "" {
 		config["greeting_message"] = v.options.GreetingMessage
