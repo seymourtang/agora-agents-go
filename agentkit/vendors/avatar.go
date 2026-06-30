@@ -117,7 +117,7 @@ func (a *AkoolAvatar) ToConfig() map[string]interface{} {
 
 type AnamAvatarOptions struct {
 	APIKey           string
-	PersonaID        string
+	AvatarID         string
 	Enable           *bool
 	AdditionalParams map[string]interface{}
 }
@@ -143,8 +143,8 @@ func (a *AnamAvatar) ToConfig() map[string]interface{} {
 		params[k] = v
 	}
 	params["api_key"] = a.options.APIKey
-	if a.options.PersonaID != "" {
-		params["persona_id"] = a.options.PersonaID
+	if a.options.AvatarID != "" {
+		params["avatar_id"] = a.options.AvatarID
 	}
 	enable := true
 	if a.options.Enable != nil {
