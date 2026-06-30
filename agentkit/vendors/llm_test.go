@@ -104,6 +104,9 @@ func TestVertexAILLMBuildsCorrectURLAndExcludesProjectFromParams(t *testing.T) {
 	if config["style"] != "gemini" {
 		t.Fatalf("unexpected style: %v", config["style"])
 	}
+	if config["api_key"] != "vertex-token" {
+		t.Fatalf("unexpected api_key: %#v", config["api_key"])
+	}
 	url, _ := config["url"].(string)
 	if !strings.Contains(url, "project") || !strings.Contains(url, "us-central1") {
 		t.Fatalf("URL does not contain project routing: %v", url)
@@ -113,6 +116,49 @@ func TestVertexAILLMBuildsCorrectURLAndExcludesProjectFromParams(t *testing.T) {
 	}
 	if _, ok := params["location"]; ok {
 		t.Fatalf("location should not be in params, got: %#v", params)
+	}
+}
+
+func TestVertexAILLMUsesExplicitURLOverride(t *testing.T) {
+	config := NewVertexAILLM(VertexAILLMOptions{
+		GeminiOptions: GeminiOptions{
+			APIKey: "vertex-token",
+			Model:  "gemini-2.0-flash",
+			URL:    "https://custom.vertex.example.com",
+		},
+		ProjectID: "project",
+		Location:  "us-central1",
+	}).ToConfig()
+
+	if config["url"] != "https://custom.vertex.example.com" {
+		t.Fatalf("unexpected url: %v", config["url"])
+	}
+	if config["api_key"] != "vertex-token" {
+		t.Fatalf("unexpected api_key: %#v", config["api_key"])
+	}
+}
+
+func TestGeminiBuildsStreamGenerateContentURLAndOmitsTopLevelAPIKey(t *testing.T) {
+	config := NewGemini(GeminiOptions{
+		APIKey: "google-key",
+		Model:  "gemini-2.0-flash",
+	}).ToConfig()
+
+	if config["style"] != "gemini" {
+		t.Fatalf("unexpected style: %v", config["style"])
+	}
+	if _, ok := config["api_key"]; ok {
+		t.Fatalf("gemini should not emit top-level api_key, got: %#v", config)
+	}
+
+	url, _ := config["url"].(string)
+	if url != "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=google-key" {
+		t.Fatalf("unexpected url: %v", url)
+	}
+
+	params := config["params"].(map[string]interface{})
+	if params["model"] != "gemini-2.0-flash" {
+		t.Fatalf("unexpected params: %#v", params)
 	}
 }
 
@@ -174,6 +220,9 @@ func TestLLMVendorsRequireModels(t *testing.T) {
 	})
 	assertPanic(t, "Gemini requires Model", func() {
 		NewGemini(GeminiOptions{APIKey: "google-key"})
+	})
+	assertPanic(t, "Gemini requires APIKey", func() {
+		NewGemini(GeminiOptions{Model: "gemini-2.0-flash"})
 	})
 	assertPanic(t, "Groq requires Model", func() {
 		NewGroq(GroqOptions{

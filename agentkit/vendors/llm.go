@@ -2,6 +2,7 @@ package vendors
 
 import (
 	"fmt"
+	neturl "net/url"
 	"strings"
 )
 
@@ -415,7 +416,11 @@ func NewGemini(opts GeminiOptions) *Gemini {
 func (g *Gemini) ToConfig() map[string]interface{} {
 	url := g.options.URL
 	if url == "" {
-		url = "https://generativelanguage.googleapis.com/v1beta/models"
+		url = fmt.Sprintf(
+			"https://generativelanguage.googleapis.com/v1beta/models/%s:streamGenerateContent?alt=sse&key=%s",
+			g.options.Model,
+			neturl.QueryEscape(g.options.APIKey),
+		)
 	}
 
 	inputMod := g.options.InputModalities
@@ -423,7 +428,6 @@ func (g *Gemini) ToConfig() map[string]interface{} {
 		inputMod = []string{"text"}
 	}
 
-	// model is the base; explicit Params entries extend it; named fields win.
 	params := map[string]interface{}{"model": g.options.Model}
 	for k, v := range g.options.Params {
 		params[k] = v
@@ -443,12 +447,10 @@ func (g *Gemini) ToConfig() map[string]interface{} {
 
 	config := map[string]interface{}{
 		"url":              url,
-		"api_key":          g.options.APIKey,
 		"params":           params,
 		"style":            "gemini",
 		"input_modalities": inputMod,
 	}
-
 	if g.options.SystemMessages != nil {
 		config["system_messages"] = g.options.SystemMessages
 	}
@@ -589,7 +591,6 @@ func NewVertexAILLM(opts VertexAILLMOptions) *VertexAILLM {
 
 func (v *VertexAILLM) ToConfig() map[string]interface{} {
 	opts := v.options.GeminiOptions
-	opts.APIKey = v.options.APIKey
 	opts.Model = v.options.Model
 	if v.options.URL != "" {
 		opts.URL = v.options.URL
@@ -599,7 +600,9 @@ func (v *VertexAILLM) ToConfig() map[string]interface{} {
 			v.options.Location, v.options.ProjectID, v.options.Location, v.options.Model,
 		)
 	}
-	return (&Gemini{options: opts}).ToConfig()
+	config := (&Gemini{options: opts}).ToConfig()
+	config["api_key"] = v.options.APIKey
+	return config
 }
 
 type AmazonBedrockOptions struct {
