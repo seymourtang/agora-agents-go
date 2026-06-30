@@ -279,6 +279,15 @@ Avatar requires TTS sample rate of 24000 Hz, but TTS is configured with 16000 Hz
 
 **Akool (16kHz)**, **Anam**, **Generic**, **SenseTime**, and **Spatius** do not panic at `WithAvatar()` time. Their constraints are checked in `AgentSession.Start()` via `ValidateTtsSampleRate` or provider-specific validation.
 
+#### Anam options
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | Anam API key |
+| `AvatarID` | `string` | No | Anam avatar identifier (wire key: `params.avatar_id`) |
+| `Enable` | `*bool` | No | Enable or disable the avatar |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
+
 ### Why panic instead of returning an error?
 
 In Go, `panic` is idiomatic for programmer errors — configuration mistakes that should be caught during development, not handled at runtime. A sample rate mismatch is a static configuration error, not a transient failure.

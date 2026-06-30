@@ -891,6 +891,15 @@ func NewAnamAvatar(opts AnamAvatarOptions) *AnamAvatar
 
 Panics if `APIKey` is empty.
 
+#### AnamAvatarOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | Anam API key |
+| `AvatarID` | `string` | No | Anam avatar identifier (wire key: `params.avatar_id`) |
+| `Enable` | `*bool` | No | Enable or disable the avatar |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
+
 ### NewGenericAvatar
 
 <!-- snippet: fragment -->
