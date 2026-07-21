@@ -289,20 +289,24 @@ Panics if `Voice` is empty. `APIKey`, `Model`, and `BaseURL` are required togeth
 func NewGenericTTS(opts GenericTTSOptions) *GenericTTS
 ```
 
-Panics if `URL`, `Headers`, `Model`, or `Voice` is empty.
+Available in both `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors` and `github.com/AgoraIO/agora-agents-go/v2/agentkit/cn/vendors`. Panics if `URL` is empty, malformed, lacks a host, or uses a scheme other than HTTP or HTTPS. Supported URLs serialize with `vendor: "generic_http"`.
+
+`AdditionalParams` values are copied into `tts.params` first. Non-empty named fields take precedence over matching additional parameters.
 
 #### GenericTTSOptions
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `URL` | `string` | Yes | Generic OpenAI-compatible TTS endpoint |
-| `Headers` | `map[string]string` | Yes | Custom HTTP headers forwarded to the TTS service |
+| `URL` | `string` | Yes | Absolute Generic OpenAI-compatible TTS endpoint using HTTP or HTTPS |
+| `Headers` | `map[string]string` | No | Custom HTTP headers forwarded to the TTS service |
 | `APIKey` | `string` | No | API key sent as `params.api_key` |
-| `Model` | `string` | Yes | TTS model name |
-| `Voice` | `string` | Yes | Voice name |
+| `Model` | `string` | No | TTS model name |
+| `Voice` | `string` | No | Voice name |
 | `Speed` | `*float64` | No | Speech rate |
 | `SampleRate` | `*SampleRate` | No | Output sample rate |
+| `ResponseFormat` | `string` | No | Output audio format sent as `params.response_format`; currently `pcm` is supported |
 | `Instruction` | `string` | No | Additional style instruction |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional provider parameters forwarded under `tts.params` |
 | `SkipPatterns` | `[]int` | No | Patterns to skip |
 
 ### NewCartesiaTTS

@@ -1,8 +1,11 @@
 package vendors
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
+
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
 )
 
 func TestCNTTSVendorParams(t *testing.T) {
@@ -161,26 +164,125 @@ func TestCNTTSVendorParams(t *testing.T) {
 		{
 			name: "generic",
 			params: NewGenericTTS(GenericTTSOptions{
-				URL:     "https://tts.example.com/v1/audio/speech",
-				Headers: map[string]string{"Authorization": "Bearer token"},
-				APIKey:  "generic-key",
-				Model:   "gpt-4o-mini-tts",
-				Voice:   "alloy",
+				URL:            "https://tts.example.com/v1/audio/speech",
+				Headers:        map[string]string{"Authorization": "Bearer token"},
+				APIKey:         "generic-key",
+				Model:          "gpt-4o-mini-tts",
+				Voice:          "alloy",
+				ResponseFormat: "pcm",
+				AdditionalParams: map[string]interface{}{
+					"api_key":         "additional-key",
+					"model":           "additional-model",
+					"voice":           "additional-voice",
+					"response_format": "mp3",
+					"custom_param":    "custom-value",
+				},
 			}).ToConfig()["params"].(map[string]interface{}),
 			want: map[string]interface{}{
 				"api_key":         "generic-key",
 				"model":           "gpt-4o-mini-tts",
 				"voice":           "alloy",
 				"response_format": "pcm",
+				"custom_param":    "custom-value",
 			},
 		},
 	}
 
 	for _, tc := range cases {
-		if !reflect.DeepEqual(tc.params, tc.want) {
-			t.Fatalf("%s params mismatch\nwant: %#v\n got: %#v", tc.name, tc.want, tc.params)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			if !reflect.DeepEqual(tc.params, tc.want) {
+				t.Fatalf("params mismatch\nwant: %#v\n got: %#v", tc.want, tc.params)
+			}
+		})
 	}
+}
+
+func TestCNGenericTTSRequiresOnlyURLAndMatchesGeneratedHTTPVendor(t *testing.T) {
+	t.Run("URL only", func(t *testing.T) {
+		config := NewGenericTTS(GenericTTSOptions{
+			URL: "https://tts.example.com/v1/audio/speech",
+		}).ToConfig()
+
+		if got := config["vendor"]; got != "generic_http" {
+			t.Fatalf("vendor = %v, want generic_http", got)
+		}
+		if _, ok := config["headers"]; ok {
+			t.Fatalf("headers should be omitted when empty: %#v", config)
+		}
+		wantParams := map[string]interface{}{}
+		if got := config["params"]; !reflect.DeepEqual(got, wantParams) {
+			t.Fatalf("params mismatch\nwant: %#v\n got: %#v", wantParams, got)
+		}
+
+		payload, err := json.Marshal(config)
+		if err != nil {
+			t.Fatalf("marshal config: %v", err)
+		}
+		var generated Agora.Tts
+		if err := json.Unmarshal(payload, &generated); err != nil {
+			t.Fatalf("unmarshal into generated TTS union: %v", err)
+		}
+		if generated.GenericHTTP == nil {
+			t.Fatalf("generated GenericHTTP vendor is nil: %#v", generated)
+		}
+		if _, err := json.Marshal(generated); err != nil {
+			t.Fatalf("marshal generated TTS union: %v", err)
+		}
+	})
+
+	t.Run("missing URL", func(t *testing.T) {
+		assertPanicValue(t, "GenericTTS requires URL", func() {
+			NewGenericTTS(GenericTTSOptions{})
+		})
+	})
+}
+
+func TestCNGenericTTSURLValidation(t *testing.T) {
+	validURLs := []struct {
+		name string
+		url  string
+	}{
+		{name: "HTTP", url: "http://tts.example.com/v1/audio/speech"},
+		{name: "HTTPS", url: "https://tts.example.com/v1/audio/speech"},
+	}
+	for _, tc := range validURLs {
+		t.Run(tc.name, func(t *testing.T) {
+			config := NewGenericTTS(GenericTTSOptions{URL: tc.url}).ToConfig()
+			if got := config["vendor"]; got != "generic_http" {
+				t.Fatalf("vendor = %v, want generic_http", got)
+			}
+		})
+	}
+
+	invalidURLs := []struct {
+		name      string
+		url       string
+		wantPanic string
+	}{
+		{name: "missing scheme", url: "tts.example.com/v1/audio/speech", wantPanic: "GenericTTS currently supports only HTTP and HTTPS URLs"},
+		{name: "missing host", url: "https:///v1/audio/speech", wantPanic: "GenericTTS currently supports only HTTP and HTTPS URLs"},
+		{name: "malformed", url: "https://tts.example.com/%zz", wantPanic: "GenericTTS currently supports only HTTP and HTTPS URLs"},
+		{name: "WebSocket", url: "ws://tts.example.com/v1/audio/speech", wantPanic: "GenericTTS currently supports only HTTP and HTTPS URLs"},
+		{name: "secure WebSocket", url: "wss://tts.example.com/v1/audio/speech", wantPanic: "GenericTTS currently supports only HTTP and HTTPS URLs"},
+		{name: "FTP", url: "ftp://tts.example.com/v1/audio/speech", wantPanic: "GenericTTS currently supports only HTTP and HTTPS URLs"},
+	}
+	for _, tc := range invalidURLs {
+		t.Run(tc.name, func(t *testing.T) {
+			assertPanicValue(t, tc.wantPanic, func() {
+				NewGenericTTS(GenericTTSOptions{URL: tc.url})
+			})
+		})
+	}
+}
+
+func assertPanicValue(t *testing.T, want string, fn func()) {
+	t.Helper()
+	defer func() {
+		if got := recover(); got != want {
+			t.Fatalf("panic = %v, want %s", got, want)
+		}
+	}()
+	fn()
 }
 
 func ptrInt(v int) *int           { return &v }

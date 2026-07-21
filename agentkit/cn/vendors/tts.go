@@ -1,5 +1,10 @@
 package vendors
 
+import (
+	"net/url"
+	"strings"
+)
+
 type MiniMaxVoiceSetting struct {
 	VoiceID              string
 	Speed                *int
@@ -250,36 +255,35 @@ func (m *MicrosoftTTS) ToConfig() map[string]interface{} {
 	return config
 }
 
+const genericTTSURLValidationMessage = "GenericTTS currently supports only HTTP and HTTPS URLs"
+
 type GenericTTSOptions struct {
-	URL          string
-	Headers      map[string]string
-	APIKey       string
-	Model        string
-	Voice        string
-	Speed        *float64
-	SampleRate   *SampleRate
-	Instruction  string
-	SkipPatterns []int
+	URL              string
+	Headers          map[string]string
+	APIKey           string
+	Model            string
+	Voice            string
+	Speed            *float64
+	SampleRate       *SampleRate
+	ResponseFormat   string
+	Instruction      string
+	AdditionalParams map[string]interface{}
+	SkipPatterns     []int
 }
 
 type GenericTTS struct {
 	options GenericTTSOptions
+	vendor  string
 }
 
 func NewGenericTTS(opts GenericTTSOptions) *GenericTTS {
 	if opts.URL == "" {
 		panic("GenericTTS requires URL")
 	}
-	if len(opts.Headers) == 0 {
-		panic("GenericTTS requires Headers")
+	return &GenericTTS{
+		options: opts,
+		vendor:  genericTTSVendorForURL(opts.URL),
 	}
-	if opts.Model == "" {
-		panic("GenericTTS requires Model")
-	}
-	if opts.Voice == "" {
-		panic("GenericTTS requires Voice")
-	}
-	return &GenericTTS{options: opts}
 }
 
 func (g *GenericTTS) GetSampleRate() *SampleRate {
@@ -287,10 +291,15 @@ func (g *GenericTTS) GetSampleRate() *SampleRate {
 }
 
 func (g *GenericTTS) ToConfig() map[string]interface{} {
-	params := map[string]interface{}{
-		"model":           g.options.Model,
-		"voice":           g.options.Voice,
-		"response_format": "pcm",
+	params := make(map[string]interface{}, len(g.options.AdditionalParams)+1)
+	for key, value := range g.options.AdditionalParams {
+		params[key] = value
+	}
+	if g.options.Model != "" {
+		params["model"] = g.options.Model
+	}
+	if g.options.Voice != "" {
+		params["voice"] = g.options.Voice
 	}
 	if g.options.APIKey != "" {
 		params["api_key"] = g.options.APIKey
@@ -301,20 +310,39 @@ func (g *GenericTTS) ToConfig() map[string]interface{} {
 	if g.options.SampleRate != nil {
 		params["sample_rate"] = int(*g.options.SampleRate)
 	}
+	if g.options.ResponseFormat != "" {
+		params["response_format"] = g.options.ResponseFormat
+	}
 	if g.options.Instruction != "" {
 		params["instruction"] = g.options.Instruction
 	}
 
 	config := map[string]interface{}{
-		"vendor":  "generic",
-		"url":     g.options.URL,
-		"headers": g.options.Headers,
-		"params":  params,
+		"vendor": g.vendor,
+		"url":    g.options.URL,
+		"params": params,
+	}
+	if len(g.options.Headers) > 0 {
+		config["headers"] = g.options.Headers
 	}
 	if g.options.SkipPatterns != nil {
 		config["skip_patterns"] = g.options.SkipPatterns
 	}
 	return config
+}
+
+func genericTTSVendorForURL(rawURL string) string {
+	parsedURL, err := url.ParseRequestURI(rawURL)
+	if err != nil || parsedURL.Host == "" {
+		panic(genericTTSURLValidationMessage)
+	}
+
+	switch strings.ToLower(parsedURL.Scheme) {
+	case "http", "https":
+		return "generic_http"
+	default:
+		panic(genericTTSURLValidationMessage)
+	}
 }
 
 type BytedanceTTSOptions struct {
