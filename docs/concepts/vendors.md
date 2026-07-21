@@ -75,7 +75,7 @@ agent := agentkit.NewAgent(client).WithLlm(llm)
 | `NewGoogleTTS` | `GoogleTTSOptions` | `Key`, `VoiceName` |
 | `NewAmazonTTS` | `AmazonTTSOptions` | `AccessKey`, `SecretKey`, `Region`, `VoiceID`, `Engine` |
 | `NewHumeAITTS` | `HumeAITTSOptions` | `Key`, `VoiceID`, `Provider` |
-| `NewRimeTTS` | `RimeTTSOptions` | `Key`, `Speaker`, `ModelID` |
+| `NewRimeTTS` | `RimeTTSOptions` | `BaseURL`, `ModelID` for managed credentials; `Key`, `Speaker`, `ModelID` for BYOK or omitted `CredentialMode` |
 | `NewFishAudioTTS` | `FishAudioTTSOptions` | `Key`, `ReferenceID`, `Backend` |
 | `NewMiniMaxTTS` | `MiniMaxTTSOptions` | `Model` for supported Agora-managed global/default MiniMax models; `Key`, `GroupID`, `Model`, `VoiceID`, `URL` for BYOK |
 | `NewDeepgramTTS` | `DeepgramTTSOptions` | `APIKey`, `Model` |

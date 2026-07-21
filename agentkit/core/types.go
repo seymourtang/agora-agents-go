@@ -9,6 +9,16 @@ const (
 	ProfileCN     Profile = "cn"
 )
 
+// CredentialMode identifies how credentials are supplied to a provider.
+type CredentialMode string
+
+const (
+	// CredentialModeManaged uses credentials managed by Agora.
+	CredentialModeManaged CredentialMode = "managed"
+	// CredentialModeBYOK uses credentials supplied by the caller.
+	CredentialModeBYOK CredentialMode = "byok"
+)
+
 // TurnDetectionConfig configures conversation turn detection.
 //
 // AgentKit owns this type rather than aliasing the generated SDK struct so the

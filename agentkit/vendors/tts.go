@@ -618,11 +618,12 @@ func (h *HumeAITTS) ToConfig() map[string]interface{} {
 }
 
 type RimeTTSOptions struct {
-	Key          string
-	Speaker      string
-	ModelID      string
-	BaseURL      string
-	SkipPatterns []int
+	CredentialMode CredentialMode
+	Key            string
+	Speaker        string
+	ModelID        string
+	BaseURL        string
+	SkipPatterns   []int
 }
 
 type RimeTTS struct {
@@ -630,14 +631,26 @@ type RimeTTS struct {
 }
 
 func NewRimeTTS(opts RimeTTSOptions) *RimeTTS {
-	if opts.Key == "" {
-		panic("RimeTTS requires Key")
-	}
-	if opts.Speaker == "" {
-		panic("RimeTTS requires Speaker")
-	}
-	if opts.ModelID == "" {
-		panic("RimeTTS requires ModelID")
+	switch opts.CredentialMode {
+	case credentialModeManaged:
+		if opts.BaseURL == "" {
+			panic("RimeTTS requires BaseURL in managed credential mode")
+		}
+		if opts.ModelID == "" {
+			panic("RimeTTS requires ModelID in managed credential mode")
+		}
+	case "", credentialModeBYOK:
+		if opts.Key == "" {
+			panic("RimeTTS requires Key")
+		}
+		if opts.Speaker == "" {
+			panic("RimeTTS requires Speaker")
+		}
+		if opts.ModelID == "" {
+			panic("RimeTTS requires ModelID")
+		}
+	default:
+		panic("RimeTTS CredentialMode must be one of: managed, byok")
 	}
 	return &RimeTTS{options: opts}
 }
@@ -648,11 +661,13 @@ func (r *RimeTTS) GetSampleRate() *SampleRate {
 
 func (r *RimeTTS) ToConfig() map[string]interface{} {
 	params := map[string]interface{}{
-		"api_key": r.options.Key,
-		"speaker": r.options.Speaker,
+		"modelId": r.options.ModelID,
 	}
-	if r.options.ModelID != "" {
-		params["modelId"] = r.options.ModelID
+	if r.options.Key != "" {
+		params["api_key"] = r.options.Key
+	}
+	if r.options.Speaker != "" {
+		params["speaker"] = r.options.Speaker
 	}
 	if r.options.BaseURL != "" {
 		params["base_url"] = r.options.BaseURL
@@ -661,6 +676,9 @@ func (r *RimeTTS) ToConfig() map[string]interface{} {
 	config := map[string]interface{}{
 		"vendor": "rime",
 		"params": params,
+	}
+	if r.options.CredentialMode != "" {
+		config["credential_mode"] = string(r.options.CredentialMode)
 	}
 	if r.options.SkipPatterns != nil {
 		config["skip_patterns"] = r.options.SkipPatterns
