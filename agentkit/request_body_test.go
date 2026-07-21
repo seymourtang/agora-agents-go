@@ -1084,14 +1084,16 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 
 	t.Run("Rime", func(t *testing.T) {
 		agent := agentWithTTS(vendors.NewRimeTTS(vendors.RimeTTSOptions{
-			Key:     "rime-key",
-			Speaker: "eva",
-			ModelID: "mist",
+			CredentialMode: CredentialModeBYOK,
+			Key:            "rime-key",
+			Speaker:        "eva",
+			ModelID:        "mist",
 		}))
 		props, err := agent.ToPropertiesMap(ttsOpts())
 		require.NoError(t, err)
 		tts := props["tts"].(map[string]interface{})
 		assert.Equal(t, "rime", tts["vendor"])
+		assert.Equal(t, "byok", tts["credential_mode"])
 		p := tts["params"].(map[string]interface{})
 		assert.Equal(t, "rime-key", p["api_key"])
 		assert.Equal(t, "eva", p["speaker"])
@@ -1173,7 +1175,30 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 		p := tts["params"].(map[string]interface{})
 		assert.Equal(t, "murf-key", p["api_key"])
 	})
+}
 
+func TestRimeTTSManagedRequestShape(t *testing.T) {
+	opts := basePropertiesOpts()
+	opts.AllowMissingVendorCategories = []string{"asr", "tts"}
+	agent := NewAgent(testAgoraClient()).
+		WithLlm(stubLLM).
+		WithTts(vendors.NewRimeTTS(vendors.RimeTTSOptions{
+			CredentialMode: CredentialModeManaged,
+			ModelID:        "mist",
+			BaseURL:        "wss://managed.rime.example/ws",
+		}))
+
+	props, err := agent.ToPropertiesMap(opts)
+	require.NoError(t, err)
+
+	tts := props["tts"].(map[string]interface{})
+	assert.Equal(t, "rime", tts["vendor"])
+	assert.Equal(t, "managed", tts["credential_mode"])
+	params := tts["params"].(map[string]interface{})
+	assert.Equal(t, "mist", params["modelId"])
+	assert.Equal(t, "wss://managed.rime.example/ws", params["base_url"])
+	assert.NotContains(t, params, "api_key")
+	assert.NotContains(t, params, "speaker")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

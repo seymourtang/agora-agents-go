@@ -1,6 +1,19 @@
 package agentkit
 
-import Agora "github.com/AgoraIO/agora-agents-go/v2"
+import (
+	Agora "github.com/AgoraIO/agora-agents-go/v2"
+	agentcore "github.com/AgoraIO/agora-agents-go/v2/agentkit/core"
+)
+
+// CredentialMode identifies how provider credentials are supplied.
+type CredentialMode = agentcore.CredentialMode
+
+const (
+	// CredentialModeManaged uses credentials managed by Agora.
+	CredentialModeManaged = agentcore.CredentialModeManaged
+	// CredentialModeBYOK uses credentials supplied by the caller.
+	CredentialModeBYOK = agentcore.CredentialModeBYOK
+)
 
 // =============================================================================
 // SAL mode constants

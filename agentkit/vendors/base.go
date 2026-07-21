@@ -13,10 +13,18 @@ const (
 	SampleRate48kHz = core.SampleRate48kHz
 )
 
+// CredentialMode is the shared credential mode accepted by provider options.
+type CredentialMode = core.CredentialMode
+
 type (
 	LLM    = core.LLMVendor
 	TTS    = core.TTSVendor
 	STT    = core.STTVendor
 	MLLM   = core.MLLMVendor
 	Avatar = core.AvatarVendorConfig
+)
+
+const (
+	credentialModeManaged = core.CredentialModeManaged
+	credentialModeBYOK    = core.CredentialModeBYOK
 )

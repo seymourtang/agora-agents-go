@@ -418,17 +418,18 @@ Panics if `Key`, `VoiceID`, or `Provider` is empty.
 func NewRimeTTS(opts RimeTTSOptions) *RimeTTS
 ```
 
-Panics if `Key`, `Speaker`, or `ModelID` is empty.
+When `CredentialMode` is `managed`, panics if `BaseURL` or `ModelID` is empty. When `CredentialMode` is omitted or set to `byok`, panics if `Key`, `Speaker`, or `ModelID` is empty. Panics if `CredentialMode` is any other value.
 
 #### RimeTTSOptions
 
-| Field          | Type       | Required | Description                                   |
-| -------------- | ---------- | -------- | --------------------------------------------- |
-| `Key`          | `string`   | Yes      | Rime API key                                  |
-| `Speaker`      | `string`   | Yes      | Speaker identifier                            |
-| `ModelID`      | `string`   | Yes      | Model identifier                              |
-| `BaseURL`      | `string`   | No       | WebSocket URL                                 |
-| `SkipPatterns` | `[]int`    | No       | Patterns to skip                              |
+| Field            | Type             | Required     | Description                                   |
+| ---------------- | ---------------- | ------------ | --------------------------------------------- |
+| `CredentialMode` | `CredentialMode` | No           | Shared credential mode. Use `agentkit.CredentialModeManaged` or `agentkit.CredentialModeBYOK`. Defaults to BYOK behavior when omitted. |
+| `Key`            | `string`         | BYOK only    | Rime API key                                  |
+| `Speaker`        | `string`         | BYOK only    | Speaker identifier                            |
+| `ModelID`        | `string`         | Yes          | Model identifier                              |
+| `BaseURL`        | `string`         | Managed mode | WebSocket URL. Optional in BYOK mode.         |
+| `SkipPatterns`   | `[]int`          | No           | Patterns to skip                              |
 
 ### NewFishAudioTTS
 

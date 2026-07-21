@@ -357,6 +357,154 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 	}
 }
 
+func TestRimeTTSCredentialModes(t *testing.T) {
+	tests := []struct {
+		name string
+		opts RimeTTSOptions
+		want map[string]interface{}
+	}{
+		{
+			name: "default BYOK mode",
+			opts: RimeTTSOptions{
+				Key:     "rime-key",
+				Speaker: "speaker",
+				ModelID: "mist",
+			},
+			want: map[string]interface{}{
+				"vendor": "rime",
+				"params": map[string]interface{}{
+					"api_key": "rime-key",
+					"speaker": "speaker",
+					"modelId": "mist",
+				},
+			},
+		},
+		{
+			name: "explicit BYOK mode",
+			opts: RimeTTSOptions{
+				CredentialMode: CredentialMode("byok"),
+				Key:            "rime-key",
+				Speaker:        "speaker",
+				ModelID:        "mist",
+			},
+			want: map[string]interface{}{
+				"vendor":          "rime",
+				"credential_mode": "byok",
+				"params": map[string]interface{}{
+					"api_key": "rime-key",
+					"speaker": "speaker",
+					"modelId": "mist",
+				},
+			},
+		},
+		{
+			name: "managed mode",
+			opts: RimeTTSOptions{
+				CredentialMode: CredentialMode("managed"),
+				ModelID:        "mist",
+				BaseURL:        "wss://managed.rime.example/ws",
+			},
+			want: map[string]interface{}{
+				"vendor":          "rime",
+				"credential_mode": "managed",
+				"params": map[string]interface{}{
+					"modelId":  "mist",
+					"base_url": "wss://managed.rime.example/ws",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewRimeTTS(tt.opts).ToConfig()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("config mismatch\nwant: %#v\n got: %#v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestRimeTTSValidation(t *testing.T) {
+	tests := []struct {
+		name      string
+		opts      RimeTTSOptions
+		wantPanic string
+	}{
+		{
+			name:      "default mode requires key",
+			opts:      RimeTTSOptions{Speaker: "speaker", ModelID: "mist"},
+			wantPanic: "RimeTTS requires Key",
+		},
+		{
+			name:      "default mode requires speaker",
+			opts:      RimeTTSOptions{Key: "rime-key", ModelID: "mist"},
+			wantPanic: "RimeTTS requires Speaker",
+		},
+		{
+			name:      "default mode requires model ID",
+			opts:      RimeTTSOptions{Key: "rime-key", Speaker: "speaker"},
+			wantPanic: "RimeTTS requires ModelID",
+		},
+		{
+			name: "BYOK mode requires key",
+			opts: RimeTTSOptions{
+				CredentialMode: CredentialMode("byok"),
+				Speaker:        "speaker",
+				ModelID:        "mist",
+			},
+			wantPanic: "RimeTTS requires Key",
+		},
+		{
+			name: "BYOK mode requires speaker",
+			opts: RimeTTSOptions{
+				CredentialMode: CredentialMode("byok"),
+				Key:            "rime-key",
+				ModelID:        "mist",
+			},
+			wantPanic: "RimeTTS requires Speaker",
+		},
+		{
+			name: "BYOK mode requires model ID",
+			opts: RimeTTSOptions{
+				CredentialMode: CredentialMode("byok"),
+				Key:            "rime-key",
+				Speaker:        "speaker",
+			},
+			wantPanic: "RimeTTS requires ModelID",
+		},
+		{
+			name: "managed mode requires base URL",
+			opts: RimeTTSOptions{
+				CredentialMode: CredentialMode("managed"),
+				ModelID:        "mist",
+			},
+			wantPanic: "RimeTTS requires BaseURL in managed credential mode",
+		},
+		{
+			name: "managed mode requires model ID",
+			opts: RimeTTSOptions{
+				CredentialMode: CredentialMode("managed"),
+				BaseURL:        "wss://managed.rime.example/ws",
+			},
+			wantPanic: "RimeTTS requires ModelID in managed credential mode",
+		},
+		{
+			name:      "unsupported credential mode",
+			opts:      RimeTTSOptions{CredentialMode: "invalid"},
+			wantPanic: "RimeTTS CredentialMode must be one of: managed, byok",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assertPanic(t, tt.wantPanic, func() {
+				NewRimeTTS(tt.opts)
+			})
+		})
+	}
+}
+
 func TestGenericTTSRequiresOnlyURLAndMatchesGeneratedHTTPVendor(t *testing.T) {
 	t.Run("URL only", func(t *testing.T) {
 		config := NewGenericTTS(GenericTTSOptions{
