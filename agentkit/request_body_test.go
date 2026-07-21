@@ -961,16 +961,20 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 
 	t.Run("GenericTTS", func(t *testing.T) {
 		agent := agentWithTTS(vendors.NewGenericTTS(vendors.GenericTTSOptions{
-			URL:     "https://tts.example.com/v1/audio/speech",
-			Headers: map[string]string{"Authorization": "Bearer token"},
-			APIKey:  "generic-key",
-			Model:   "gpt-4o-mini-tts",
-			Voice:   "alloy",
+			URL:            "https://tts.example.com/v1/audio/speech",
+			Headers:        map[string]string{"Authorization": "Bearer token"},
+			APIKey:         "generic-key",
+			Model:          "gpt-4o-mini-tts",
+			Voice:          "alloy",
+			ResponseFormat: "pcm",
+			AdditionalParams: map[string]interface{}{
+				"custom_param": "custom-value",
+			},
 		}))
 		props, err := agent.ToPropertiesMap(ttsOpts())
 		require.NoError(t, err)
 		tts := props["tts"].(map[string]interface{})
-		assert.Equal(t, "generic", tts["vendor"])
+		assert.Equal(t, "generic_http", tts["vendor"])
 		assert.Equal(t, "https://tts.example.com/v1/audio/speech", tts["url"])
 		assert.Equal(t, map[string]string{"Authorization": "Bearer token"}, tts["headers"])
 		p := tts["params"].(map[string]interface{})
@@ -978,6 +982,7 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 		assert.Equal(t, "gpt-4o-mini-tts", p["model"])
 		assert.Equal(t, "alloy", p["voice"])
 		assert.Equal(t, "pcm", p["response_format"])
+		assert.Equal(t, "custom-value", p["custom_param"])
 	})
 
 	t.Run("XaiTTS", func(t *testing.T) {
