@@ -5181,6 +5181,255 @@ func (g *GoogleTtsVoiceSelectionParams) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+// Gradium Text-to-Speech configuration.
+var (
+	gradiumTtsFieldParams       = big.NewInt(1 << 0)
+	gradiumTtsFieldSkipPatterns = big.NewInt(1 << 1)
+)
+
+type GradiumTts struct {
+	Params *GradiumTtsParams `json:"params" url:"params"`
+	// Controls whether the TTS module skips bracketed content when reading LLM response text.
+	SkipPatterns []int `json:"skip_patterns,omitempty" url:"skip_patterns,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (g *GradiumTts) GetParams() *GradiumTtsParams {
+	if g == nil {
+		return nil
+	}
+	return g.Params
+}
+
+func (g *GradiumTts) GetSkipPatterns() []int {
+	if g == nil {
+		return nil
+	}
+	return g.SkipPatterns
+}
+
+func (g *GradiumTts) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GradiumTts) require(field *big.Int) {
+	if g.explicitFields == nil {
+		g.explicitFields = big.NewInt(0)
+	}
+	g.explicitFields.Or(g.explicitFields, field)
+}
+
+// SetParams sets the Params field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GradiumTts) SetParams(params *GradiumTtsParams) {
+	g.Params = params
+	g.require(gradiumTtsFieldParams)
+}
+
+// SetSkipPatterns sets the SkipPatterns field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GradiumTts) SetSkipPatterns(skipPatterns []int) {
+	g.SkipPatterns = skipPatterns
+	g.require(gradiumTtsFieldSkipPatterns)
+}
+
+func (g *GradiumTts) UnmarshalJSON(data []byte) error {
+	type unmarshaler GradiumTts
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GradiumTts(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+	g.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GradiumTts) MarshalJSON() ([]byte, error) {
+	type embed GradiumTts
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*g),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, g.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (g *GradiumTts) String() string {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+// Gradium TTS configuration parameters.
+var (
+	gradiumTtsParamsFieldAPIKey     = big.NewInt(1 << 0)
+	gradiumTtsParamsFieldURL        = big.NewInt(1 << 1)
+	gradiumTtsParamsFieldModelName  = big.NewInt(1 << 2)
+	gradiumTtsParamsFieldVoiceID    = big.NewInt(1 << 3)
+	gradiumTtsParamsFieldSampleRate = big.NewInt(1 << 4)
+)
+
+type GradiumTtsParams struct {
+	// Gradium API key.
+	APIKey string `json:"api_key" url:"api_key"`
+	// WebSocket endpoint for streaming TTS output (for example, "wss://api.gradium.ai/api/speech/tts").
+	URL *string `json:"url,omitempty" url:"url,omitempty"`
+	// Gradium TTS model name (for example, "default").
+	ModelName *string `json:"model_name,omitempty" url:"model_name,omitempty"`
+	// Gradium voice identifier.
+	VoiceID *string `json:"voice_id,omitempty" url:"voice_id,omitempty"`
+	// Audio sample rate in Hz (for example, 16000).
+	SampleRate *int `json:"sample_rate,omitempty" url:"sample_rate,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (g *GradiumTtsParams) GetAPIKey() string {
+	if g == nil {
+		return ""
+	}
+	return g.APIKey
+}
+
+func (g *GradiumTtsParams) GetURL() *string {
+	if g == nil {
+		return nil
+	}
+	return g.URL
+}
+
+func (g *GradiumTtsParams) GetModelName() *string {
+	if g == nil {
+		return nil
+	}
+	return g.ModelName
+}
+
+func (g *GradiumTtsParams) GetVoiceID() *string {
+	if g == nil {
+		return nil
+	}
+	return g.VoiceID
+}
+
+func (g *GradiumTtsParams) GetSampleRate() *int {
+	if g == nil {
+		return nil
+	}
+	return g.SampleRate
+}
+
+func (g *GradiumTtsParams) GetExtraProperties() map[string]interface{} {
+	return g.ExtraProperties
+}
+
+func (g *GradiumTtsParams) require(field *big.Int) {
+	if g.explicitFields == nil {
+		g.explicitFields = big.NewInt(0)
+	}
+	g.explicitFields.Or(g.explicitFields, field)
+}
+
+// SetAPIKey sets the APIKey field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GradiumTtsParams) SetAPIKey(apiKey string) {
+	g.APIKey = apiKey
+	g.require(gradiumTtsParamsFieldAPIKey)
+}
+
+// SetURL sets the URL field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GradiumTtsParams) SetURL(url *string) {
+	g.URL = url
+	g.require(gradiumTtsParamsFieldURL)
+}
+
+// SetModelName sets the ModelName field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GradiumTtsParams) SetModelName(modelName *string) {
+	g.ModelName = modelName
+	g.require(gradiumTtsParamsFieldModelName)
+}
+
+// SetVoiceID sets the VoiceID field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GradiumTtsParams) SetVoiceID(voiceID *string) {
+	g.VoiceID = voiceID
+	g.require(gradiumTtsParamsFieldVoiceID)
+}
+
+// SetSampleRate sets the SampleRate field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (g *GradiumTtsParams) SetSampleRate(sampleRate *int) {
+	g.SampleRate = sampleRate
+	g.require(gradiumTtsParamsFieldSampleRate)
+}
+
+func (g *GradiumTtsParams) UnmarshalJSON(data []byte) error {
+	type embed GradiumTtsParams
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*g),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*g = GradiumTtsParams(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.ExtraProperties = extraProperties
+	g.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GradiumTtsParams) MarshalJSON() ([]byte, error) {
+	type embed GradiumTtsParams
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*g),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, g.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, g.ExtraProperties)
+}
+
+func (g *GradiumTtsParams) String() string {
+	if len(g.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(g.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
 // Hume AI Text-to-Speech configuration (Beta).
 var (
 	humeAiTtsFieldParams       = big.NewInt(1 << 0)
@@ -7451,6 +7700,221 @@ func (m *MinimaxTtsParamsVoiceSetting) MarshalJSON() ([]byte, error) {
 }
 
 func (m *MinimaxTtsParamsVoiceSetting) String() string {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+// Mistral Text-to-Speech configuration.
+var (
+	mistralTtsFieldParams       = big.NewInt(1 << 0)
+	mistralTtsFieldSkipPatterns = big.NewInt(1 << 1)
+)
+
+type MistralTts struct {
+	Params *MistralTtsParams `json:"params" url:"params"`
+	// Controls whether the TTS module skips bracketed content when reading LLM response text.
+	SkipPatterns []int `json:"skip_patterns,omitempty" url:"skip_patterns,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	extraProperties map[string]interface{}
+	rawJSON         json.RawMessage
+}
+
+func (m *MistralTts) GetParams() *MistralTtsParams {
+	if m == nil {
+		return nil
+	}
+	return m.Params
+}
+
+func (m *MistralTts) GetSkipPatterns() []int {
+	if m == nil {
+		return nil
+	}
+	return m.SkipPatterns
+}
+
+func (m *MistralTts) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MistralTts) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetParams sets the Params field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MistralTts) SetParams(params *MistralTtsParams) {
+	m.Params = params
+	m.require(mistralTtsFieldParams)
+}
+
+// SetSkipPatterns sets the SkipPatterns field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MistralTts) SetSkipPatterns(skipPatterns []int) {
+	m.SkipPatterns = skipPatterns
+	m.require(mistralTtsFieldSkipPatterns)
+}
+
+func (m *MistralTts) UnmarshalJSON(data []byte) error {
+	type unmarshaler MistralTts
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MistralTts(value)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+	m.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MistralTts) MarshalJSON() ([]byte, error) {
+	type embed MistralTts
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return json.Marshal(explicitMarshaler)
+}
+
+func (m *MistralTts) String() string {
+	if len(m.rawJSON) > 0 {
+		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := internal.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+// Mistral TTS configuration parameters.
+var (
+	mistralTtsParamsFieldAPIKey = big.NewInt(1 << 0)
+	mistralTtsParamsFieldModel  = big.NewInt(1 << 1)
+	mistralTtsParamsFieldVoice  = big.NewInt(1 << 2)
+)
+
+type MistralTtsParams struct {
+	// Mistral API key.
+	APIKey string `json:"api_key" url:"api_key"`
+	// Mistral TTS model name (for example, "voxtral-mini-tts-2603").
+	Model *string `json:"model,omitempty" url:"model,omitempty"`
+	// Mistral voice identifier.
+	Voice *string `json:"voice,omitempty" url:"voice,omitempty"`
+
+	// Private bitmask of fields set to an explicit value and therefore not to be omitted
+	explicitFields *big.Int `json:"-" url:"-"`
+
+	ExtraProperties map[string]interface{} `json:"-" url:"-"`
+
+	rawJSON json.RawMessage
+}
+
+func (m *MistralTtsParams) GetAPIKey() string {
+	if m == nil {
+		return ""
+	}
+	return m.APIKey
+}
+
+func (m *MistralTtsParams) GetModel() *string {
+	if m == nil {
+		return nil
+	}
+	return m.Model
+}
+
+func (m *MistralTtsParams) GetVoice() *string {
+	if m == nil {
+		return nil
+	}
+	return m.Voice
+}
+
+func (m *MistralTtsParams) GetExtraProperties() map[string]interface{} {
+	return m.ExtraProperties
+}
+
+func (m *MistralTtsParams) require(field *big.Int) {
+	if m.explicitFields == nil {
+		m.explicitFields = big.NewInt(0)
+	}
+	m.explicitFields.Or(m.explicitFields, field)
+}
+
+// SetAPIKey sets the APIKey field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MistralTtsParams) SetAPIKey(apiKey string) {
+	m.APIKey = apiKey
+	m.require(mistralTtsParamsFieldAPIKey)
+}
+
+// SetModel sets the Model field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MistralTtsParams) SetModel(model *string) {
+	m.Model = model
+	m.require(mistralTtsParamsFieldModel)
+}
+
+// SetVoice sets the Voice field and marks it as non-optional;
+// this prevents an empty or null value for this field from being omitted during serialization.
+func (m *MistralTtsParams) SetVoice(voice *string) {
+	m.Voice = voice
+	m.require(mistralTtsParamsFieldVoice)
+}
+
+func (m *MistralTtsParams) UnmarshalJSON(data []byte) error {
+	type embed MistralTtsParams
+	var unmarshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*m = MistralTtsParams(unmarshaler.embed)
+	extraProperties, err := internal.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.ExtraProperties = extraProperties
+	m.rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MistralTtsParams) MarshalJSON() ([]byte, error) {
+	type embed MistralTtsParams
+	var marshaler = struct {
+		embed
+	}{
+		embed: embed(*m),
+	}
+	explicitMarshaler := internal.HandleExplicitFields(marshaler, m.explicitFields)
+	return internal.MarshalJSONWithExtraProperties(explicitMarshaler, m.ExtraProperties)
+}
+
+func (m *MistralTtsParams) String() string {
 	if len(m.rawJSON) > 0 {
 		if value, err := internal.StringifyJSON(m.rawJSON); err == nil {
 			return value
@@ -11562,6 +12026,8 @@ type Tts struct {
 	Cosyvoice       *CosyvoiceTts
 	BytedanceDuplex *BytedanceDuplexTts
 	Stepfun         *StepfunTts
+	Gradium         *GradiumTts
+	Mistral         *MistralTts
 }
 
 func (t *Tts) GetVendor() string {
@@ -11711,6 +12177,20 @@ func (t *Tts) GetStepfun() *StepfunTts {
 	return t.Stepfun
 }
 
+func (t *Tts) GetGradium() *GradiumTts {
+	if t == nil {
+		return nil
+	}
+	return t.Gradium
+}
+
+func (t *Tts) GetMistral() *MistralTts {
+	if t == nil {
+		return nil
+	}
+	return t.Mistral
+}
+
 func (t *Tts) UnmarshalJSON(data []byte) error {
 	var unmarshaler struct {
 		Vendor string `json:"vendor"`
@@ -11843,6 +12323,18 @@ func (t *Tts) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		t.Stepfun = value
+	case "gradium":
+		value := new(GradiumTts)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Gradium = value
+	case "mistral":
+		value := new(MistralTts)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		t.Mistral = value
 	}
 	return nil
 }
@@ -11911,6 +12403,12 @@ func (t Tts) MarshalJSON() ([]byte, error) {
 	if t.Stepfun != nil {
 		return internal.MarshalJSONWithExtraProperty(t.Stepfun, "vendor", "stepfun")
 	}
+	if t.Gradium != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Gradium, "vendor", "gradium")
+	}
+	if t.Mistral != nil {
+		return internal.MarshalJSONWithExtraProperty(t.Mistral, "vendor", "mistral")
+	}
 	return nil, fmt.Errorf("type %T does not define a non-empty union type", t)
 }
 
@@ -11935,6 +12433,8 @@ type TtsVisitor interface {
 	VisitCosyvoice(*CosyvoiceTts) error
 	VisitBytedanceDuplex(*BytedanceDuplexTts) error
 	VisitStepfun(*StepfunTts) error
+	VisitGradium(*GradiumTts) error
+	VisitMistral(*MistralTts) error
 }
 
 func (t *Tts) Accept(visitor TtsVisitor) error {
@@ -11997,6 +12497,12 @@ func (t *Tts) Accept(visitor TtsVisitor) error {
 	}
 	if t.Stepfun != nil {
 		return visitor.VisitStepfun(t.Stepfun)
+	}
+	if t.Gradium != nil {
+		return visitor.VisitGradium(t.Gradium)
+	}
+	if t.Mistral != nil {
+		return visitor.VisitMistral(t.Mistral)
 	}
 	return fmt.Errorf("type %T does not define a non-empty union type", t)
 }
@@ -12065,6 +12571,12 @@ func (t *Tts) validate() error {
 	}
 	if t.Stepfun != nil {
 		fields = append(fields, "stepfun")
+	}
+	if t.Gradium != nil {
+		fields = append(fields, "gradium")
+	}
+	if t.Mistral != nil {
+		fields = append(fields, "mistral")
 	}
 	if len(fields) == 0 {
 		if t.Vendor != "" {
