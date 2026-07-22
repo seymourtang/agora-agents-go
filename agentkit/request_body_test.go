@@ -1175,6 +1175,51 @@ func TestBYOKTTSVendorShapes(t *testing.T) {
 		p := tts["params"].(map[string]interface{})
 		assert.Equal(t, "murf-key", p["api_key"])
 	})
+
+	t.Run("Gradium", func(t *testing.T) {
+		sampleRate := vendors.SampleRate16kHz
+		agent := agentWithTTS(vendors.NewGradiumTTS(vendors.GradiumTTSOptions{
+			APIKey:     "gradium-key",
+			URL:        "wss://api.gradium.ai/api/speech/tts",
+			ModelName:  "default",
+			VoiceID:    "voice-id",
+			SampleRate: &sampleRate,
+			AdditionalParams: map[string]interface{}{
+				"custom_param": true,
+			},
+		}))
+		props, err := agent.ToPropertiesMap(ttsOpts())
+		require.NoError(t, err)
+		tts := props["tts"].(map[string]interface{})
+		assert.Equal(t, "gradium", tts["vendor"])
+		p := tts["params"].(map[string]interface{})
+		assert.Equal(t, "gradium-key", p["api_key"])
+		assert.Equal(t, "wss://api.gradium.ai/api/speech/tts", p["url"])
+		assert.Equal(t, "default", p["model_name"])
+		assert.Equal(t, "voice-id", p["voice_id"])
+		assert.Equal(t, 16000, p["sample_rate"])
+		assert.Equal(t, true, p["custom_param"])
+	})
+
+	t.Run("Mistral", func(t *testing.T) {
+		agent := agentWithTTS(vendors.NewMistralTTS(vendors.MistralTTSOptions{
+			APIKey: "mistral-key",
+			Model:  "voxtral-mini-tts-2603",
+			Voice:  "voice-id",
+			AdditionalParams: map[string]interface{}{
+				"custom_param": true,
+			},
+		}))
+		props, err := agent.ToPropertiesMap(ttsOpts())
+		require.NoError(t, err)
+		tts := props["tts"].(map[string]interface{})
+		assert.Equal(t, "mistral", tts["vendor"])
+		p := tts["params"].(map[string]interface{})
+		assert.Equal(t, "mistral-key", p["api_key"])
+		assert.Equal(t, "voxtral-mini-tts-2603", p["model"])
+		assert.Equal(t, "voice-id", p["voice"])
+		assert.Equal(t, true, p["custom_param"])
+	})
 }
 
 func TestRimeTTSManagedRequestShape(t *testing.T) {

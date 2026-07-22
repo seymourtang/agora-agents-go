@@ -83,6 +83,8 @@ agent := agentkit.NewAgent(client).WithLlm(llm)
 | `NewSarvamTTS` | `SarvamTTSOptions` | `APIKey` |
 | `NewMurfTTS` | `MurfTTSOptions` | `Key` |
 | `NewXaiTTS` | `XaiTTSOptions` | `APIKey`, `Language` |
+| `NewGradiumTTS` | `GradiumTTSOptions` | `APIKey` |
+| `NewMistralTTS` | `MistralTTSOptions` | `APIKey` |
 
 `NewGenericTTS` is available in both `agentkit/vendors` and `agentkit/cn/vendors`. The required `URL` must be an absolute HTTP or HTTPS URL; other schemes are currently rejected. Supported URLs serialize with `vendor: "generic_http"`. All other fields are optional, and `AdditionalParams` forwards provider-specific values under `tts.params`; explicitly set named fields take precedence over matching additional parameters.
 

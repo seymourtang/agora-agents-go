@@ -533,6 +533,50 @@ Panics if `APIKey` or `Language` is empty.
 | `SampleRate` | `*SampleRate` | No | Output sample rate |
 | `SkipPatterns` | `[]int` | No | Patterns to skip |
 
+### NewGradiumTTS
+
+<!-- snippet: fragment -->
+```go
+func NewGradiumTTS(opts GradiumTTSOptions) *GradiumTTS
+```
+
+Panics if `APIKey` is empty. Available only in `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`.
+
+`AdditionalParams` values are copied into `tts.params` first. Non-empty named fields take precedence over matching additional parameters.
+
+#### GradiumTTSOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | Gradium API key |
+| `URL` | `string` | No | WebSocket endpoint for streaming TTS output |
+| `ModelName` | `string` | No | Gradium TTS model name |
+| `VoiceID` | `string` | No | Gradium voice identifier |
+| `SampleRate` | `*SampleRate` | No | Output sample rate |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional provider parameters forwarded under `tts.params` |
+| `SkipPatterns` | `[]int` | No | Patterns to skip |
+
+### NewMistralTTS
+
+<!-- snippet: fragment -->
+```go
+func NewMistralTTS(opts MistralTTSOptions) *MistralTTS
+```
+
+Panics if `APIKey` is empty. Available only in `github.com/AgoraIO/agora-agents-go/v2/agentkit/vendors`.
+
+`AdditionalParams` values are copied into `tts.params` first. Non-empty named fields take precedence over matching additional parameters.
+
+#### MistralTTSOptions
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `APIKey` | `string` | Yes | Mistral API key |
+| `Model` | `string` | No | Mistral TTS model name |
+| `Voice` | `string` | No | Mistral voice identifier |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional provider parameters forwarded under `tts.params` |
+| `SkipPatterns` | `[]int` | No | Patterns to skip |
+
 ---
 
 ## STT Vendors
