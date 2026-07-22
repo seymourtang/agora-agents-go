@@ -924,3 +924,113 @@ func (m *MurfTTS) ToConfig() map[string]interface{} {
 	}
 	return config
 }
+
+// GradiumTTSOptions configures the Gradium text-to-speech provider.
+type GradiumTTSOptions struct {
+	APIKey           string
+	URL              string
+	ModelName        string
+	VoiceID          string
+	SampleRate       *SampleRate
+	AdditionalParams map[string]interface{}
+	SkipPatterns     []int
+}
+
+// GradiumTTS is a Gradium text-to-speech provider configuration.
+type GradiumTTS struct {
+	options GradiumTTSOptions
+}
+
+// NewGradiumTTS creates a Gradium text-to-speech provider configuration.
+func NewGradiumTTS(opts GradiumTTSOptions) *GradiumTTS {
+	if opts.APIKey == "" {
+		panic("GradiumTTS requires APIKey")
+	}
+	return &GradiumTTS{options: opts}
+}
+
+// GetSampleRate returns the configured Gradium output sample rate.
+func (g *GradiumTTS) GetSampleRate() *SampleRate {
+	return g.options.SampleRate
+}
+
+// ToConfig returns the Gradium configuration expected by the generated API types.
+func (g *GradiumTTS) ToConfig() map[string]interface{} {
+	params := make(map[string]interface{}, len(g.options.AdditionalParams)+1)
+	for key, value := range g.options.AdditionalParams {
+		params[key] = value
+	}
+	params["api_key"] = g.options.APIKey
+	if g.options.URL != "" {
+		params["url"] = g.options.URL
+	}
+	if g.options.ModelName != "" {
+		params["model_name"] = g.options.ModelName
+	}
+	if g.options.VoiceID != "" {
+		params["voice_id"] = g.options.VoiceID
+	}
+	if g.options.SampleRate != nil {
+		params["sample_rate"] = int(*g.options.SampleRate)
+	}
+
+	config := map[string]interface{}{
+		"vendor": "gradium",
+		"params": params,
+	}
+	if g.options.SkipPatterns != nil {
+		config["skip_patterns"] = g.options.SkipPatterns
+	}
+	return config
+}
+
+// MistralTTSOptions configures the Mistral text-to-speech provider.
+type MistralTTSOptions struct {
+	APIKey           string
+	Model            string
+	Voice            string
+	AdditionalParams map[string]interface{}
+	SkipPatterns     []int
+}
+
+// MistralTTS is a Mistral text-to-speech provider configuration.
+type MistralTTS struct {
+	options MistralTTSOptions
+}
+
+// NewMistralTTS creates a Mistral text-to-speech provider configuration.
+func NewMistralTTS(opts MistralTTSOptions) *MistralTTS {
+	if opts.APIKey == "" {
+		panic("MistralTTS requires APIKey")
+	}
+	return &MistralTTS{options: opts}
+}
+
+// GetSampleRate returns nil because the Mistral API does not expose a sample-rate option.
+func (m *MistralTTS) GetSampleRate() *SampleRate {
+	return nil
+}
+
+// ToConfig returns the Mistral configuration expected by the generated API types.
+func (m *MistralTTS) ToConfig() map[string]interface{} {
+	params := make(map[string]interface{}, len(m.options.AdditionalParams)+1)
+	for key, value := range m.options.AdditionalParams {
+		params[key] = value
+	}
+	params["api_key"] = m.options.APIKey
+	if m.options.Model != "" {
+		params["model"] = m.options.Model
+	}
+	if m.options.Voice != "" {
+		params["voice"] = m.options.Voice
+	}
+
+	config := map[string]interface{}{
+		"vendor": "mistral",
+		"params": params,
+	}
+	if m.options.SkipPatterns != nil {
+		config["skip_patterns"] = m.options.SkipPatterns
+	}
+	return config
+}

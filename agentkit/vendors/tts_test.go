@@ -346,6 +346,49 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			}).ToConfig()["params"].(map[string]interface{}),
 			want: map[string]interface{}{"api_key": "murf-key"},
 		},
+		{
+			name: "gradium",
+			params: NewGradiumTTS(GradiumTTSOptions{
+				APIKey:     "gradium-key",
+				URL:        "wss://api.gradium.ai/api/speech/tts",
+				ModelName:  "default",
+				VoiceID:    "voice-id",
+				SampleRate: &sampleRate,
+				AdditionalParams: map[string]interface{}{
+					"api_key":      "override-key",
+					"model_name":   "override-model",
+					"sample_rate":  8000,
+					"custom_param": "custom-value",
+				},
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"api_key":      "gradium-key",
+				"url":          "wss://api.gradium.ai/api/speech/tts",
+				"model_name":   "default",
+				"voice_id":     "voice-id",
+				"sample_rate":  24000,
+				"custom_param": "custom-value",
+			},
+		},
+		{
+			name: "mistral",
+			params: NewMistralTTS(MistralTTSOptions{
+				APIKey: "mistral-key",
+				Model:  "voxtral-mini-tts-2603",
+				Voice:  "voice-id",
+				AdditionalParams: map[string]interface{}{
+					"api_key":      "override-key",
+					"model":        "override-model",
+					"custom_param": "custom-value",
+				},
+			}).ToConfig()["params"].(map[string]interface{}),
+			want: map[string]interface{}{
+				"api_key":      "mistral-key",
+				"model":        "voxtral-mini-tts-2603",
+				"voice":        "voice-id",
+				"custom_param": "custom-value",
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -353,6 +396,112 @@ func TestTTSVendorParamsMatchGeneratedCoreShapes(t *testing.T) {
 			if !reflect.DeepEqual(tc.params, tc.want) {
 				t.Fatalf("params mismatch\nwant: %#v\n got: %#v", tc.want, tc.params)
 			}
+		})
+	}
+}
+
+func TestGradiumAndMistralTTSMatchGeneratedUnion(t *testing.T) {
+	sampleRate := SampleRate16kHz
+	tests := []struct {
+		name   string
+		config map[string]interface{}
+		check  func(*testing.T, *Agora.Tts)
+	}{
+		{
+			name: "gradium",
+			config: NewGradiumTTS(GradiumTTSOptions{
+				APIKey:     "gradium-key",
+				URL:        "wss://api.gradium.ai/api/speech/tts",
+				ModelName:  "default",
+				VoiceID:    "voice-id",
+				SampleRate: &sampleRate,
+				AdditionalParams: map[string]interface{}{
+					"custom_param": "custom-value",
+				},
+				SkipPatterns: []int{1, 2},
+			}).ToConfig(),
+			check: func(t *testing.T, generated *Agora.Tts) {
+				t.Helper()
+				if generated.Gradium == nil || generated.Gradium.Params == nil {
+					t.Fatalf("generated Gradium vendor is nil: %#v", generated)
+				}
+				if got := generated.Gradium.Params.GetSampleRate(); got == nil || *got != 16000 {
+					t.Fatalf("sample_rate = %v, want 16000", got)
+				}
+				if got := generated.Gradium.Params.GetExtraProperties()["custom_param"]; got != "custom-value" {
+					t.Fatalf("custom_param = %v, want custom-value", got)
+				}
+			},
+		},
+		{
+			name: "mistral",
+			config: NewMistralTTS(MistralTTSOptions{
+				APIKey: "mistral-key",
+				Model:  "voxtral-mini-tts-2603",
+				Voice:  "voice-id",
+				AdditionalParams: map[string]interface{}{
+					"custom_param": "custom-value",
+				},
+				SkipPatterns: []int{1, 2},
+			}).ToConfig(),
+			check: func(t *testing.T, generated *Agora.Tts) {
+				t.Helper()
+				if generated.Mistral == nil || generated.Mistral.Params == nil {
+					t.Fatalf("generated Mistral vendor is nil: %#v", generated)
+				}
+				if got := generated.Mistral.Params.GetModel(); got == nil || *got != "voxtral-mini-tts-2603" {
+					t.Fatalf("model = %v, want voxtral-mini-tts-2603", got)
+				}
+				if got := generated.Mistral.Params.GetExtraProperties()["custom_param"]; got != "custom-value" {
+					t.Fatalf("custom_param = %v, want custom-value", got)
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			payload, err := json.Marshal(tt.config)
+			if err != nil {
+				t.Fatalf("marshal config: %v", err)
+			}
+			var generated Agora.Tts
+			if err := json.Unmarshal(payload, &generated); err != nil {
+				t.Fatalf("unmarshal into generated TTS union: %v", err)
+			}
+			tt.check(t, &generated)
+			if _, err := json.Marshal(generated); err != nil {
+				t.Fatalf("marshal generated TTS union: %v", err)
+			}
+		})
+	}
+}
+
+func TestGradiumAndMistralTTSValidation(t *testing.T) {
+	tests := []struct {
+		name      string
+		wantPanic string
+		create    func()
+	}{
+		{
+			name:      "gradium requires API key",
+			wantPanic: "GradiumTTS requires APIKey",
+			create: func() {
+				NewGradiumTTS(GradiumTTSOptions{})
+			},
+		},
+		{
+			name:      "mistral requires API key",
+			wantPanic: "MistralTTS requires APIKey",
+			create: func() {
+				NewMistralTTS(MistralTTSOptions{})
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assertPanic(t, tt.wantPanic, tt.create)
 		})
 	}
 }
