@@ -714,18 +714,22 @@ Panics if `ProjectID`, `Location`, `ADCCredentialsString`, or `Language` is empt
 func NewGeminiSTT(opts GeminiSTTOptions) *GeminiSTT
 ```
 
-Panics if `APIKey` or `Model` is empty.
+Panics if `APIKey` is empty. `Model` defaults to `gemini-3.5-transcribe-live`.
 
 #### GeminiSTTOptions
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `APIKey` | `string` | Yes | Google Gemini API key |
-| `Model` | `string` | Yes | Gemini transcription model identifier |
+| `Model` | `string` | No | Gemini transcription model identifier; defaults to `gemini-3.5-transcribe-live` |
 | `Language` | `string` | No | Recognition language code |
-| `SampleRate` | `*SampleRate` | No | Audio sample rate |
+| `LanguageCodes` | `[]string` | No | Candidate transcription languages, sent as `params.language_hints`; nil is omitted and an empty slice is sent explicitly |
+| `CustomVocabulary` | `[]string` | No | Words and phrases used to bias recognition |
+| `SampleRate` | `int` | No | Audio sample rate; defaults to `16000` |
 | `WordTimestamp` | `*bool` | No | Include word-level timestamps |
-| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor params |
+| `AdditionalParams` | `map[string]interface{}` | No | Additional vendor-specific parameters |
+
+`CustomVocabulary` cannot be combined with `WordTimestamp: true`.
 
 ### NewAmazonSTT
 

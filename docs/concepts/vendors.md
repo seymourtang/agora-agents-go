@@ -127,7 +127,7 @@ Use `TurnDetectionConfig.Language` for Agora interaction language; it defaults t
 | `NewMicrosoftSTT` | `MicrosoftSTTOptions` | `Key`, `Region`, `Language` |
 | `NewOpenAISTT` | `OpenAISTTOptions` | `APIKey` |
 | `NewGoogleSTT` | `GoogleSTTOptions` | `ProjectID`, `Location`, `ADCCredentialsString`, `Language` |
-| `NewGeminiSTT` | `GeminiSTTOptions` | `APIKey`, `Model` |
+| `NewGeminiSTT` | `GeminiSTTOptions` | `APIKey`; `Model` defaults to `gemini-3.5-transcribe-live` |
 | `NewAmazonSTT` | `AmazonSTTOptions` | `AccessKey`, `SecretKey`, `Region`, `Language` |
 | `NewAssemblyAISTT` | `AssemblyAISTTOptions` | `APIKey`, `Language` |
 | `NewAresSTT` | `AresSTTOptions` | None; optional `Keywords` and `AdditionalParams` |

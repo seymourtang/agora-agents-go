@@ -69,12 +69,11 @@ func TestGeneratedSpeechmaticsParamsNormalizesDeprecatedAPIKey(t *testing.T) {
 
 func TestGeminiSTTMatchesGeneratedASRSchema(t *testing.T) {
 	wordTimestamp := true
-	sampleRate := SampleRate16kHz
 	config := NewGeminiSTT(GeminiSTTOptions{
 		APIKey:        "gemini-key",
 		Model:         "gemini-3.7-transcribe-live",
 		Language:      "en-US",
-		SampleRate:    &sampleRate,
+		SampleRate:    16000,
 		WordTimestamp: &wordTimestamp,
 	}).ToConfig()
 
@@ -108,19 +107,123 @@ func TestGeminiSTTMatchesGeneratedASRSchema(t *testing.T) {
 	}
 }
 
+func TestGeminiSTTPreservesPreviewAPI(t *testing.T) {
+	config := NewGeminiSTT(GeminiSTTOptions{
+		APIKey:           "gemini-key",
+		LanguageCodes:    []string{"en-US", "es-ES"},
+		CustomVocabulary: []string{"Agora", "ConvoAI"},
+	}).ToConfig()
+	params := config["params"].(map[string]interface{})
+
+	if params["model"] != GeminiSTTModel35Live {
+		t.Fatalf("model = %#v, want %q", params["model"], GeminiSTTModel35Live)
+	}
+	if params["sample_rate"] != 16000 {
+		t.Fatalf("sample_rate = %#v, want 16000", params["sample_rate"])
+	}
+	if !reflect.DeepEqual(params["language_hints"], []string{"en-US", "es-ES"}) {
+		t.Fatalf("language_hints = %#v", params["language_hints"])
+	}
+	if !reflect.DeepEqual(params["custom_vocabulary"], []string{"Agora", "ConvoAI"}) {
+		t.Fatalf("custom_vocabulary = %#v", params["custom_vocabulary"])
+	}
+
+	payload, err := json.Marshal(config)
+	if err != nil {
+		t.Fatalf("marshal Gemini config: %v", err)
+	}
+	var generated Agora.Asr
+	if err := json.Unmarshal(payload, &generated); err != nil {
+		t.Fatalf("unmarshal Gemini config into generated ASR: %v", err)
+	}
+	if !reflect.DeepEqual(generated.Gemini.Params.ExtraProperties["language_hints"], []interface{}{"en-US", "es-ES"}) {
+		t.Fatalf("generated language_hints = %#v", generated.Gemini.Params.ExtraProperties["language_hints"])
+	}
+	if !reflect.DeepEqual(generated.Gemini.Params.ExtraProperties["custom_vocabulary"], []interface{}{"Agora", "ConvoAI"}) {
+		t.Fatalf("generated custom_vocabulary = %#v", generated.Gemini.Params.ExtraProperties["custom_vocabulary"])
+	}
+}
+
+func TestGeminiSTTPreservesPreviewSliceSemantics(t *testing.T) {
+	tests := []struct {
+		name       string
+		opts       GeminiSTTOptions
+		key        string
+		want       []string
+		wantExists bool
+	}{
+		{
+			name: "nil language codes are omitted",
+			opts: GeminiSTTOptions{APIKey: "gemini-key"},
+			key:  "language_hints",
+		},
+		{
+			name:       "empty language codes are sent",
+			opts:       GeminiSTTOptions{APIKey: "gemini-key", LanguageCodes: []string{}},
+			key:        "language_hints",
+			want:       []string{},
+			wantExists: true,
+		},
+		{
+			name: "nil custom vocabulary is omitted",
+			opts: GeminiSTTOptions{APIKey: "gemini-key"},
+			key:  "custom_vocabulary",
+		},
+		{
+			name:       "empty custom vocabulary is sent",
+			opts:       GeminiSTTOptions{APIKey: "gemini-key", CustomVocabulary: []string{}},
+			key:        "custom_vocabulary",
+			want:       []string{},
+			wantExists: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			params := NewGeminiSTT(tt.opts).ToConfig()["params"].(map[string]interface{})
+			got, exists := params[tt.key]
+			if exists != tt.wantExists {
+				t.Fatalf("%s existence = %t, want %t", tt.key, exists, tt.wantExists)
+			}
+			if tt.wantExists && !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("%s = %#v, want %#v", tt.key, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGeminiSTTRejectsPreviewParameterConflict(t *testing.T) {
+	wordTimestamp := true
+	defer func() {
+		if got := recover(); got != "CustomVocabulary cannot be used with WordTimestamp=true" {
+			t.Fatalf("panic = %v", got)
+		}
+	}()
+
+	NewGeminiSTT(GeminiSTTOptions{
+		APIKey:           "gemini-key",
+		CustomVocabulary: []string{"Agora"},
+		WordTimestamp:    &wordTimestamp,
+	}).ToConfig()
+}
+
 func TestGeminiSTTExplicitFieldsOverrideAdditionalParams(t *testing.T) {
 	wordTimestamp := false
 	config := NewGeminiSTT(GeminiSTTOptions{
-		APIKey:        "gemini-key",
-		Model:         "gemini-3.7-transcribe-live",
-		Language:      "en-US",
-		WordTimestamp: &wordTimestamp,
+		APIKey:           "gemini-key",
+		Model:            "gemini-3.7-transcribe-live",
+		Language:         "en-US",
+		LanguageCodes:    []string{"en-US"},
+		CustomVocabulary: []string{"Agora"},
+		WordTimestamp:    &wordTimestamp,
 		AdditionalParams: map[string]interface{}{
-			"api_key":          "wrong-key",
-			"model":            "wrong-model",
-			"language":         "fr-FR",
-			"word_timestamp":   true,
-			"custom_parameter": "kept",
+			"api_key":           "wrong-key",
+			"model":             "wrong-model",
+			"language":          "fr-FR",
+			"language_hints":    []string{"fr-FR"},
+			"custom_vocabulary": []string{"wrong"},
+			"word_timestamp":    true,
+			"custom_parameter":  "kept",
 		},
 	}).ToConfig()
 
@@ -131,39 +234,22 @@ func TestGeminiSTTExplicitFieldsOverrideAdditionalParams(t *testing.T) {
 	if params["language"] != "en-US" || params["word_timestamp"] != false {
 		t.Fatalf("explicit optional fields did not win: %#v", params)
 	}
+	if !reflect.DeepEqual(params["language_hints"], []string{"en-US"}) ||
+		!reflect.DeepEqual(params["custom_vocabulary"], []string{"Agora"}) {
+		t.Fatalf("explicit compatibility fields did not win: %#v", params)
+	}
 	if params["custom_parameter"] != "kept" {
 		t.Fatalf("additional parameter was lost: %#v", params)
 	}
 }
 
-func TestGeminiSTTRequiresGeneratedRequiredFields(t *testing.T) {
-	tests := []struct {
-		name      string
-		opts      GeminiSTTOptions
-		wantPanic string
-	}{
-		{
-			name:      "missing API key",
-			opts:      GeminiSTTOptions{Model: "gemini-3.7-transcribe-live"},
-			wantPanic: "GeminiSTT requires APIKey",
-		},
-		{
-			name:      "missing model",
-			opts:      GeminiSTTOptions{APIKey: "gemini-key"},
-			wantPanic: "GeminiSTT requires Model",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			defer func() {
-				if got := recover(); got != tt.wantPanic {
-					t.Fatalf("panic = %v, want %q", got, tt.wantPanic)
-				}
-			}()
-			NewGeminiSTT(tt.opts)
-		})
-	}
+func TestGeminiSTTRequiresAPIKey(t *testing.T) {
+	defer func() {
+		if got := recover(); got != "GeminiSTT requires APIKey" {
+			t.Fatalf("panic = %v, want %q", got, "GeminiSTT requires APIKey")
+		}
+	}()
+	NewGeminiSTT(GeminiSTTOptions{Model: "gemini-3.7-transcribe-live"})
 }
 
 func TestAresSTTKeywordsMatchGeneratedASR(t *testing.T) {

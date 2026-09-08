@@ -4,21 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [v2.8.0]
 
 ### Added
 
 - **Generated filler words** — AgentKit now exposes generated filler content types and mode constants, including optional service-default generation and custom OpenAI-compatible filler LLM configuration.
 - **Inline LLM tools** — Global and mainland China LLM vendor options now accept typed `Tools` definitions for inline REST function calls. AgentKit exposes the generated `LlmTool` types, and tool execution is enabled with `WithTools(true)` alongside MCP tools.
-- **Global Gemini ASR** — `vendors.NewGeminiSTT` emits the generated `gemini` ASR schema with required `APIKey` and `Model`, plus optional `Language`, `SampleRate`, and `WordTimestamp` parameters.
+- **Global Gemini ASR** — `vendors.NewGeminiSTT` emits the generated `gemini` ASR schema while retaining the preview API's `LanguageCodes`, `CustomVocabulary`, `SampleRate`, default model, and validation behavior. The global API's optional `Language` parameter is also available.
 
 ### Changed
 
 - **Ares and Fengming STT parameters** — `Keywords` is emitted as top-level `asr.keywords`; `AdditionalParams` remains an unchanged passthrough map under `asr.params` for both providers.
+- **Gemini ASR routing** — Gemini ASR now uses the production endpoint. Existing `vendors.GeminiSTTOptions` calls remain source-compatible; no preview-specific import or type migration is required.
+- **Gemini ASR language mapping** — The public `LanguageCodes` option is retained for source compatibility and serializes as `params.language_hints`, which the Gemini ASR extension converts to the Google API's `language_codes` field.
 
 ### Removed
 
-- **Gemini ASR preview implementation** — Removed the preview-only Gemini ASR vendor implementation, preview endpoint routing, and preview-specific configuration. Global Gemini ASR now uses the Fern-generated production schema through `vendors.NewGeminiSTT`.
+- **Gemini ASR preview routing** — Removed the preview endpoint and feature-gate routing. The public Gemini STT options remain available from the same `agentkit/vendors` package.
 
 ## [v2.7.0] — 2026-08-26
 
